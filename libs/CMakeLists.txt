@@ -1,0 +1,11 @@
+add_subdirectory(lith)
+add_subdirectory(stdlith)
+add_subdirectory(CryptMgr)
+add_subdirectory(ButeMgr)
+add_subdirectory(rezmgr)
+add_subdirectory(ltamgr)
+add_subdirectory(ltmem)
+
+if (WIN32)
+    add_subdirectory(RegMgr32)
+endif()
