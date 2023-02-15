@@ -21,15 +21,9 @@ target_include_directories(ltsdk PUBLIC ${CMAKE_CURRENT_LIST_DIR} ${CMAKE_CURREN
 target_compile_definitions(ltsdk PUBLIC $<$<CONFIG:RELEASSE>:_FINAL>;)
 
 if (WIN32)
-	target_compile_definitions(ltsdk PUBLIC -DWIN32 _D__WINDOWS)
+	target_compile_definitions(ltsdk PUBLIC -DWIN32 -D__WINDOWS)
 elseif(LINUX)
 	target_compile_definitions(ltsdk PUBLIC -DLINUX)
-endif()
-
-if ("${LT_RENDER}" STREQUAL "OPENGL")
-	target_compile_definitions(ltsdk PUBLIC -DOGL)
-elseif ("${LT_RENDER}" STREQUAL "DIRECTX9")
-	target_compile_definitions(ltsdk PUBLIC -D__D3D -D__D3DREND)
 endif()
 
 set_target_properties(ltsdk PROPERTIES FOLDER engine)

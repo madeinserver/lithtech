@@ -387,7 +387,7 @@ LTRESULT dtx_Create(ILTStream *pStream, TextureData **ppOut, uint32& nBaseWidth,
 	// Read in mipmap data (and convert it to our DDFormat).
 	for (uint32 iMipmap=0; iMipmap < hdr.m_nMipmaps; iMipmap++) 
 	{
-		pMip = &pRet->m_Mips[iMipmap];
+		TextureMipData* pMip = &pRet->m_Mips[iMipmap];
 		if (hdr.GetBPPIdent() == BPP_32) 
 		{
 			for (y=0; y < pMip->m_Height; y++) 

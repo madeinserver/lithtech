@@ -25,7 +25,7 @@
 #include "server_interface.h"
 #include "dhashtable.h"
 #include "console.h"
-
+#include "soundmgr.h"
 #include "build_options.h"
 #include "render.h"
 

@@ -43,6 +43,7 @@
 #include "ltpixelshadermgr.h"
 #include "lteffectshadermgr.h"
 #include "ltinfo_impl.h"
+#include "soundmgr.h"
 
 //------------------------------------------------------------------
 //------------------------------------------------------------------

@@ -14,7 +14,7 @@
 #include "bdefs.h"
 #include "clientmgr.h"
 #include "consolecommands.h"
-
+#include "soundmgr.h"
 
 extern LTCommandVar *g_pNameVar;
 

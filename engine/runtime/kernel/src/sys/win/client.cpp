@@ -12,6 +12,7 @@
 #include <crtdbg.h>
 #include "iltclient.h"
 #include "dsys_interface.h"
+#include "soundmgr.h"
 
 
 //------------------------------------------------------------------

@@ -36,12 +36,6 @@ class CLTRealVideoMgr;
 #include "motion.h"
 #endif
 
-#ifndef __LINUX
-#ifndef __SOUNDMGR_H__
-#include "soundmgr.h"
-#endif
-#endif // !__LINUX
-
 #ifndef __MUSICMGR_H__
 #include "musicmgr.h"
 #endif

@@ -28,7 +28,7 @@
 #include "render.h"
 #include "iltmodel.h"
 #include "ltobjectcreate.h"
-
+#include "soundinstance.h"
 #include "iltmessage.h"
 #include "ltmessage_client.h"
 
