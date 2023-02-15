@@ -1,0 +1,6 @@
+file(GLOB SRC "*.h" "*.cpp" "*.rc" "*.ico")
+source_group("" FILES ${SRC})
+add_executable(FxED WIN32 ${SRC})
+set_target_properties(FxED PROPERTIES FOLDER "tools")
+target_link_libraries(FxED PRIVATE ltsdk stdlith lttools)
+target_precompile_headers(FxED PRIVATE StdAfx.h)

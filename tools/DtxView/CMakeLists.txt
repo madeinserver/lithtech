@@ -1,0 +1,8 @@
+file(GLOB SRC "*.h" "*.cpp" "*.rc")
+file(GLOB RES "res/*.rc" "res/*.rc2" "res/*.ico" "res/*.manifest" "res/*.bmp")
+source_group("" FILES ${SRC})
+source_group("res" FILES ${RES})
+add_executable(DtxView ${SRC} ${RES})
+set_target_properties(DtxView PROPERTIES FOLDER "tools")
+target_link_libraries(DtxView PRIVATE ltsdk stdlith lttools)
+target_precompile_headers(winpacker PRIVATE stdafx.h)

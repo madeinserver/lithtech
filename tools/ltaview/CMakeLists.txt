@@ -1,0 +1,6 @@
+file(GLOB SRC "*.h" "*.cpp" "*.rc")
+source_group("" FILES ${SRC})
+add_executable(ltaview WIN32 ${SRC})
+set_target_properties(ltaview PROPERTIES FOLDER "tools")
+target_link_libraries(ltaview PRIVATE ltsdk stdlith lttools Winmm)
+target_precompile_headers(ltaview PRIVATE StdAfx.h)

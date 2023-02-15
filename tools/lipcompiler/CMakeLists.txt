@@ -1,0 +1,5 @@
+file(GLOB SRC "*.h" "*.cpp" "*.rc")
+source_group("" FILES ${SRC})
+add_executable(lipcompiler ${SRC})
+set_target_properties(lipcompiler PROPERTIES FOLDER "tools")
+target_link_libraries(lipcompiler PRIVATE ltsdk stdlith lttools)

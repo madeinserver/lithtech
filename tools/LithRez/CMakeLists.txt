@@ -1,0 +1,5 @@
+file(GLOB SRC "*.h" "*.cpp" "*.rc")
+source_group("" FILES ${SRC})
+add_executable(lithrez ${SRC})
+set_target_properties(lithrez PROPERTIES FOLDER "tools")
+target_link_libraries(lithrez PRIVATE ltsdk stdlith lttools rezmgr)

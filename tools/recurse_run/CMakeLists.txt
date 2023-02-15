@@ -1,0 +1,5 @@
+file(GLOB SRC "*.h" "*.cpp" "*.rc")
+source_group("" FILES ${SRC})
+add_executable(recurse_run ${SRC})
+set_target_properties(recurse_run PROPERTIES FOLDER "tools")
+target_link_libraries(recurse_run PRIVATE ltsdk stdlith lttools)

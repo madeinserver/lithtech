@@ -209,6 +209,12 @@ Used for: Misc.
         LTStream_Write(this, toWrite);
         return *this;
     }
+
+    // apperently float& doesn't work properly
+    ILTStream& operator<<(float toWrite) {
+        Write(&toWrite, sizeof(toWrite));
+        return *this;
+    }
 };
 
 /*!
@@ -229,7 +235,7 @@ READWRITE_FN(unsigned char);
 READWRITE_FN(short);
 READWRITE_FN(unsigned short);
 READWRITE_FN(int);
-READWRITE_FN(uint32);
+READWRITE_FN(unsigned int);
 READWRITE_FN(float);
 READWRITE_FN(double);
 

@@ -1,0 +1,8 @@
+file(GLOB SRC "*.h" "*.cpp" "*.rc" "*.ico")
+source_group("" FILES ${SRC})
+add_executable(Model_Packer ${SRC})
+set_target_properties(Model_Packer PROPERTIES FOLDER "tools")
+target_link_libraries(Model_Packer PRIVATE ltsdk stdlith lttools d3dx9)
+target_compile_definitions(Model_Packer PRIVATE -DLTA2LTB_D3D)
+target_include_directories(Model_Packer PRIVATE ${DirectX_D3DX9_INCLUDE_DIR})
+target_link_directories(Model_Packer PRIVATE ${DirectX_ROOT_DIR}/Lib/${DX_ARCH})

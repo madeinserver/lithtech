@@ -1,0 +1,5 @@
+file(GLOB SRC "*.h" "*.cpp" "*.rc")
+source_group("" FILES ${SRC})
+add_executable(pma ${SRC})
+set_target_properties(pma PROPERTIES FOLDER "tools")
+target_link_libraries(pma PRIVATE ltsdk stdlith lttools)

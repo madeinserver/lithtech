@@ -5,4 +5,3 @@
 
 //#include "mfcstub.h"
 
-#endif

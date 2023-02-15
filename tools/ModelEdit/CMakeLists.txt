@@ -1,0 +1,7 @@
+file(GLOB SRC "*.h" "*.cpp" "*.rc" "*.ico")
+source_group("" FILES ${SRC})
+add_executable(ModelEdit WIN32 ${SRC})
+set_target_properties(ModelEdit PROPERTIES FOLDER "tools")
+target_link_libraries(ModelEdit PRIVATE ltsdk stdlith lttools)
+target_precompile_headers(ModelEdit PRIVATE StdAfx.h)
+target_compile_definitions(ModelEdit PRIVATE -DMODEL_STANDALONE)

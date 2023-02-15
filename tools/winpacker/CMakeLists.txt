@@ -1,0 +1,6 @@
+file(GLOB SRC "*.h" "*.cpp" "*.rc")
+source_group("" FILES ${SRC})
+add_executable(winpacker WIN32 ${SRC})
+set_target_properties(winpacker PROPERTIES FOLDER "tools")
+target_link_libraries(winpacker PRIVATE ltsdk stdlith lttools Winmm)
+target_precompile_headers(winpacker PRIVATE StdAfx.h)

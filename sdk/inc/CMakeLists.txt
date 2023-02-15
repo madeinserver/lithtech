@@ -21,9 +21,9 @@ target_include_directories(ltsdk PUBLIC ${CMAKE_CURRENT_LIST_DIR} ${CMAKE_CURREN
 target_compile_definitions(ltsdk PUBLIC $<$<CONFIG:RELEASSE>:_FINAL>;)
 
 if (WIN32)
-	target_compile_definitions(ltsdk PUBLIC -DWIN32 -D__WINDOWS)
+	target_compile_definitions(ltsdk PUBLIC -DWIN32 -D__WINDOWS -D_WIN32_WINNT=0x501 -D_WIN32_WINDOWS=0x501 -D_WIN32_IE=0x501 -DWINVER=0x501) # Windows XP
 elseif(LINUX)
-	target_compile_definitions(ltsdk PUBLIC -DLINUX)
+	target_compile_definitions(ltsdk PUBLIC -D__LINUX)
 endif()
 
 set_target_properties(ltsdk PROPERTIES FOLDER engine)

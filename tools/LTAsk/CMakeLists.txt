@@ -1,0 +1,5 @@
+file(GLOB SRC "*.h" "*.cpp" "*.rc")
+source_group("" FILES ${SRC})
+add_executable(LTAsk ${SRC})
+set_target_properties(LTAsk PROPERTIES FOLDER "tools")
+target_link_libraries(LTAsk PRIVATE ltsdk stdlith lttools)

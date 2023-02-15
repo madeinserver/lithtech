@@ -1,0 +1,7 @@
+file(GLOB SRC "*.h" "*.cpp" "*.rc" "*.ico")
+source_group("" FILES ${SRC})
+add_executable(WorldPacker WIN32 ${SRC})
+set_target_properties(WorldPacker PROPERTIES FOLDER "tools")
+target_link_libraries(WorldPacker PRIVATE ltsdk stdlith lttools Winmm)
+target_precompile_headers(WorldPacker PRIVATE StdAfx.h)
+target_compile_definitions(WorldPacker PRIVATE -DWORLDPACKER_EXPORTS)

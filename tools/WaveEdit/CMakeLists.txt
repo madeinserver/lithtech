@@ -1,0 +1,6 @@
+file(GLOB SRC "*.h" "*.cpp" "*.rc")
+source_group("" FILES ${SRC})
+add_executable(WaveEdit WIN32 ${SRC})
+set_target_properties(WaveEdit PROPERTIES FOLDER "tools")
+target_link_libraries(WaveEdit PRIVATE ltsdk stdlith lttools Winmm)
+target_precompile_headers(WaveEdit PRIVATE StdAfx.h)

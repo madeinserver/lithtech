@@ -1,0 +1,5 @@
+file(GLOB SRC "*.h" "*.cpp" "*.rc")
+source_group("" FILES ${SRC})
+add_executable(TSCompiler ${SRC})
+set_target_properties(TSCompiler PROPERTIES FOLDER "tools")
+target_link_libraries(TSCompiler PRIVATE ltsdk stdlith lttools)

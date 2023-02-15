@@ -230,11 +230,13 @@ bool CLTAHuffmanTree::IncrementWeight(uint8 nItem)
 
 	while(pCurr)
 	{
+		uint32 nTestNode;
+
 		//increment the weight
 		pCurr->SetWeight(pCurr->GetWeight() + 1);
 
 		//see if we need to swap it
-		for(uint32 nTestNode = pCurr->GetWeightIndex(); nTestNode > 0; nTestNode--)
+		for(nTestNode = pCurr->GetWeightIndex(); nTestNode > 0; nTestNode--)
 		{
 			if(m_pWeights[nTestNode - 1]->GetWeight() >= pCurr->GetWeight())
 			{

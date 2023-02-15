@@ -1,0 +1,5 @@
+file(GLOB SRC "*.h" "*.cpp" "*.rc")
+source_group("" FILES ${SRC})
+add_executable(LTC ${SRC})
+set_target_properties(LTC PROPERTIES FOLDER "tools")
+target_link_libraries(LTC PRIVATE ltsdk stdlith lttools)

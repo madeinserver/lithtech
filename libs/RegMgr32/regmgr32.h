@@ -2,6 +2,7 @@
 #define RegMgr32_H
 
 #include "winreg.h"
+#include <atlstr.h>
 
 class CRegMgr32 {
 protected:

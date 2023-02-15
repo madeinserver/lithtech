@@ -1,0 +1,18 @@
+file(GLOB SRC "*.h" "*.cpp" "*.rc" "*.bmp" "*.ico")
+source_group("" FILES ${SRC})
+
+add_executable(RenderStyleEditor WIN32 ${SRC})
+set_target_properties(RenderStyleEditor PROPERTIES FOLDER "tools")
+target_link_libraries(RenderStyleEditor PRIVATE ltsdk stdlith lttools ltamgr d3d9 d3dx9 d3dcompiler Winmm)
+target_precompile_headers(RenderStyleEditor PRIVATE StdAfx.h)
+target_compile_definitions(RenderStyleEditor PRIVATE -D_RS_EDITOR)
+target_include_directories(RenderStyleEditor PRIVATE ${DirectX_D3DX9_INCLUDE_DIR})
+target_link_directories(RenderStyleEditor PRIVATE ${DirectX_ROOT_DIR}/Lib/${DX_ARCH})
+
+add_executable(RenderStyleViewer WIN32 ${SRC})
+set_target_properties(RenderStyleViewer PROPERTIES FOLDER "tools")
+target_link_libraries(RenderStyleViewer PRIVATE ltsdk stdlith lttools ltamgr d3d9 d3dx9 d3dcompiler Winmm)
+target_precompile_headers(RenderStyleViewer PRIVATE StdAfx.h)
+target_compile_definitions(RenderStyleViewer PRIVATE -D_RS_VIEWER)
+target_include_directories(RenderStyleViewer PRIVATE ${DirectX_D3DX9_INCLUDE_DIR})
+target_link_directories(RenderStyleViewer PRIVATE ${DirectX_ROOT_DIR}/Lib/${DX_ARCH})

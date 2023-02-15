@@ -1,0 +1,5 @@
+file(GLOB SRC "*.h" "*.cpp" "*.rc")
+source_group("" FILES ${SRC})
+add_executable(SetVersionCode ${SRC})
+set_target_properties(SetVersionCode PROPERTIES FOLDER "tools")
+target_link_libraries(SetVersionCode PRIVATE ltsdk stdlith lttools)

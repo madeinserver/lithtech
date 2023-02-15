@@ -6,9 +6,24 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 if (MSVC)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /utf-8 /MP")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /utf-8 /MP")
+    set(LT_FLAGS "/utf-8 /MP")
+else() # GCC/CLang
+    set(LT_FLAGS "-fpermissive")
 endif()
+
+string(FIND ${VCPKG_TARGET_TRIPLET} "-static" IS_STATIC)
+
+if (NOT "${IS_STATIC}" STREQUAL "-1") # /MT
+    set(IS_STATIC 1)
+    set(CMAKE_MFC_FLAG 1)
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>" CACHE STRING "MSVC Runtime library" FORCE)
+else() # /MD
+    set(IS_STATIC 0)
+    set(CMAKE_MFC_FLAG 2)
+endif()
+
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${LT_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${LT_FLAGS}")
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
     set(BITS64 1)
@@ -33,8 +48,8 @@ find_package(Freetype REQUIRED)
 
 # release: _FINAL
 # unknown: _PUBLIC_DEVELOPMENT
-# demo: COMPILE_JUPITER_EVAL
 
 add_subdirectory(sdk)
 add_subdirectory(libs)
 add_subdirectory(engine)
+add_subdirectory(tools)

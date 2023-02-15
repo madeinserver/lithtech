@@ -1,0 +1,5 @@
+file(GLOB SRC "*.h" "*.cpp" "*.rc")
+source_group("" FILES ${SRC})
+add_executable(dtxutil ${SRC})
+set_target_properties(dtxutil PROPERTIES FOLDER "tools")
+target_link_libraries(dtxutil PRIVATE ltsdk stdlith lttools)

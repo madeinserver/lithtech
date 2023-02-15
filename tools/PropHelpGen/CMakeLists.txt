@@ -1,0 +1,6 @@
+file(GLOB SRC "*.h" "*.cpp" "*.rc")
+source_group("" FILES ${SRC})
+add_executable(PropHelpGen ${SRC})
+set_target_properties(PropHelpGen PROPERTIES FOLDER "tools")
+target_link_libraries(PropHelpGen PRIVATE ltsdk stdlith lttools ButeMgr)
+target_precompile_headers(PropHelpGen PRIVATE StdAfx.h)

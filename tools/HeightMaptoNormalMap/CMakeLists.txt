@@ -1,0 +1,6 @@
+file(GLOB SRC "*.h" "*.cpp" "*.rc" "*.ico")
+source_group("" FILES ${SRC})
+add_executable(HeightMaptoNormalMap WIN32 ${SRC})
+set_target_properties(HeightMaptoNormalMap PROPERTIES FOLDER "tools")
+target_link_libraries(HeightMaptoNormalMap PRIVATE ltsdk stdlith lttools)
+target_precompile_headers(HeightMaptoNormalMap PRIVATE StdAfx.h)

@@ -1,0 +1,6 @@
+file(GLOB SRC "*.h" "*.cpp" "*.rc" "*.ico")
+source_group("" FILES ${SRC})
+add_executable(ltdmtest WIN32 ${SRC})
+set_target_properties(ltdmtest PROPERTIES FOLDER "tools")
+target_link_libraries(ltdmtest PRIVATE ltsdk stdlith lttools)
+target_precompile_headers(ltdmtest PRIVATE StdAfx.h)

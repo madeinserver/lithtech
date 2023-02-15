@@ -1,0 +1,6 @@
+file(GLOB SRC "*.h" "*.cpp" "*.rc" "*.ico")
+source_group("" FILES ${SRC})
+add_executable(ButeEdit WIN32 ${SRC})
+set_target_properties(ButeEdit PROPERTIES FOLDER "tools")
+target_link_libraries(ButeEdit PRIVATE ltsdk stdlith lttools ButeMgr)
+target_precompile_headers(ButeEdit PRIVATE StdAfx.h)
