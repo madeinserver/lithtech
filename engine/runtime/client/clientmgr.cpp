@@ -389,10 +389,6 @@ LTRESULT CClientMgr::Init(const char *resTrees[MAX_RESTREES], uint32 nResTrees, 
     rGraphMgr.bottom = defaultMode.m_Height;
     graph_mgr->Mgr()->Init(&rGraphMgr);
 
-#ifdef COMPILE_JUPITER_EVAL
-	m_WaterMark.Init();
-#endif // COMPILE_JUPITER_EVAL
-
     return dResult;
 }
 
@@ -1277,10 +1273,6 @@ void CClientMgr::Term()
     // be restored for any demo playbacks.
     EndShell();
 
-#ifdef COMPILE_JUPITER_EVAL
-	m_WaterMark.Term();
-#endif // COMPILE_JUPITER_EVAL
-
 	if (m_pOldShell != NULL)
 	{
 		delete m_pOldShell;
@@ -1907,10 +1899,6 @@ bool CClientMgr::Render(CameraInstance *pCamera, int drawMode, LTObject **pObjec
 		if (g_CV_RenderEnable) {
 			renderStatus = pRenderStruct->RenderScene(&sceneDesc);
 		}
-
-#ifdef COMPILE_JUPITER_EVAL
-    	m_WaterMark.Draw();
-#endif // COMPILE_JUPITER_EVAL
 
         // Reset the camera to NULL
         // This is required for the console to draw properly

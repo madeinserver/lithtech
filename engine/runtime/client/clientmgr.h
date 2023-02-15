@@ -52,10 +52,6 @@ class CLTRealVideoMgr;
 #include "netmgr.h"
 #endif
 
-#ifdef COMPILE_JUPITER_EVAL
-#include "WaterMark.h"
-#endif
-
 #include <vector>
 
 //----------------------------------------------------------------------------
@@ -547,10 +543,6 @@ private:
 	};
 
 	CDefaultNetHandler m_cDefaultNetHandler;
-
-#ifdef COMPILE_JUPITER_EVAL
-	WaterMark				m_WaterMark;
-#endif // COMPILE_JUPITER_EVAL
 };
 
 extern CClientMgr *g_pClientMgr;
