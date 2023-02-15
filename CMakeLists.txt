@@ -52,4 +52,11 @@ find_package(Freetype REQUIRED)
 add_subdirectory(sdk)
 add_subdirectory(libs)
 add_subdirectory(engine)
-add_subdirectory(tools)
+
+if (NOT LT_NO_TOOLS)
+    add_subdirectory(tools)
+endif()
+
+if (NOT LT_NO_INSTALL)
+    include(MakeSDK)
+endif()
