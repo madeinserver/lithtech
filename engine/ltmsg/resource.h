@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Developer Studio generated include file.
-// Used by ltenglish.rc
+// File di inclusione generato con Microsoft Visual C++.
+// Utilizzato da ltmsg.rc
 //
 #define IDS_GENERIC_ERROR               1
 #define IDS_MISSINGWORLDMODEL           2

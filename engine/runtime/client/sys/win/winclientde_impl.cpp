@@ -1683,7 +1683,7 @@ static LTRESULT cis_GetEngineHook(char *pName, void **pData)
 	else if(stricmp(pName, "d3ddevice")==0)
 	{
 		//IDirect3DDevice9*
-		*pData = (void*)r_GetRenderStruct()->GetD3DDevice();
+		*pData = (void*)r_GetRenderStruct()->GetDevice();
 		return LT_OK;
 	}
 	
@@ -1697,24 +1697,7 @@ static LTRESULT cis_QueryGraphicDevice(LTGraphicsCaps* pCaps)
 		return LT_ERROR;
 	}
 
-	if(!r_GetRenderStruct()->GetD3DDevice())
-	{
-		return LT_ERROR;
-	}
-
-	D3DCAPS9 caps;
-	HRESULT hres = r_GetRenderStruct()->GetD3DDevice()->GetDeviceCaps(&caps);
-
-	if(hres != D3D_OK)
-	{
-		return LT_ERROR;
-	}
-
-	pCaps->PixelShaderVersion = (uint32)caps.PixelShaderVersion;
-	pCaps->VertexShaderVersion = (uint32)caps.VertexShaderVersion;
-	
-
-	return LT_OK;
+	return r_GetRenderStruct()->GetDeviceCaps(pCaps);
 }
 
 

@@ -10,6 +10,8 @@
 #include "classbind.h"
 #include "bindmgr.h"
 #include "console.h"
+#include "ltresources.h"
+#include <objbase.h>
 
 
 //------------------------------------------------------------------
@@ -558,6 +560,30 @@ LTRESULT dsi_InitClientShellDE()
 
         g_pClientMgr->SetupError(LT_INVALIDSHELLDLL, "cres.dll");
         RETURN_ERROR_PARAM(1, InitClientShellDE, LT_INVALIDSHELLDLL, "cres.dll");
+    }
+
+    
+    { // MIS: change icon and cursor based from CRes
+        HINSTANCE hCRes;
+        bm_GetInstanceHandle(g_pClientMgr->m_hClientResourceModule, (void**)&hCRes);
+
+        HICON hResIcon, hResIconSm;
+        HCURSOR hResCursor;
+
+        hResIconSm = LoadIcon(hCRes, MAKEINTRESOURCE(DEFAULT_ICON_SM));
+        hResIcon = LoadIcon(hCRes, MAKEINTRESOURCE(DEFAULT_ICON));
+        hResCursor = LoadCursor(hCRes, MAKEINTRESOURCE(DEFAULT_CURSOR));
+
+        if (hResCursor)
+            SetCursor(hResCursor);
+
+        if (hResIcon)
+            SendMessage(g_ClientGlob.m_hMainWnd, WM_SETICON, ICON_BIG, (LPARAM)hResIcon);
+
+        if (hResIconSm)
+            SendMessage(g_ClientGlob.m_hMainWnd, WM_SETICON, ICON_SMALL, (LPARAM)hResIconSm);
+        else if (hResIcon)
+            SendMessage(g_ClientGlob.m_hMainWnd, WM_SETICON, ICON_SMALL, (LPARAM)hResIcon);
     }
 
     //let the dll know it's instance handle.

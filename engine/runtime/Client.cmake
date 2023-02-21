@@ -47,22 +47,8 @@ if (WIN32)
         client/sys/win/lithtech.rc
         client/sys/win/resource.h
     )
+    list(APPEND LT_CLIENT_LIBS dinput8 dxguid)
     source_group("resources" FILES ${LT_CLIENT_RESOURCES})
-endif()
-
-if ("${LT_RENDER}" STREQUAL "DIRECTX9")
-    list(APPEND LT_CLIENT_LIBS d3dx9 d3d9 dxguid dxerr dinput8 Dbghelp)
-    list(APPEND LT_CLIENT_INCLUDE ${DirectX_D3DX9_INCLUDE_DIR})
-    list(APPEND LT_CLIENT_LIBDIR ${DirectX_ROOT_DIR}/Lib/${DX_ARCH})
-    list(APPEND LT_CLIENT_DEFINE -D__D3D -D__D3DREND)
-
-    set(D3D_SHADOWS_SRC
-        render/sys/d3d/shadows/d3dmodelshadowrenderer.h
-        render/sys/d3d/shadows/d3dshadowtexture.cpp
-        render/sys/d3d/shadows/d3dshadowtexture.h
-    )
-    source_group("render/sys/d3d/shadows" FILES ${D3D_SHADOWS_SRC})
-    list(APPEND LT_CLIENT_SOURCE ${D3D_SHADOWS_SRC})
 endif()
 
 add_executable(lithtech WIN32 ${LT_CLIENT_SOURCE} ${LT_CLIENT_RESOURCES})

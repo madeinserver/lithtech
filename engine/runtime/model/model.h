@@ -14,10 +14,6 @@
 #include "dynarray.h"
 #endif
 
-#ifndef __SYSDDSTRUCTS_H__
-#include "sysddstructs.h"
-#endif
-
 #ifndef __RENDEROBJECT_H__
 #include "renderobject.h"
 #endif

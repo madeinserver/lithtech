@@ -9,6 +9,7 @@
 #include "iltfontmanager.h"
 #include "ilttexinterface.h"
 #include "iltdrawprim.h"
+#include "renderstruct.h"
 
 static ILTDrawPrim *g_pILTDrawPrimInternal;
 define_holder_to_instance(ILTDrawPrim, g_pILTDrawPrimInternal, Internal);

@@ -20,7 +20,7 @@
 #include "iltfontmanager.h"
 #include "ilttexinterface.h"
 #include "debuggeometry.h"
-#include "sysdrawprim.h"
+#include "render.h"
 
 //------------------------------------------------------------------
 //------------------------------------------------------------------
@@ -1115,22 +1115,12 @@ void CConsole::BorderedRectangle(uint32 fillColor, uint32 borderColor, LTRect re
 
 extern uint32	g_ScreenWidth, g_ScreenHeight;
 void CConsole::Draw() {
+
 #ifndef DE_HEADLESS_CLIENT
 	//	if ((!m_pFontBitmapData) || (!m_pStruct)) return;
 	if (!m_pStruct) return;
 
-	// Preserve current viewport
-	D3DVIEWPORT9 oldViewportData;
-    PD3DDEVICE->GetViewport(&oldViewportData);
-
-	D3DVIEWPORT9 viewportData;
-	viewportData.X		= 0;	
-	viewportData.Y		= 0;
-	viewportData.Width	= g_ScreenWidth;
-	viewportData.Height = g_ScreenHeight;
-	viewportData.MinZ	= 0;
-	viewportData.MaxZ	= 1.0f;
-	HRESULT hResult = D3D_CALL(PD3DDEVICE->SetViewport(&viewportData));
+	r_GetRenderStruct()->SetConsoleView();
 
 	// Check the console variables
 	CheckVariables();
@@ -1162,22 +1152,7 @@ void CConsole::Draw() {
 		BorderedRectangle( m_BackColor, m_BorderColor, cRect );
 	}
 
-	// Grab the current filter states.
-	bool bValidFilterStates = true;
-	DWORD nMinFilter, nMagFilter, nMipFilter;
-	if( FAILED(PD3DDEVICE->GetSamplerState(0, D3DSAMP_MINFILTER, &nMinFilter)) )
-		bValidFilterStates = false;
-	if( FAILED(PD3DDEVICE->GetSamplerState(0, D3DSAMP_MAGFILTER, &nMagFilter)) )
-		bValidFilterStates = false;
-	if( FAILED(PD3DDEVICE->GetSamplerState(0, D3DSAMP_MIPFILTER, &nMipFilter)) )
-		bValidFilterStates = false;
-
-	if( !bValidFilterStates )
-	{
-		PD3DDEVICE->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
-		PD3DDEVICE->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
-		PD3DDEVICE->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_POINT);
-	}
+	r_GetRenderStruct()->SetConsoleTextRenderMode();
 
 	// Draw all the text.
 	DrawTextLines( m_nTextLines );
@@ -1185,16 +1160,8 @@ void CConsole::Draw() {
 	// Draw the command box.
 	GetCommandBox()->Draw();
 
-	// Restore the previous filter states.
-	if( bValidFilterStates )
-	{
-		PD3DDEVICE->SetSamplerState(0, D3DSAMP_MINFILTER, nMinFilter);
-		PD3DDEVICE->SetSamplerState(0, D3DSAMP_MAGFILTER, nMagFilter);
-		PD3DDEVICE->SetSamplerState(0, D3DSAMP_MIPFILTER, nMipFilter);
-	}
-
-	// Restore previous viewport
-    PD3DDEVICE->SetViewport(&oldViewportData);
+	r_GetRenderStruct()->UnsetConsoleTextRenderMode();
+	r_GetRenderStruct()->UnsetConsoleView();
 
 #endif // !DE_HEADLESS_CLIENT
 }
@@ -1282,127 +1249,20 @@ void CConsole::DrawTextLine(const char *pText, const LTRect *pRect, COLORREF tex
  		m_Font->DrawString((float)pRect->left,(float)pRect->top,szBuff); 
 
 	}
-
-
-/*	long pitch;
-	int stringLen;
-	int	xCurPos, xEndPos, iChar, charWidth, xCounter;
-	uint32 *pCurMonoPos;
-	int	y;
-	GenericColor gcTextColor;
-	FormatMgr *pFormatMgr;
-	uint8 *pBuf, *pBufLine;
-	uint16 *pPos16;
-	uint32 *pPos32;
-	char theChar;
-
-	if ((pRect->top < 0) || (pRect->bottom >= (int)m_pStruct->m_Height) ||
-		((pRect->top + m_FullFontHeight) >= (int)m_pStruct->m_Height))
-		return;
-
-	pFormatMgr = format_mgr->Mgr();
-	PFormat screenFormat; m_pStruct->GetScreenFormat(&screenFormat);
-	pFormatMgr->PValueToFormatColor( &screenFormat, textColor, gcTextColor );
-
-	if (m_pStruct->LockScreen(pRect->left, pRect->top, pRect->right, pRect->bottom, (void**)&pBuf, &pitch)) {
-		xCurPos = 0;
-
-		stringLen = strlen( pText );
-		for (iChar = 0; iChar < stringLen; iChar++) {
-			theChar = pText[iChar];
-			if (theChar < 0) continue;
-
-			charWidth = m_CharWidths[theChar];
-			xEndPos = xCurPos + charWidth;
-
-			// Clip on X.
-			if ((xCurPos < 0) || (xEndPos >= (pRect->right - pRect->left))) continue;
-
-			// Draw.
-			pBufLine = pBuf + xCurPos * screenFormat.GetNumPixelBytes();
-			pCurMonoPos = &m_pFontBitmapData[ theChar * m_FullFontHeight ];
-			for (y = 0; y < m_FullFontHeight; ++y) {
-				uint32 nLineData = *pCurMonoPos;
-			
-				// Draw one line
-				xCounter = charWidth;
-				if (screenFormat.m_BPP == BPP_16) {
-					pPos16 = (uint16*)pBufLine;
-					while (xCounter) {
-						xCounter--;
-						if (nLineData & 1) {
-							*pPos16 = gcTextColor.wVal; }
-						nLineData = nLineData >> 1;
-						++pPos16; } }
-				else if (screenFormat.m_BPP == BPP_32) {
-					pPos32 = (uint32*)pBufLine;
-					
-					while (xCounter) {
-						xCounter--;
-						if (nLineData & 1) {
-							*pPos32 = gcTextColor.dwVal; }
-						nLineData = nLineData >> 1;
-						++pPos32; } }
-
-				// Move to the next line
-				pBufLine += pitch;
-				pCurMonoPos++; }			
-
-			// Increment the X position.
-			xCurPos += charWidth; }
-		
-		m_pStruct->UnlockScreen(); } */
 }
 
 void CConsole::DrawSmall(int nLines)
 {
 #ifndef DE_HEADLESS_CLIENT
-	//	if (!m_pFontBitmapData) return;
-
-	// Preserve current viewport
-	D3DVIEWPORT9 oldViewportData;
-    PD3DDEVICE->GetViewport(&oldViewportData);
-
-	D3DVIEWPORT9 viewportData;
-	viewportData.X		= 0;	
-	viewportData.Y		= 0;
-	viewportData.Width	= g_ScreenWidth;
-	viewportData.Height = g_ScreenHeight;
-	viewportData.MinZ	= 0;
-	viewportData.MaxZ	= 1.0f;
-	HRESULT hResult = D3D_CALL(PD3DDEVICE->SetViewport(&viewportData));
-
-	// Grab the current filter states.
-	bool bValidFilterStates = true;
-	DWORD nMinFilter, nMagFilter, nMipFilter;
-	if( FAILED(PD3DDEVICE->GetSamplerState(0, D3DSAMP_MINFILTER, &nMinFilter)) )
-		bValidFilterStates = false;
-	if( FAILED(PD3DDEVICE->GetSamplerState(0, D3DSAMP_MAGFILTER, &nMagFilter)) )
-		bValidFilterStates = false;
-	if( FAILED(PD3DDEVICE->GetSamplerState(0, D3DSAMP_MIPFILTER, &nMipFilter)) )
-		bValidFilterStates = false;
-
-	if( !bValidFilterStates )
-	{
-		PD3DDEVICE->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
-		PD3DDEVICE->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
-		PD3DDEVICE->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_POINT);
-	}
+	r_GetRenderStruct()->SetConsoleView();
+	r_GetRenderStruct()->SetConsoleTextRenderMode();
+	
 
 	// Draw the text.
 	DrawTextLines( nLines, true );
 
-	// Restore the previous filter states.
-	if( bValidFilterStates )
-	{
-		PD3DDEVICE->SetSamplerState(0, D3DSAMP_MINFILTER, nMinFilter);
-		PD3DDEVICE->SetSamplerState(0, D3DSAMP_MAGFILTER, nMagFilter);
-		PD3DDEVICE->SetSamplerState(0, D3DSAMP_MIPFILTER, nMipFilter);
-	}
-
-	//Restore previous viewport
-    PD3DDEVICE->SetViewport(&oldViewportData);
-
+	r_GetRenderStruct()->UnsetConsoleTextRenderMode();
+	r_GetRenderStruct()->UnsetConsoleView();
 #endif // !DE_HEADLESS_CLIENT
 }
 

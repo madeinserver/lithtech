@@ -88,6 +88,12 @@ Render Target handles
 	#define DEFAULT_RENDER_TARGET 0
 
 /*!
+Back buffer handles
+*/
+	typedef uint32 HBACKBUFFER;
+	#define INVALID_BACK_BUFFER ((HBACKBUFFER)0)
+
+/*!
 Poly reference.
 */
 	struct HPOLY

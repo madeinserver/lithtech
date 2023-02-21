@@ -61,15 +61,6 @@
 
 	#define MAX_LM_GRID_SIZE			255
 
-	struct LTRGBColor
-	{
-		union
-		{
-			LTRGB	rgb;
-			uint32	dwordVal;
-		};
-	};
-
 #endif  // __DE_WORLD_H__
 
 

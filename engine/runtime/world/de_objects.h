@@ -470,9 +470,6 @@ public:
 	// transform access returns false if no cached transforms.
 	bool				GetCachedTransform( uint32 iNode, LTMatrix &transform );
 	
-	// get transforms used for rendering, these are device dependant matrices.
-	DDMatrix*			GetRenderingTransforms();
-	
 	// returns false if iNode/iSock is out of range.
 	// both kinds one for ltransform, one for ltmatrix
 	bool				GetNodeTransform( uint32 iNode, LTransform &tf, bool bInWorldSpace=true );
@@ -570,7 +567,6 @@ protected :
 	void				DisableTransformCache();
 	
 	LTMatrix			*m_CachedTransforms;
-	DDMatrix			*m_RenderingTransforms ; 
 
 	// state of every node in tranform cache 
 	struct SCachedTransformInfo

@@ -37,11 +37,7 @@
 #include "collision.h"
 
 #include "ltrendererstats.h"
-#include "rendererframestats.h"
 
-#include "ltvertexshadermgr.h"
-#include "ltpixelshadermgr.h"
-#include "lteffectshadermgr.h"
 #include "ltinfo_impl.h"
 #include "soundmgr.h"
 
@@ -151,7 +147,13 @@ define_holder_to_instance(ILTPhysics, ilt_physics_client, Client);
 static IWorldParticleBlockerData *world_particle_blocker_data;
 define_holder(IWorldParticleBlockerData, world_particle_blocker_data);
 
+#include "iltvertexshadermgr.h"
+static ILTVertexShaderMgr* ilt_vertexshader_mgr;
+define_holder(ILTVertexShaderMgr, ilt_vertexshader_mgr);
 
+#include "iltpixelshadermgr.h"
+static ILTPixelShaderMgr* ilt_pixelshader_mgr;
+define_holder(ILTPixelShaderMgr, ilt_pixelshader_mgr);
 
 // ---------------------------------
 // Begin undocumented random puff.
@@ -1081,8 +1083,8 @@ bool CLTClient::AddVertexShader(const char *pFileName, int VertexShaderID,
 	ILTStream *pStream = NULL;
 	if (OpenFile(pFileName, &pStream) == LT_OK)
 	{
-		bSuccess = LTVertexShaderMgr::GetSingleton().AddVertexShader(pStream, pFileName, VertexShaderID,
-																	 (D3DVERTEXELEMENT9*)pVertexElements,
+		bSuccess = ilt_vertexshader_mgr->AddVertexShader(pStream, pFileName, VertexShaderID,
+																	 pVertexElements,
 																	 VertexElementsSize, bCompileShader);
 	}
 
@@ -1097,17 +1099,17 @@ bool CLTClient::AddVertexShader(const char *pFileName, int VertexShaderID,
 
 void CLTClient::RemoveVertexShader(int VertexShaderID)
 {
-	LTVertexShaderMgr::GetSingleton().RemoveVertexShader(VertexShaderID);
+	ilt_vertexshader_mgr->RemoveVertexShader(VertexShaderID);
 }
 
 void CLTClient::RemoveAllVertexShaders()
 {
-	LTVertexShaderMgr::GetSingleton().RemoveAllVertexShaders();
+	ilt_vertexshader_mgr->RemoveAllVertexShaders();
 }
 
 LTVertexShader* CLTClient::GetVertexShader(int VertexShaderID)
 {
-	return LTVertexShaderMgr::GetSingleton().GetVertexShader(VertexShaderID);
+	return ilt_vertexshader_mgr->GetVertexShader(VertexShaderID);
 }
 
 bool CLTClient::AddPixelShader(const char *pFileName, int PixelShaderID, bool bCompileShader)
@@ -1118,7 +1120,7 @@ bool CLTClient::AddPixelShader(const char *pFileName, int PixelShaderID, bool bC
 	ILTStream *pStream = NULL;
 	if (OpenFile(pFileName, &pStream) == LT_OK)
 	{
-		bSuccess = LTPixelShaderMgr::GetSingleton().AddPixelShader(pStream, pFileName, PixelShaderID, bCompileShader);
+		bSuccess = ilt_pixelshader_mgr->AddPixelShader(pStream, pFileName, PixelShaderID, bCompileShader);
 	}
 
 	// Close the file.
@@ -1132,17 +1134,17 @@ bool CLTClient::AddPixelShader(const char *pFileName, int PixelShaderID, bool bC
 
 void CLTClient::RemovePixelShader(int PixelShaderID)
 {
-	LTPixelShaderMgr::GetSingleton().RemovePixelShader(PixelShaderID);
+	ilt_pixelshader_mgr->RemovePixelShader(PixelShaderID);
 }
 
 void CLTClient::RemoveAllPixelShaders()
 {
-	LTPixelShaderMgr::GetSingleton().RemoveAllPixelShaders();
+	ilt_pixelshader_mgr->RemoveAllPixelShaders();
 }
 
 LTPixelShader* CLTClient::GetPixelShader(int PixelShaderID)
 {
-	return LTPixelShaderMgr::GetSingleton().GetPixelShader(PixelShaderID);
+	return ilt_pixelshader_mgr->GetPixelShader(PixelShaderID);
 }
 
 void CLTClient::CPrint(const char *pMsg, ...)
@@ -1588,7 +1590,7 @@ LTRESULT CLTClient::GetRendererStats(LTRendererStats &refStats)
 		return LT_ERROR;
 
     // Fill our stats struct
-    if(GetFrameStats(refStats))
+    if(r_GetRenderStruct()->GetFrameStats(refStats))
     {
         return LT_ERROR;
     }

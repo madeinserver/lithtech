@@ -1,6 +1,6 @@
 #include "bdefs.h"
 #include "texturestringimage.h"
-#include "d3d_texture.h"
+
 #include <algorithm>
 
 //----------------------------------------------------------------------------------------

@@ -13,6 +13,7 @@
 #include "iltclient.h"
 #include "dsys_interface.h"
 #include "soundmgr.h"
+#include "sys/win/resource.h" // MIS: icon
 
 
 //------------------------------------------------------------------
@@ -496,7 +497,7 @@ int LTAllocHook(int allocType, void *userData, size_t size, int blockType,
 
 int RunClientApp(HINSTANCE hInstance) {
     MSG         msg;
-    WNDCLASS    wndclass;
+    WNDCLASSEX    wndclass; // MIS: use ex style
     ClientGlob  *pGlob;
     const char      *pArg;
     RECT screenRect, wndRect;
@@ -568,13 +569,16 @@ int RunClientApp(HINSTANCE hInstance) {
     wndclass.cbClsExtra    = 0;
     wndclass.cbWndExtra    = 0;
     wndclass.hInstance     = pGlob->m_hInstance;
-    wndclass.hIcon         = LoadIcon (LTNULL, IDI_APPLICATION);
+    wndclass.hIcon         = LoadIcon (hInstance, MAKEINTRESOURCE(IDR_MAINFRAME)); // MIS: use lithtech icon
     wndclass.hCursor       = LoadCursor (LTNULL, IDC_ARROW);
     wndclass.hbrBackground = (HBRUSH)GetStockObject (BLACK_BRUSH);
     wndclass.lpszMenuName  = LTNULL;
     wndclass.lpszClassName = pGlob->m_WndClassName;
+    wndclass.cbSize         = sizeof(wndclass);
+    wndclass.hIconSm        = LoadIcon(hInstance, MAKEINTRESOURCE(IDR_MAINFRAME)); // MIS: small icon for Vista+
 
-    RegisterClass (&wndclass);
+    if (!RegisterClassEx(&wndclass))
+        return -1; // MIS: add check for register class
 
     GetWindowRect(GetDesktopWindow(), &screenRect);
 

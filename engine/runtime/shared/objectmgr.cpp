@@ -413,7 +413,6 @@ ModelInstance::ModelInstance()
 	// Cached Transforms 
 	m_CachedTransforms			= NULL;
 	m_CachedTransformInfo		= NULL;
-	m_RenderingTransforms		= NULL;
 
     m_LastDirLightAmount		= -1.0f;
 	m_nRenderInfoIndex			= INVALID_MODEL_INFO_INDEX;
@@ -960,14 +959,6 @@ void ModelInstance::EnableTransformCache()
 	LT_MEM_TRACK_ALLOC( m_CachedTransformInfo= new SCachedTransformInfo [ nNumNodes ], 
 						LT_MEM_TYPE_OBJECT);
 
-
-	// only allocate rendering transforms if on the client.
-	if( GetCSType() == ClientType )
-	{
-		LT_MEM_TRACK_ALLOC( m_RenderingTransforms= new DDMatrix [ nNumNodes ], 
-							LT_MEM_TYPE_OBJECT);
-	}
-
 	ResetCachedTransformNodeStates();
 }
 
@@ -984,9 +975,6 @@ void ModelInstance::DisableTransformCache()
 
 	delete [] m_CachedTransformInfo;
 	m_CachedTransformInfo= NULL ;
-
-	delete [] m_RenderingTransforms;
-	m_RenderingTransforms = NULL ;
 }
 
 // ------------------------------------------------------------------------
@@ -1151,39 +1139,6 @@ bool ModelInstance::GetCachedTransform( uint32 iNode, LTMatrix &transform )
 	}
 }
 
-// ------------------------------------------------------------------------
-// GetRenderingTransforms()
-// get the matrix for use in rendering of the current animation state.
-// ------------------------------------------------------------------------
-DDMatrix*	ModelInstance::GetRenderingTransforms()
-{ 
-	UpdateCachedTransformsWithPath();	
-	
-	// only do this if we're the client
-	if( GetCSType() == ClientType )
-	{
-		// Apply the inverse global transform of the bind pos to create 
-		// a difference transform between bind pose and animated pose. 
-		// This is what d3d needs.
-		for (uint32 i=0; i < GetModelDB()->NumNodes(); ++i) 
-		{
-			// if we need to update rendering transform do it.
-			// if not already done and eval'd by transform maker.
-			if( !IsNodeEvaluatedRendering(i) && IsNodeEvaluated(i) )
-			{
-				// render trans = anim-global-result * inverse of base pose ; 
-				// thus getting the diff
-				Convert_DItoDD( m_CachedTransforms[i] * GetModelDB()->GetNode(i)->GetInvGlobalTransform(),
-					            m_RenderingTransforms[i]); 
-
-				SetNodeEvaluatedRendering(i, true);
-			}
-		}
-	}
-
-	return m_RenderingTransforms ; 
-}
-	
 // ------------------------------------------------------------------------
 // ResetCachedTransformNodeStates()
 // mark all nodes as unevaluated & off the eval-path for the current frame

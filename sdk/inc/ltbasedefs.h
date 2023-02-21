@@ -2380,6 +2380,15 @@ struct LTTechniqueInfo
 	int  nPasses;
 };
 
+struct LTRGBColor
+{
+	union
+	{
+		LTRGB	rgb;
+		uint32	dwordVal;
+	};
+};
+
 class LTEffectShader
 {
 public:

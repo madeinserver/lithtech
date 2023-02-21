@@ -2,10 +2,6 @@
 #ifndef __LIGHT_TABLE_H__
 #define __LIGHT_TABLE_H__
 
-#ifndef __SYSDDSTRUCTS_H__
-#include "sysddstructs.h"
-#endif
-
 #include <list>
 
 // Used to determine how to shade things throughout the level.

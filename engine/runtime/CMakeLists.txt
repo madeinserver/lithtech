@@ -26,16 +26,6 @@ macro(runtime_src DIR EX)
 
         list(APPEND LT_${EX}_SOURCE ${${DIR}_WIN})
         list(APPEND LT_${EX}_INCLUDE ${${DIR}_WIN_INCLUDE})
-
-        if ("${LT_RENDER}" STREQUAL "DIRECTX9")
-            # DirectX 9
-            file(GLOB ${DIR}_D3D "${DIR}/sys/d3d/*.cpp" "${DIR}/sys/d3d/*.h")
-            list(APPEND ${DIR}_D3D_INCLUDE "${CMAKE_CURRENT_LIST_DIR}/${DIR}/sys/d3d")
-            source_group("${DIR}/sys/d3d" FILES ${${DIR}_D3D})
-
-            list(APPEND LT_${EX}_SOURCE ${${DIR}_D3D})
-            list(APPEND LT_${EX}_INCLUDE ${${DIR}_D3D_INCLUDE})
-        endif()
     elseif (LINUX)
 
         # Linux
@@ -45,16 +35,6 @@ macro(runtime_src DIR EX)
 
         list(APPEND LT_${EX}_SOURCE ${${DIR}_LNX})
         list(APPEND LT_${EX}_INCLUDE ${${DIR}_LNX_INCLUDE})
-    endif()
-
-    if ("${LT_RENDER}" STREQUAL "OPENGL")
-        # OpenGL
-        file(GLOB ${DIR}_OGL "${DIR}/sys/ogl/*.cpp" "${DIR}/sys/ogl/*.h")
-        list(APPEND ${DIR}_OGL_INCLUDE "${CMAKE_CURRENT_LIST_DIR}/${DIR}/sys/ogl")
-        source_group("${DIR}/sys/ogl" FILES ${${DIR}_OGL})
-
-        list(APPEND LT_${EX}_SOURCE ${${DIR}_OGL})
-        list(APPEND LT_${EX}_INCLUDE ${${DIR}_OGL_INCLUDE})
     endif()
 endmacro()
 
