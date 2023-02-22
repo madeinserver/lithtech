@@ -2,8 +2,10 @@
 #include <windows.h>
 #include "ltbasedefs.h"
 #include "ltbasetypes.h"
-#include "colorops.h"
-#include "renderstruct.h"
+#include "ltrenderstruct.h"
+#include "iltrender.h"
+#include "ltcolorops.h"
+#include "ltmodule.h"
 #include <malloc.h>
 #include <string.h>
 
@@ -339,84 +341,328 @@ bool nr_GetScreenFormat(PFormat *pFormat)
 	return true;
 }
 
+LTObject* nr_ProcessAttachment(LTObject* pParent, LTAttachment* pAttachment)
+{
+	return pParent;
+}
+
+// Get a shared texture from a file name  (returns NULL on failure)
+SharedTexture* nr_GetSharedTexture(const char* pFilename) { return NULL; }
+
+// Gets the texture in memory (guaranteed to be in memory until the next 
+// call to GetTexture).  
+HTEXTUREDATA nr_GetTexture(SharedTexture* pTexture) { return NULL; }
+
+// Gets the texture's file name
+const char* nr_GetTextureName(const SharedTexture* pTexture) { return NULL; }
+
+// Force it to free this texture.
+void            nr_FreeTexture(SharedTexture* pTexture) {}
+
+// Runs a string in the console.  The render drivers usually use this
+// so they can get HLTPARAMs right away and not have to check for
+// them all the time.
+void            nr_RunConsoleString(char* pString) {}
+
+// Print a string in the console.           
+void            nr_ConsolePrint(char* pMsg, ...) {}
+
+// Gets a parameter from the game (something that can be set from the console).
+// Returns NULL if the parameter doesn't exist.
+HLTPARAM nr_GetParameter(char* pName) { return NULL; }
+
+// Gets the value of a parameter .. returns 0/NULL if you pass in NULL.
+float           nr_GetParameterValueFloat(HLTPARAM hParam) { return 0.0f; }
+char* nr_GetParameterValueString(HLTPARAM hParam) { return NULL; }
+
+// Increments the object frame code.  This is needed for portals.
+uint32 nr_IncObjectFrameCode() { return 0; }
+uint32 nr_GetObjectFrameCode() { return 0; }
+
+// Returns a texture frame code that is guaranteed to not be set in 
+// any SharedTextures.  The renderer is expected to set this frame code on
+// any SharedTextures that it uses while rendering so the engine can know
+// if a texture was viewed or not.
+uint16 nr_IncCurTextureFrameCode() { return 0; }
+
+void* nr_GetDevice() {
+	return NULL;
+} 
+
+PFormat nr_GetTextureDDFormat1(BPPIdent BPP, uint32 iFlags) { return PFormat(); }
+bool            nr_QueryDDSupport(PFormat* Format) { return false; }
+bool            nr_GetTextureDDFormat2(BPPIdent BPP, uint32 iFlags, PFormat* pFormat) { return false; }
+bool            nr_ConvertTexDataToDD(uint8* pSrcData, PFormat* SrcFormat, uint32 SrcWidth, uint32 SrcHeight, uint8* pDstData, PFormat* DstFormat, BPPIdent eDstType, uint32 nDstFlags, uint32 DstWidth, uint32 DstHeight)
+{
+	return false;
+}
+
+
+//called to set a texture for the draw primitive
+void            nr_DrawPrimSetTexture(SharedTexture* pTexture) {}
+void            nr_DrawPrimDisableTextures() {}
+
+bool            nr_SetOptimized2DBlend(LTSurfaceBlend blend) { return false; }
+bool            nr_GetOptimized2DBlend(LTSurfaceBlend& blend) { return false; }
+bool            nr_SetOptimized2DColor(HLTCOLOR color) { return false; }
+bool            nr_GetOptimized2DColor(HLTCOLOR& color) { return false; }
+
+void            nr_BlitToScreen(BlitRequest* pRequest) {}
+bool            nr_WarpToScreen(BlitRequest* pRequest) { return false; }
+
+void			nr_MakeCubicEnvMap(const char* pszPrefix, uint32 nSize, const SceneDesc& InSceneDesc) {}
+
+
+// Get the current render info
+void            nr_GetRenderInfo(RenderInfoStruct* pStruct) {}
+
+// Blit from the screen.
+
+void            nr_BlitFromScreen(BlitRequest* pRequest) {}
+
+// Creating RenderObjects...
+HRENDEROBJECT nr_CreateRenderObject(RENDER_OBJECT_TYPES ObjectType) { return NULL; }
+bool            nr_DestroyRenderObject(HRENDEROBJECT pObject) { return false; }
+
+// Load rendering data from the specified stream
+bool			nr_LoadWorldData(ILTStream* pStream) { return false; }
+
+// Change the color of a lightgroup in the currently loaded world
+// Returns false if a world isn't loaded
+bool			nr_SetLightGroupColor(uint32 nID, const LTVector& vColor) { return false; }
+
+// Change/query the state of an occluder in the currently loaded world
+// Returns LT_NOTFOUND if the ID isn't found or LT_NOTINWORLD if a world isn't loaded
+LTRESULT nr_SetOccluderEnabled(uint32 nID, bool bEnabled) { return LT_ERROR; }
+LTRESULT nr_GetOccluderEnabled(uint32 nID, bool* pEnabled) { return LT_ERROR; }
+
+// Accessing texture effect variables
+uint32 nr_GetTextureEffectVarID(const char* pszEffectGroup, uint32 nStage) { return 0; }
+bool			nr_SetTextureEffectVar(uint32 nVarID, uint32 nVar, float fValue) { return false; }
+
+// Access to the different object groups
+bool			nr_IsObjectGroupEnabled(uint32 nGroup) { return false; }
+void			nr_SetObjectGroupEnabled(uint32 nGroup, bool bEnable) {}
+void			nr_SetAllObjectGroupEnabled() {}
+
+// Access to the render style map used when rendering the glow effect
+bool			nr_AddGlowRenderStyleMapping(const char* pszSource, const char* pszMapTo) { return false; }
+bool			nr_SetGlowDefaultRenderStyle(const char* pszFile) { return false; }
+bool			nr_SetNoGlowRenderStyle(const char* pszFile) { return false; }
+
+int             nr_GetFrameStats(LTRendererStats& refStats) { return 0; }
+bool            nr_GetBackBuffer(HBACKBUFFER* pBackBuffer) { return false; }
+void            nr_ReleaseBackBuffer(HBACKBUFFER pBackBuffer) {}
+
+bool            nr_SaveDefaultData(uint32 data) { return false; }
+bool            nr_RestoreDefaultData(uint32 data) { return false; }
+void            nr_FreeDefaultData(uint32 data) {}
+LTRESULT nr_GetDeviceCaps(LTGraphicsCaps* caps) { return LT_ERROR; }
+LTRESULT nr_SnapshotCurrentFrame() { return LT_ERROR; }
+LTRESULT nr_SaveCurrentFrameToPrevious() { return LT_ERROR; }
+LTRESULT nr_UploadCurrentFrameToEffect(LTEffectShader* pEffect, const char* szParam) { return LT_ERROR; }
+LTRESULT nr_UploadPreviousFrameToEffect(LTEffectShader* pEffect, const char* szParam) { return LT_ERROR; }
+void            nr_SetConsoleView() {}
+void            nr_UnsetConsoleView() {}
+void            nr_SetConsoleTextRenderMode() {}
+void            nr_UnsetConsoleTextRenderMode() {}
+
+class NullRenderSys : public ILTRenderSys
+{
+public:
+	bool Init() { return true; }
+	void Term() {}
+
+	void Setup(LTRenderStruct* pStruct)
+	{
+		pStruct->ProcessAttachment = nr_ProcessAttachment;
+		pStruct->GetSharedTexture = nr_GetSharedTexture;
+		pStruct->GetTexture = nr_GetTexture;
+		pStruct->GetTextureName = nr_GetTextureName;
+		pStruct->FreeTexture = nr_FreeTexture;
+		pStruct->RunConsoleString = nr_RunConsoleString;
+		pStruct->ConsolePrint = nr_ConsolePrint;
+		pStruct->GetParameter = nr_GetParameter;
+		pStruct->GetParameterValueFloat = nr_GetParameterValueFloat;
+		pStruct->GetParameterValueString = nr_GetParameterValueString;
+		pStruct->IncObjectFrameCode = nr_IncObjectFrameCode;
+		pStruct->GetObjectFrameCode = nr_GetObjectFrameCode;
+		pStruct->IncCurTextureFrameCode = nr_IncCurTextureFrameCode;
+
+		pStruct->Init = nr_Init;
+		pStruct->Term = nr_Term;
+		pStruct->GetDevice = nr_GetDevice;
+
+		pStruct->BindTexture = nr_BindTexture;
+		pStruct->UnbindTexture = nr_UnbindTexture;
+		pStruct->GetTextureDDFormat1 = nr_GetTextureDDFormat1;
+		pStruct->QueryDDSupport = nr_QueryDDSupport;
+		pStruct->GetTextureDDFormat2 = nr_GetTextureDDFormat2;
+		pStruct->ConvertTexDataToDD = nr_ConvertTexDataToDD;
+
+		pStruct->DrawPrimSetTexture = nr_DrawPrimSetTexture;
+		pStruct->DrawPrimDisableTextures = nr_DrawPrimDisableTextures;
+
+		pStruct->CreateContext = nr_CreateContext;
+		pStruct->DeleteContext = nr_DeleteContext;
+
+		pStruct->Clear = nr_Clear;
+
+		pStruct->Start3D = nr_Start3D;
+		pStruct->End3D = nr_End3D;
+		pStruct->IsIn3D = nr_IsIn3D;
+
+		pStruct->StartOptimized2D = nr_StartOptimized2D;
+		pStruct->EndOptimized2D = nr_EndOptimized2D;
+		pStruct->IsInOptimized2D = nr_IsInOptimized2D;
+		pStruct->SetOptimized2DBlend = nr_SetOptimized2DBlend;
+		pStruct->GetOptimized2DBlend = nr_GetOptimized2DBlend;
+		pStruct->SetOptimized2DColor = nr_SetOptimized2DColor;
+		pStruct->GetOptimized2DColor = nr_GetOptimized2DColor;
+
+		pStruct->RenderScene = nr_RenderScene;
+
+		pStruct->RenderCommand = nr_RenderCommand;
+
+		pStruct->SwapBuffers = nr_SwapBuffers;
+
+		pStruct->GetScreenFormat = nr_GetScreenFormat;
+
+		pStruct->CreateSurface = nr_CreateSurface;
+		pStruct->DeleteSurface = nr_DeleteSurface;
+
+		pStruct->GetSurfaceInfo = nr_GetSurfaceInfo;
+
+		pStruct->LockScreen = nr_LockScreen;
+		pStruct->UnlockScreen = nr_UnlockScreen;
+
+		pStruct->OptimizeSurface = nr_OptimizeSurface;
+		pStruct->UnoptimizeSurface = nr_UnoptimizeSurface;
+
+		pStruct->LockSurface = nr_LockSurface;
+		pStruct->UnlockSurface = nr_UnlockSurface;
+
+		pStruct->BlitToScreen = nr_BlitToScreen;
+		pStruct->WarpToScreen = nr_WarpToScreen;
+
+		pStruct->MakeScreenShot = nr_MakeScreenShot;
+
+		pStruct->MakeCubicEnvMap = nr_MakeCubicEnvMap;
+
+		pStruct->ReadConsoleVariables = nr_ReadConsoleVariables;
+
+		pStruct->GetRenderInfo = nr_GetRenderInfo;
+
+		pStruct->BlitFromScreen = nr_BlitFromScreen;
+
+		pStruct->CreateRenderObject = nr_CreateRenderObject;
+		pStruct->DestroyRenderObject = nr_DestroyRenderObject;
+
+		pStruct->LoadWorldData = nr_LoadWorldData;
+
+		pStruct->SetLightGroupColor = nr_SetLightGroupColor;
+
+		pStruct->SetOccluderEnabled = nr_SetOccluderEnabled;
+		pStruct->GetOccluderEnabled = nr_GetOccluderEnabled;
+
+		pStruct->GetTextureEffectVarID = nr_GetTextureEffectVarID;
+		pStruct->SetTextureEffectVar = nr_SetTextureEffectVar;
+
+		pStruct->IsObjectGroupEnabled = nr_IsObjectGroupEnabled;
+		pStruct->SetObjectGroupEnabled = nr_SetObjectGroupEnabled;
+		pStruct->SetAllObjectGroupEnabled = nr_SetAllObjectGroupEnabled;
+
+		pStruct->AddGlowRenderStyleMapping = nr_AddGlowRenderStyleMapping;
+		pStruct->SetGlowDefaultRenderStyle = nr_SetGlowDefaultRenderStyle;
+		pStruct->SetNoGlowRenderStyle = nr_SetNoGlowRenderStyle;
+
+		pStruct->GetFrameStats = nr_GetFrameStats;
+		pStruct->GetBackBuffer = nr_GetBackBuffer;
+		pStruct->ReleaseBackBuffer = nr_ReleaseBackBuffer;
+
+		pStruct->SaveDefaultData = nr_SaveDefaultData;
+		pStruct->RestoreDefaultData = nr_RestoreDefaultData;
+		pStruct->FreeDefaultData = nr_FreeDefaultData;
+		pStruct->GetDeviceCaps = nr_GetDeviceCaps;
+		pStruct->SnapshotCurrentFrame = nr_SnapshotCurrentFrame;
+		pStruct->SaveCurrentFrameToPrevious = nr_SaveCurrentFrameToPrevious;
+		pStruct->UploadCurrentFrameToEffect = nr_UploadCurrentFrameToEffect;
+		pStruct->UploadPreviousFrameToEffect = nr_UploadPreviousFrameToEffect;
+
+		pStruct->SetConsoleView = nr_SetConsoleView;
+		pStruct->UnsetConsoleView = nr_UnsetConsoleView;
+		pStruct->SetConsoleTextRenderMode = nr_SetConsoleTextRenderMode;
+		pStruct->UnsetConsoleTextRenderMode = nr_UnsetConsoleTextRenderMode;
+	}
+
+
+	RMode* GetSupportedModes()
+	{
+		RMode* pMode;
+
+		LT_MEM_TRACK_ALLOC(pMode = new RMode, LT_MEM_TYPE_RENDERER);
+		if (pMode)
+		{
+			LTStrCpy(pMode->m_Description, "NullRender: (debug renderer)", sizeof(pMode->m_Description));
+			LTStrCpy(pMode->m_InternalName, "NullRender", sizeof(pMode->m_InternalName));
+
+			pMode->m_Width = 640;
+			pMode->m_Height = 480;
+			pMode->m_BitDepth = 32;
+			pMode->m_bHWTnL = true;
+			pMode->m_pNext = LTNULL;
+
+			return pMode;
+		}
+		else
+		{
+			return LTNULL;
+		}
+	}
+
+
+	void FreeModeList(RMode* pModes)
+	{
+		//	free(pModes);
+		RMode* pCur = pModes;
+		while (pCur) {
+			RMode* pNext = pCur->m_pNext;
+			LTMemFree(pCur);
+			pCur = pNext;
+		}
+	}
+
+public:
+	static NullRenderSys m_NulSys;
+	static char* m_pcNulSysDesc;
+};
 
 // ---------------------------------------------------------------- //
 // DLL export functions.
 // ---------------------------------------------------------------- //
 
+NullRenderSys NullRenderSys::m_NulSys;
+char* NullRenderSys::m_pcNulSysDesc = "*** null render driver ***";
+
 extern "C"
 {
-	void RenderDLLSetup(RenderStruct *pStruct);
-	RMode* GetSupportedModes();
-	void FreeModeList(RMode *pModes);
-};
-
-
-void rdll_RenderDLLSetup(RenderStruct *pStruct)
-{
-	pStruct->Start3D = nr_Start3D;
-	pStruct->End3D = nr_End3D;
-	pStruct->IsIn3D = nr_IsIn3D;
-	pStruct->StartOptimized2D = nr_StartOptimized2D;
-	pStruct->EndOptimized2D = nr_EndOptimized2D;
-	pStruct->IsInOptimized2D = nr_IsInOptimized2D;
-	pStruct->OptimizeSurface = nr_OptimizeSurface;
-	pStruct->UnoptimizeSurface = nr_UnoptimizeSurface;
-	pStruct->Init = nr_Init;
-	pStruct->Term = nr_Term;
-	pStruct->BindTexture = nr_BindTexture;
-	pStruct->UnbindTexture = nr_UnbindTexture;
-	pStruct->CreateContext = nr_CreateContext;
-	pStruct->DeleteContext = nr_DeleteContext;
-	pStruct->Clear = nr_Clear;
-	pStruct->RenderScene = nr_RenderScene;
-	pStruct->RenderCommand = nr_RenderCommand;
-	pStruct->SwapBuffers = nr_SwapBuffers;
-	pStruct->CreateSurface = nr_CreateSurface;
-	pStruct->DeleteSurface = nr_DeleteSurface;
-	pStruct->GetSurfaceInfo = nr_GetSurfaceInfo;
-	pStruct->LockSurface = nr_LockSurface;
-	pStruct->UnlockSurface = nr_UnlockSurface;
-	pStruct->LockScreen = nr_LockScreen;
-	pStruct->UnlockScreen = nr_UnlockScreen;
-	pStruct->MakeScreenShot = nr_MakeScreenShot;
-	pStruct->ReadConsoleVariables = nr_ReadConsoleVariables;
-	pStruct->GetScreenFormat = nr_GetScreenFormat;
-	pStruct->BlitToScreen = NULL;
+	LTMODULE_EXPORT char* RenderSysDesc();
+	LTMODULE_EXPORT ILTRenderSys* RenderSysMake();
 }
 
-
-RMode* rdll_GetSupportedModes()
+char* RenderSysDesc()
 {
-	RMode *pMode;
-
-	LT_MEM_TRACK_ALLOC(pMode = new RMode, LT_MEM_TYPE_RENDERER);
-	if(pMode)
-	{
-		LTStrCpy(pMode->m_Description, "NullRender: (debug renderer)", sizeof(pMode->m_Description));
-		LTStrCpy(pMode->m_InternalName, "NullRender", sizeof(pMode->m_InternalName));
-
-		pMode->m_Width		= 640;
-		pMode->m_Height		= 480;
-		pMode->m_BitDepth	= 32;
-		pMode->m_bHWTnL		= true;
-		pMode->m_pNext		= LTNULL;
-
-		return pMode;
-	}
-	else
-	{
-		return LTNULL;
-	}
+	return NullRenderSys::m_pcNulSysDesc;
 }
 
-
-void rdll_FreeModeList(RMode *pModes)
+ILTRenderSys* RenderSysMake()
 {
-//	free(pModes);
-	RMode* pCur = pModes;
-	while (pCur) {
-		RMode* pNext = pCur->m_pNext;
-		LTMemFree(pCur);
-		pCur = pNext; }
+	return &NullRenderSys::m_NulSys;
 }
+
+#ifdef _WIN32
+bool WINAPI DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)
+{
+	return true;
+}
+#endif
