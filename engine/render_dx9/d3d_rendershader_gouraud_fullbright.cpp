@@ -10,7 +10,7 @@
 #include "common_draw.h"
 #include "common_stuff.h"
 #include "d3d_texture.h"
-#include "renderstruct.h"
+#include "ltrenderstruct.h"
 
 #include "memstats_world.h"
 

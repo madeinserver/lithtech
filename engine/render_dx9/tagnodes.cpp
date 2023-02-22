@@ -3,7 +3,7 @@
 #include "tagnodes.h"
 #include "drawobjects.h"
 #include "common_draw.h"
-#include "renderstruct.h"
+#include "ltrenderstruct.h"
 #include "de_mainworld.h"
 #include "drawlight.h"
 #include "objectgroupmgr.h"
@@ -20,7 +20,7 @@
 //------------------------------------------------------------------
 
 //IWorldClientBSP holder
-#include "world_client_bsp.h"
+#include "iltworldclientbsp.h"
 static IWorldClientBSP *world_bsp_client;
 define_holder(IWorldClientBSP, world_bsp_client);
 
@@ -53,7 +53,7 @@ static void d3d_ProcessAttachments(LTObject *pObject, uint32 depth)
 	// Don't recurse too far.
 	assert(depth < 32);
 
-	Attachment *pCur = pObject->m_Attachments;
+	LTAttachment *pCur = pObject->m_Attachments;
 	while(pCur)
 	{
 		LTObject *pAttachedObject = g_pStruct->ProcessAttachment(pObject, pCur);

@@ -10,13 +10,11 @@
 
 #ifndef __TEXTUREPROP_H__
 #define __TEXTUREPROP_H__
-
 #pragma once
-#include <windows.h>
+
+#include "dtxmgr.h"
 
 // OLD Defs
-#define DTX_COMMANDSTRING_LEN 128
-typedef short int int16;
 class TextureData;
 
 #define TPROP_FLAGS					(1<<0)
@@ -42,13 +40,13 @@ class TextureProp
 public:
 
 	TextureProp()
-		: m_pTexture(NULL),
-		  m_bFullBrights(FALSE),
-		  m_b32BitSysCopy(FALSE),
-		  m_bPrefer4444(FALSE),
-		  m_bPrefer5551(FALSE),
-		  m_bPrefer16Bit(FALSE),
-		  m_bNoSysCache(FALSE),
+		: m_pTexture(LTNULL),
+		  m_bFullBrights(LTFALSE),
+		  m_b32BitSysCopy(LTFALSE),
+		  m_bPrefer4444(LTFALSE),
+		  m_bPrefer5551(LTFALSE),
+		  m_bPrefer16Bit(LTFALSE),
+		  m_bNoSysCache(LTFALSE),
 		  m_TextureFlags(0),
 		  m_TextureGroup(0),
 		  m_nMipmaps(0),
@@ -91,23 +89,23 @@ public:
 	// This texture is deleted automatically when the window is closed.
 	TextureData*	m_pTexture;
 
-	BOOL			m_bFullBrights;
-	BOOL			m_b32BitSysCopy;
-	BOOL			m_bPrefer4444;
-	BOOL			m_bPrefer5551;
-	BOOL			m_bPrefer16Bit;
-	BOOL			m_bNoSysCache;
-	DWORD			m_TextureFlags;
-	DWORD			m_TextureGroup;
-	DWORD			m_nMipmaps;
-	DWORD			m_NonS3TCMipmapOffset;
+	LTBOOL			m_bFullBrights;
+	LTBOOL			m_b32BitSysCopy;
+	LTBOOL			m_bPrefer4444;
+	LTBOOL			m_bPrefer5551;
+	LTBOOL			m_bPrefer16Bit;
+	LTBOOL			m_bNoSysCache;
+	uint32			m_TextureFlags;
+	uint32			m_TextureGroup;
+	uint32			m_nMipmaps;
+	uint32			m_NonS3TCMipmapOffset;
 	int				m_AlphaCutoff;
 	int				m_AverageAlpha;
 	int				m_UIMipmapOffset;
 	char			m_CommandString[DTX_COMMANDSTRING_LEN];
 	int				m_BPPIdent;
 	int				m_TempBPPIdent;
-	DWORD			m_TexturePriority;
+	uint32			m_TexturePriority;
 	float			m_DetailTextureScale;
 	int16			m_DetailTextureAngle;
 

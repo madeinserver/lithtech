@@ -8,7 +8,7 @@ struct RenderInfoStruct;
 #endif
 
 #include "ltattachment.h"
-#include "ltpformat.h"
+#include "ltpixelformat.h"
 
 #ifndef NUM_MIPMAPS
     #define NUM_MIPMAPS 8
@@ -32,6 +32,7 @@ typedef RenderContext* HRENDERCONTEXT;
 typedef void* HLTPARAM;
 typedef void* HLTBUFFER;
 
+typedef uint32 DDFormat;
 
 // Draw modes.
 #define DRAWMODE_NORMAL     1   // Render normally.
@@ -96,13 +97,6 @@ struct RenderStructInit
     void    *m_hWnd;    // The main window.
 };
 
-enum LTDefaultData
-{
-    DEFD_RENDER_TARGET,
-    DEFD_DEPTH_BUFFER,
-};
-
-
 // A blit command.
 class BlitRequest
 {
@@ -131,6 +125,38 @@ public:
 	LTWarpPt       *m_pWarpPts;
 	int            m_nWarpPts;
 	bool				m_bUseOld;
+};
+
+/*!
+* This structure provide access to some methods back to the engine, this has been used by the D3D renderer so far
+* This is the safest way to provide access without dllexporting lithtech.exe
+*/
+struct LTInternalAccess
+{
+    LTRESULT (*LoadSystemTexture)(SharedTexture* pSharedTexture);
+
+    //frees the associated texture data and cleans up references to it
+    void (*UnloadSystemTexture)(TextureData* pTexture);
+
+    //this will bind the texture to the device. Note that the texture data is not guaranteed to be valid
+    //after this call since the renderer can free it to save memory
+    void (*BindTexture)(SharedTexture* pSharedTexture, LTBOOL bTextureChanged);
+
+    //unbinds the texture from the device
+    void (*UnbindTexture)(SharedTexture* pSharedTexture, bool bUnLoad_EngineData);
+
+    HTEXTURE(*AllocateSharedTexture)();
+
+    void (*FreeSharedTexture)(HTEXTURE texture);
+
+    void (*LinkSharedTexture)(HTEXTURE texture);
+
+    bool(*GetTextureInfo)(HTEXTURE texture, uint32& width, uint32& height, PFormat& format);
+
+    TextureData* (*GetTextureData)(HTEXTURE texture);
+
+    void (*LinkTextureData)(TextureData* texture);
+
 };
 
 struct LTRenderStruct
@@ -210,7 +236,7 @@ struct LTRenderStruct
         // even if it's already bound.
         void            (*BindTexture)(SharedTexture *pTexture, bool bTextureChanged);
         void            (*UnbindTexture)(SharedTexture *pTexture);
-        PFormat         (*GetTextureDDFormat1)(BPPIdent BPP, uint32 iFlags);
+        DDFormat        (*GetTextureDDFormat1)(BPPIdent BPP, uint32 iFlags);
         bool            (*QueryDDSupport)(PFormat* Format);
         bool            (*GetTextureDDFormat2)(BPPIdent BPP, uint32 iFlags, PFormat* pFormat);
         bool            (*ConvertTexDataToDD)(uint8* pSrcData, PFormat* SrcFormat, uint32 SrcWidth, uint32 SrcHeight, uint8* pDstData, PFormat* DstFormat, BPPIdent eDstType, uint32 nDstFlags, uint32 DstWidth, uint32 DstHeight);
@@ -340,9 +366,9 @@ struct LTRenderStruct
         bool            (*GetBackBuffer)(HBACKBUFFER* pBackBuffer);
         void            (*ReleaseBackBuffer)(HBACKBUFFER pBackBuffer);
 
-        bool            (*SaveDefaultData)(uint32 data);
-        bool            (*RestoreDefaultData)(uint32 data);
-        void            (*FreeDefaultData)(uint32 data);
+        bool            (*SaveDefaultRenderTarget)();
+        bool            (*RestoreDefaultRenderTarget)();
+        void            (*FreeDefaultRenderTarget)();
         LTRESULT        (*GetDeviceCaps)(LTGraphicsCaps* caps);
         LTRESULT        (*SnapshotCurrentFrame)();
         LTRESULT        (*SaveCurrentFrameToPrevious)();
@@ -353,6 +379,14 @@ struct LTRenderStruct
         void            (*UnsetConsoleView)();
         void            (*SetConsoleTextRenderMode)();
         void            (*UnsetConsoleTextRenderMode)();
+
+        // export of DDMatrix...
+
+        void            (*AllocateMatrix)(uint32 nNumNodes, void** pOutput);
+        void            (*FreeMatrix)(void* pData);
+        void            (*SetMatrixInfo)(uint32 i, LTMatrix input, void* pOutput);
+
+        LTInternalAccess    m_access; // MIS: for d3d abstraction
 };
 
 #endif  // __RENDERSTRUCT_H__

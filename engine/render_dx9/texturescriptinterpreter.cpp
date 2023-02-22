@@ -1,7 +1,7 @@
 #include "texturescriptinterpreter.h"
 
 //Interface for the client file manager
-#include "client_filemgr.h"		
+#include "iltclientfilemgr.h"		
 static IClientFileMgr* g_pIClientFileMgr;
 define_holder(IClientFileMgr, g_pIClientFileMgr);
 

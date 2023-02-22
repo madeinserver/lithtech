@@ -18,12 +18,12 @@
 //------------------------------------------------------------------
 
 //IClientFileMgr
-#include "client_filemgr.h"
+#include "iltclientfilemgr.h"
 static IClientFileMgr *client_file_mgr;
 define_holder(IClientFileMgr, client_file_mgr);
 
 //a IClientFormatMgr interface
-#include "client_formatmgr.h"
+#include "iltclientformatmgr.h"
 static IClientFormatMgr *format_mgr;
 define_holder(IClientFormatMgr, format_mgr);
 

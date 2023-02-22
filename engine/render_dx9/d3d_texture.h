@@ -16,7 +16,7 @@ class PFormat;
 #endif
 
 #ifndef __PIXELFORMAT_H__
-#include "pixelformat.h"
+#include "ltpixelformat.h"
 #endif
 
 #ifndef __D3D_DEVICE_H__
@@ -31,6 +31,7 @@ class PFormat;
 #	include "rendererframestats.h"
 #endif
 
+#include <object_bank.h>
 
 
 class SharedTexture;
@@ -223,8 +224,8 @@ public:
 	D3DFORMAT			S3TCFormatConv(BPPIdent BPP);
 	BPPIdent			S3TCFormatConv(D3DFORMAT Format);
 	static bool			QueryDDSupport(PFormat* Format);					// Device support this format?
-	static D3DFORMAT	QueryDDFormat1(BPPIdent BPP, uint32 iFlags);		// Figures out what format we'll use based on the flags...
-	static bool			QueryDDFormat2(BPPIdent BPP, uint32 iFlags, PFormat* pDstFormat)	{ return d3d_D3DFormatToPFormat(QueryDDFormat1(BPP,iFlags),pDstFormat); }
+	static DDFormat		QueryDDFormat1(BPPIdent BPP, uint32 iFlags);		// Figures out what format we'll use based on the flags...
+	static bool			QueryDDFormat2(BPPIdent BPP, uint32 iFlags, PFormat* pDstFormat)	{ return d3d_D3DFormatToPFormat((D3DFORMAT)QueryDDFormat1(BPP,iFlags),pDstFormat); }
 	static bool			ConvertTexDataToDD(uint8* pSrcData, PFormat* SrcFormat, uint32 SrcWidth, uint32 SrcHeight, uint8* pDstData, PFormat* DstFormat, BPPIdent eDstType, uint32 nDstFlags, uint32 DstWidth, uint32 DstHeight);
 	bool				UploadRTexture(TextureData* pSrcTexture, uint32 iSrcLvl, RTexture* pDstTexture, uint32 iDstLvl);
 

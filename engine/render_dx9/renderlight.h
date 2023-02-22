@@ -1,10 +1,6 @@
 #ifndef __RENDERLIGHT_H__
 #define __RENDERLIGHT_H__
 
-//include this for the light attenuation type
-#ifndef __DE_WORLD_H__
-#	include "de_world.h"
-#endif
 
 class CRenderLight
 {

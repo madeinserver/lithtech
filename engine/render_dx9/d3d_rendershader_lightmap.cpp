@@ -11,7 +11,7 @@
 #include "lightmapdefs.h"
 #include "lightmap_compress.h"
 #include "common_stuff.h"
-#include "renderstruct.h"
+#include "ltrenderstruct.h"
 
 #include "memstats_world.h"
 

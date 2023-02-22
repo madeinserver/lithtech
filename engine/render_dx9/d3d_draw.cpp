@@ -6,7 +6,7 @@
 #include "common_stuff.h"
 #include "fixedpoint.h"
 #include "d3d_utils.h"
-#include "renderstruct.h"
+#include "ltrenderstruct.h"
 #include "common_draw.h"
 #include "d3d_texture.h"
 #include "de_mainworld.h"
@@ -16,7 +16,6 @@
 #include "drawsky.h"
 #include "drawlight.h"
 #include "debuggeometry.h"
-#include "sysconsole_impl.h"
 #include "d3d_renderstatemgr.h"
 #include "d3d_renderworld.h"
 #include "iaggregateshader.h"
@@ -36,7 +35,7 @@ static ILTDrawPrim* g_pILTDrawPrim;
 define_holder_to_instance(ILTDrawPrim, g_pILTDrawPrim, Internal);
 
 //IWorldClient holder
-#include "world_client_bsp.h"
+#include "iltworldclientbsp.h"
 static IWorldClientBSP *world_bsp_client;
 define_holder(IWorldClientBSP, world_bsp_client);
 

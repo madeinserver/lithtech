@@ -18,7 +18,8 @@
 #include "ltlink.h"
 #endif
 
-#include "syslthread.h"
+#include <lthread.h>
+
 #include "sysudpthread.h"
 
 #include "listqueue.h"

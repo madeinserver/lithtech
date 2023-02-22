@@ -1,6 +1,6 @@
 #include "ltmodule.h"
-#include "pixelformat.h"
-#include "client_formatmgr.h"
+#include "ltpixelformat.h"
+#include "iltclientformatmgr.h"
 
 //implementation of IClientFormatMgr interface
 class CClientFormatMgr : public IClientFormatMgr {

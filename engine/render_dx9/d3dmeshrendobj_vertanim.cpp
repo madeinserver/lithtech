@@ -5,7 +5,7 @@
 #include "d3dmeshrendobj_vertanim.h"
 #include "model.h"
 #include "ltanimtracker.h"
-#include "renderstruct.h"
+#include "ltrenderstruct.h"
 #include "ltb.h"
 #include "d3d_device.h"
 #include "d3d_texture.h"

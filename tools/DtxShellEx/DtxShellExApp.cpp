@@ -143,20 +143,6 @@ BOOL CDtxShellExApp::InitATL()
 //-------------------------------------------------------------------------------------------------
 typedef unsigned int uint32;
 
-void* dalloc(unsigned int size)
-{
-	return (char*)malloc((size_t)size);
-}
-
-
-
-void dfree(void *ptr)
-{
-	free(ptr);
-}
-
-
-
 // Hook Stdlith's base allocators.
 void* DefStdlithAlloc(uint32 size)
 {

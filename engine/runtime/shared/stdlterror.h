@@ -33,15 +33,6 @@ extern class IBaseError *g_pSTDLTError;
 #define CRITICAL_ERROR(m,s) g_pSTDLTError->CriticalError(m,s)
 #define RECOVERABLE_ERROR(m,s) g_pSTDLTError->RecoverableError(m,s)
 
-enum ESTDLTResults {
-	STDLT_OK = 0,
-	STDLT_ERROR,
-	STDLT_WARNING,
-
-	STDLT_BEGIN,
-	STDLT_END
-};
-
 // #define LTRESULT ESTDLTResults
 
 // ------------------------------------------------------------------------- //

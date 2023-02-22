@@ -1,15 +1,13 @@
 #include "precompile.h"
-
-#include "interface_helpers.h"
-#include "pixelformat.h"
+#include "ltpixelformat.h"
 #include "d3d_surface.h"
-#include "renderstruct.h"
+#include "ltrenderstruct.h"
 #include "d3d_device.h"
 #include "dirtyrect.h"
 #include "common_stuff.h"
 #include "d3d_utils.h"
 #include "d3d_shell.h"
-#include "client_formatmgr.h"
+#include "iltclientformatmgr.h"
 #include "d3d_draw.h"
 #include "rendererconsolevars.h"
 

@@ -11,9 +11,8 @@
 #include "console.h"
 #endif
 
-#ifndef __SYSLTHREAD_H__
-#include "syslthread.h"
-#endif
+#include <lthread.h>
+
 
 // Forward declarations
 class CConsole;

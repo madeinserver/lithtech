@@ -1,11 +1,9 @@
 #include "precompile.h"
 
 #include "3d_ops.h"
-#include "de_world.h"
 #include "tagnodes.h"
 #include "common_draw.h"
-#include "de_mainworld.h"
-#include "renderstruct.h"
+#include "ltrenderstruct.h"
 #include "drawsky.h"
 
 

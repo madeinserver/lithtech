@@ -10,7 +10,7 @@
 #endif
 
 #ifndef __PIXELFORMAT_H__
-#include "pixelformat.h"
+#include "ltpixelformat.h"
 #endif
 
 

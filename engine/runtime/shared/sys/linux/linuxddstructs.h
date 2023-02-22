@@ -6,12 +6,6 @@
 #ifndef __D3DDDSTRUCTS_H__
 #define	__D3DDDSTRUCTS_H__
 
-#ifndef LTRGBColorANDLTRGB
-#define LTRGBColorANDLTRGB
-//struct LTRGB		{ uint8 b, g, r, a; };
-union LTRGBColor	{ LTRGB rgb; uint32 dwordVal; };
-#endif
-
 struct SLinuxColorDef
 {
     union {

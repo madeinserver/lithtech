@@ -2,7 +2,7 @@
 #include "precompile.h"
 #include "LTEffectImpl.h"
 #include "rendererconsolevars.h"
-#include "render.h"
+#include "iltrender.h"
 #include "d3d_device.h"
 #include "d3d_texture.h"
 #include "d3d_utils.h"
@@ -136,7 +136,7 @@ bool  LTEffectImpl::Recreate()
 	
 	LTEffectInclude includeHandler;
 	includeHandler.SetParentFilename(m_FileName);
-	hr = D3DXCreateEffect(r_GetRenderStruct()->GetD3DDevice(),
+	hr = D3DXCreateEffect((LPDIRECT3DDEVICE9)r_GetRenderStruct()->GetDevice(),
 		m_pByteCode,
 		m_ByteCodeSize,
 		NULL,

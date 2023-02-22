@@ -3,8 +3,8 @@
 #include "precompile.h"
 
 #include "d3d_utils.h"
-#include "pixelformat.h"
-#include "renderstruct.h"
+#include "ltpixelformat.h"
+#include "ltrenderstruct.h"
 #include "common_stuff.h"
 
 

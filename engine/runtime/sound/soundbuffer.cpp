@@ -16,7 +16,7 @@ extern int32 g_nSoundDebugLevel;
 //------------------------------------------------------------------
 
 //IClientFileMgr
-#include "client_filemgr.h"
+#include "iltclientfilemgr.h"
 static IClientFileMgr *client_file_mgr;
 define_holder(IClientFileMgr, client_file_mgr);
 

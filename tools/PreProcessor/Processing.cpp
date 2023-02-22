@@ -55,33 +55,6 @@ bool					g_bInFullVis = false;
 
 
 //---------------------Memory Allocation----------------------------//
-void* dalloc(unsigned int size)
-{
-	void *pRet;
-	
-	pRet = malloc((size_t)size);
-	if(!pRet)
-		throw CLithMemException();
-
-	return pRet;
-}
-
-void dfree(void *ptr)
-{
-	free(ptr);
-}
-
-void* dalloc_z(unsigned int size)
-{
-	void *pRet;
-	
-	pRet = malloc((size_t)size);
-	if(!pRet)
-		throw CLithMemException();
-	
-	memset(pRet, 0, size);
-	return pRet;
-}
 
 // Hook Stdlith's base allocators.
 void* DefStdlithAlloc(uint32 size)

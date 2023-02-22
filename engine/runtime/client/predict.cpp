@@ -26,7 +26,7 @@ static IClientShell *i_client_shell;
 define_holder(IClientShell, i_client_shell);
 
 //IWorldClientBSP holder
-#include "world_client_bsp.h"
+#include "iltworldclientbsp.h"
 static IWorldClientBSP *world_bsp_client;
 define_holder(IWorldClientBSP, world_bsp_client);
 

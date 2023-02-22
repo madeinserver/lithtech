@@ -5,7 +5,7 @@
 #include "dsys.h"
 #include "conparse.h"
 #include "systimer.h"
-#include "syslthread.h"
+#include <lthread.h>
 #include "systhread.h"
 
 

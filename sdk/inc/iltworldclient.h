@@ -2,7 +2,7 @@
 #define __WORLD_CLIENT_H__
 
 #ifndef __WORLD_INTERFACE_H__
-#include "world_interface.h"
+#include "iltworld.h"
 #endif
 
 //

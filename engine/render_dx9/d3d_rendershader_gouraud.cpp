@@ -14,7 +14,7 @@ define_holder(IClientShell, i_client_shell);
 #include "common_draw.h"
 #include "common_stuff.h"
 #include "d3d_texture.h"
-#include "renderstruct.h"
+#include "ltrenderstruct.h"
 #include "3d_ops.h"
 #include "memstats_world.h"
 

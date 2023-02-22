@@ -10,7 +10,7 @@
 #include "drawobjects.h"
 #include "d3d_renderworld.h"
 
-#include "renderstruct.h"
+#include "ltrenderstruct.h"
 #include "counter.h"
 
 // ---------------------------------------------------------------- //

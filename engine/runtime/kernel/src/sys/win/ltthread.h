@@ -19,8 +19,8 @@
 #include "stdlterror.h"
 #endif
 
-#ifndef __ITHREAD_H__
-#include "ithread.h"
+#ifndef __LTHREAD_H__
+#include "lthread.h"
 #endif
 
 #define WIN32_LEAN_AND_MEAN
@@ -28,6 +28,9 @@
 #include <windows.h>  // ecch (needed for inline critical sections)
 #define __WINDOWS_H__
 #endif
+
+#include "lthread.h"
+
 
 // ------------------------------------------------------------------------- //
 // Defines
@@ -42,20 +45,6 @@
 // Class Definitions
 // ------------------------------------------------------------------------- //
 
-//
-// CLASS: CSysSyncVar
-//
-class CSysSyncVar : public ISyncVar {
-    public:
-        CSysSyncVar();
-        ~CSysSyncVar();
-        // implement this interface (see IThread.h)
-        ESyncResult Begin();
-        ESyncResult End();
-        ESyncResult Wait();
-    protected:
-        HANDLE m_hMutex;
-}; // CSysSyncVar
 
 inline
 CSysSyncVar::CSysSyncVar() 
@@ -90,20 +79,6 @@ CSysSyncVar::Wait()
     return(SYNC_ERROR);
 }
 
-//
-// CLASS: CSysSerialVar
-//
-class CSysSerialVar : public ISerialVar 
-{
-    public:
-        CSysSerialVar();
-        ~CSysSerialVar();
-        // implement this interface (see IThread.h)
-        ESyncResult Lock();
-        ESyncResult Unlock();
-    protected:
-        CRITICAL_SECTION m_CritSect;
-};
 
 inline
 CSysSerialVar::CSysSerialVar() 
@@ -172,49 +147,6 @@ CSysEventVar::WaitFor(uint32 timeout_ms) {
 			return SYNC_ERROR;
 	}
 }
-
-//
-// CLASS: CSysThread
-//
-class CSysThread : public IThread 
-{
-    public:
-        CSysThread();
-        // implement the pure vitural interface defined in ithread.h
-        virtual ESTDLTResults Run(EThreadPriority pri = ThreadNormal);
-        virtual ESTDLTResults Wakeup();
-        virtual ESTDLTResults Term(bool blocking = true); // avoid using this function if possible!
-        virtual void          WaitForTerm();
-    protected:
-        // these methods are not in IThread
-        bool    IsInThisThread() const;
-        bool    IsThreadActive() const;
-        static  unsigned int __stdcall  ThreadLaunch(void * pWhichThread);
-        virtual void                    ThreadRun() = 0;
-        virtual ESTDLTResults           ThreadInit();
-        virtual ESTDLTResults           ThreadTerm();
-        virtual void                    Sleep();
-    protected:
-        // not portable
-        int     LTPriToWinPri(EThreadPriority pri);
-        HANDLE  GetWinThreadHandle() { return m_hThread; }
-        DWORD   GetWinThreadId() { return m_ThreadID; }
-    private:
-        // data members
-        CSysSerialVar m_Lock; // thread-safe access to m_LocalWakeup
-        int m_LocalWakeup;
-        HANDLE m_hThread;
-        unsigned int m_ThreadID;
-}; // CSysThread
-
-inline
-CSysThread::CSysThread() 
-  : m_LocalWakeup(0),
-    m_hThread(NULL),
-    m_ThreadID(0)
-{
-    m_LocalWakeup=0;
-} // CSysThread constructor
 
 inline int
 CSysThread::LTPriToWinPri(EThreadPriority pri) 

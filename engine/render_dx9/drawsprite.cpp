@@ -5,17 +5,15 @@
 static IClientShell *i_client_shell;
 define_holder(IClientShell, i_client_shell);
 
-#include "de_objects.h"
 #include "3d_ops.h"
 #include "common_draw.h"
-#include "de_mainworld.h"
 #include "fixedpoint.h"
 #include "d3d_texture.h"
 #include "tagnodes.h"
 #include "drawobjects.h"
 #include "rendererframestats.h"
 
-#include "renderstruct.h"
+#include "ltrenderstruct.h"
 #include "counter.h"
 
 #include "LTEffectImpl.h"
@@ -30,7 +28,7 @@ define_holder(IClientShell, i_client_shell);
 //------------------------------------------------------------------
 
 //IWorldClientBSP holder
-#include "world_client_bsp.h"
+#include "iltworldclientbsp.h"
 static IWorldClientBSP *world_bsp_client;
 define_holder(IWorldClientBSP, world_bsp_client);
 

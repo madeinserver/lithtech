@@ -3,7 +3,7 @@
 #include "d3d_device.h"
 #include "d3d_renderstyleinterface.h"
 #include "d3d_renderstyle.h"
-#include "client_filemgr.h"					// For class FileRef...
+#include "iltclientfilemgr.h"					// For class FileRef...
 
 #include <string>
 
@@ -11,10 +11,10 @@
 static IClientFileMgr* client_file_mgr;
 define_holder(IClientFileMgr, client_file_mgr);
 
-define_interface(D3DRenderStyles, ILTRenderStyles);
+define_interface(RenderStyles, ILTRenderStyles);
 
 // Duplicate a render style (maybe you want to change it just for a certain object - you better dup it first, then change it, and set it)...
-CRenderStyle* D3DRenderStyles::DuplicateRenderStyle(CRenderStyle* pRendStyle)
+CRenderStyle* RenderStyles::DuplicateRenderStyle(CRenderStyle* pRendStyle)
 {
 	CD3DRenderStyle* pNewRenderStyle			= g_Device.CreateRenderStyle();
 	if (!pNewRenderStyle) return NULL;
@@ -23,14 +23,14 @@ CRenderStyle* D3DRenderStyles::DuplicateRenderStyle(CRenderStyle* pRendStyle)
 }
 
 // Create a render style. You can then set all it's internals yourself...
-CRenderStyle* D3DRenderStyles::CreateRenderStyle(bool bSetToDefault)
+CRenderStyle* RenderStyles::CreateRenderStyle(bool bSetToDefault)
 {
 	CD3DRenderStyle* pRenderStyle				= g_Device.CreateRenderStyle();
 	return pRenderStyle;
 }
 
 // Load a render style (ltb file) and create a render object for it...
-CRenderStyle* D3DRenderStyles::LoadRenderStyle(const char* szFilename)
+CRenderStyle* RenderStyles::LoadRenderStyle(const char* szFilename)
 {
 	FileRef ref; 
 	CD3DRenderStyle* pRenderStyle	= NULL;
@@ -80,14 +80,14 @@ CRenderStyle* D3DRenderStyles::LoadRenderStyle(const char* szFilename)
 }
 
 // Free render style - you no longer need it (may or may not be internally freed - depending on the ref count)...
-void D3DRenderStyles::FreeRenderStyle(CRenderStyle* pRendStyle)
+void RenderStyles::FreeRenderStyle(CRenderStyle* pRendStyle)
 {
 	pRendStyle->DecRefCount(); assert(pRendStyle->GetRefCount() < 1000000); // Sanity check it...
 	if (pRendStyle->GetRefCount() == 0) {
 		g_Device.DestroyRenderStyle((CD3DRenderStyle*)pRendStyle); }
 }
 
-void D3DRenderStyles::OnDelete(CD3DRenderStyle* pRendStyle)
+void RenderStyles::OnDelete(CD3DRenderStyle* pRendStyle)
 {
 	FileRef ref; 
 	

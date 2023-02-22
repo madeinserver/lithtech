@@ -15,10 +15,6 @@
 #ifndef __ITHREAD_H__
 #define __ITHREAD_H__
 
-#ifndef __STDLTERROR_H__
-#include "stdlterror.h"
-#endif
-
 #ifndef __LTINTEGER_H__
 #include "ltinteger.h"
 #endif
@@ -26,6 +22,16 @@
 // ------------------------------------------------------------------------- //
 // Typedefs & Enums
 // ------------------------------------------------------------------------- //
+
+enum ESTDLTResults {
+	STDLT_OK = 0,
+	STDLT_ERROR,
+	STDLT_WARNING,
+
+	STDLT_BEGIN,
+	STDLT_END
+};
+
 enum EThreadPriority {
 	ThreadLow    =0,
 	ThreadPri0   =0,

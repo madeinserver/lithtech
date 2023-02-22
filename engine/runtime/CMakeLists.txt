@@ -73,7 +73,7 @@ macro(runtime_link PROJ EX)
     target_include_directories(${PROJ} PRIVATE ${LT_${EX}_INCLUDE})
 endmacro()
 
-set(LT_SHARED_LIBS ltsdk stdlith ltmem lith rezmgr)
+set(LT_SHARED_LIBS ltsdk stdlith ltmem lith rezmgr dtxmgr)
 
 if (WIN32)
     list(APPEND LT_SHARED_LIBS Winmm ws2_32 Dbghelp)

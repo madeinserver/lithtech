@@ -30,6 +30,8 @@
 #include "ltinteger.h"
 #endif
 
+#include "lthread.h"
+
 #include <pthread.h>
 #include <sys/time.h>
 #include <errno.h>
@@ -42,32 +44,6 @@
 // Class Definitions
 // ------------------------------------------------------------------------- //
 
-//
-// CLASS: CSysThread
-//
-class CSysThread : public IThread {
-	public:
-		CSysThread();
-		// implement the pure vitural interface defined in ithread.h
-		virtual ESTDLTResults Run    (EThreadPriority pri = ThreadNormal);
-		virtual ESTDLTResults Wakeup ();
-		virtual ESTDLTResults Term   (bool blocking = true);
-        virtual void          WaitForTerm();
-	protected:
-		pthread_t	m_ThreadID;
-		pthread_cond_t	m_ThreadCond;
-		pthread_mutex_t	m_ThreadMutex;
-		pthread_mutex_t	m_WakeupMutex;
-		uint32          m_WakeupCnt;
-
-		bool	IsInThisThread() const { return pthread_self() == m_ThreadID; }
-		static  void          	*ThreadLaunch	(void *pWhichThread);
-		virtual void           	ThreadRun    	() = 0;
-		virtual ESTDLTResults  	ThreadInit   	();
-		virtual ESTDLTResults  	ThreadTerm   	();
-		virtual void           	Sleep        	();
-};
-
 inline
 CSysThread::CSysThread() {
 	// m_ThreadCond		= PTHREAD_COND_INITIALIZER;
@@ -77,22 +53,6 @@ CSysThread::CSysThread() {
 	pthread_mutex_init (&m_WakeupMutex, NULL);
 	m_WakeupCnt = 0;
 }
-
-
-//
-// CLASS: CSysSyncVar
-//
-class CSysSyncVar : public ISyncVar {
-	public:
-		CSysSyncVar();
-		~CSysSyncVar();
-		// implement this interface (see IThread.h)
-		ESyncResult Begin();
-		ESyncResult End();
-		ESyncResult Wait();
-	protected:
-		pthread_mutex_t	m_Mutex;
-};
 
 inline
 CSysSyncVar::CSysSyncVar() {
@@ -119,24 +79,6 @@ inline
 CSysSyncVar::~CSysSyncVar() {
 	pthread_mutex_destroy (&m_Mutex);
 }
-
-
-//
-// CLASS: CSysSerialVar
-//
-class CSysSerialVar : public ISerialVar {
-	public:
-		CSysSerialVar();
-		~CSysSerialVar();
-		// implement this interface (see IThread.h)
-		ESyncResult Lock();
-		ESyncResult Unlock();
-	protected:
-		friend class CSysEventVar;
-		pthread_mutex_t	m_Mutex;
-		// attributes for mutex object
-		pthread_mutexattr_t m_MutexAttr;
-};
 
 inline
 CSysSerialVar::CSysSerialVar() 

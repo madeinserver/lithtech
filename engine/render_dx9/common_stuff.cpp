@@ -1,11 +1,11 @@
 #include "precompile.h"
 
-#include "renderstruct.h"
+#include "ltrenderstruct.h"
 #include "common_stuff.h"
 #include "d3d_init.h"
 #include "rendererconsolevars.h"
 
-RenderStruct *g_pStruct=NULL;
+LTRenderStruct *g_pStruct=NULL;
 
 // Main globals.
 HWND	g_hWnd;
@@ -15,6 +15,11 @@ uint32	g_ScreenWidth, g_ScreenHeight;
 
 // The main list of ConVars.
 BaseConVar* g_pConVars	= NULL;
+
+LTRenderStruct* r_GetRenderStruct()
+{
+	return g_pStruct;
+}
 
 void AddDebugMessage(uint32 debugLevel, const char *pMsg, ...)
 {

@@ -3,11 +3,11 @@
 #include "d3d_texture.h"
 #include "d3d_convar.h"
 #include "common_stuff.h"
-#include "renderstruct.h"
+#include "ltrenderstruct.h"
 #include "dtxmgr.h"
 #include "common_draw.h"
 #include "d3d_shell.h"
-#include "colorops.h"
+#include "ltcolorops.h"
 #include "rendererframestats.h"
 
 // Globals.
@@ -286,7 +286,7 @@ bool CTextureManager::QueryDDSupport(PFormat* Format)
 }
 
 // Figures out what format we'll use based on the flags...
-D3DFORMAT CTextureManager::QueryDDFormat1(BPPIdent BPP, uint32 iFlags)
+DDFormat CTextureManager::QueryDDFormat1(BPPIdent BPP, uint32 iFlags)
 {
 	uint32 iFormat = NULL;				// Pick a texture format.
 
@@ -319,7 +319,7 @@ D3DFORMAT CTextureManager::QueryDDFormat1(BPPIdent BPP, uint32 iFlags)
 bool CTextureManager::ConvertTexDataToDD(uint8* pSrcData, PFormat* SrcFormat, uint32 SrcWidth, uint32 SrcHeight, uint8* pDstData, PFormat* DstFormat, BPPIdent eDstType, uint32 nDstFlags, uint32 DstWidth, uint32 DstHeight)
 {
  	D3DFORMAT D3DSrcFormat = d3d_PFormatToD3DFormat(SrcFormat); assert(D3DSrcFormat != D3DFMT_UNKNOWN);
-	D3DFORMAT D3DDstFormat = QueryDDFormat1(eDstType, nDstFlags); assert(D3DDstFormat != D3DFMT_UNKNOWN);
+	D3DFORMAT D3DDstFormat = (D3DFORMAT)QueryDDFormat1(eDstType, nDstFlags); assert(D3DDstFormat != D3DFMT_UNKNOWN);
 	
 	// Create a quick little surface to convert into....
 	LPDIRECT3DSURFACE9 pD3DDstSurface = NULL; LPDIRECT3DTEXTURE9 pD3DDstTexture = NULL;
@@ -362,7 +362,7 @@ bool CTextureManager::UploadRTexture(TextureData* pSrcTexture, uint32 iSrcLvl, R
 	PFormat SrcFormat; 
 	pSrcTexture->SetupPFormat(&SrcFormat);
 
-	D3DFORMAT D3DSrcFormat = QueryDDFormat1(pSrcTexture->m_Header.GetBPPIdent(), pSrcTexture->m_Header.m_IFlags);
+	D3DFORMAT D3DSrcFormat = (D3DFORMAT)QueryDDFormat1(pSrcTexture->m_Header.GetBPPIdent(), pSrcTexture->m_Header.m_IFlags);
 
 	if (pDstTexture->IsCubeMap()) 
 	{
@@ -453,7 +453,7 @@ RTexture* CTextureManager::CreateRTexture(SharedTexture* pSharedTexture, Texture
 
 	// Figure out which format we're going to use...
 	BPPIdent bpp		= pTextureData->m_Header.GetBPPIdent();
-	D3DFORMAT iFormat	= QueryDDFormat1(bpp,pTextureData->m_Header.m_IFlags);
+	D3DFORMAT iFormat	= (D3DFORMAT)QueryDDFormat1(bpp,pTextureData->m_Header.m_IFlags);
 
 	uint32 baseMipmapOffset = 0;
 

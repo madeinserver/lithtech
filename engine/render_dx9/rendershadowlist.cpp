@@ -11,6 +11,7 @@
 #include "shadows\d3dshadowtexture.h"
 #include "ltpixelshadermgr.h"
 #include <algorithm>
+#include "d3dddstructs.h"
 
 //------------------------------------------------------------------
 // Constants and defines
@@ -28,7 +29,7 @@ static ILTCommon *ilt_common_client;
 define_holder_to_instance(ILTCommon, ilt_common_client, Client);
 
 //Interface for the client file manager
-#include "client_filemgr.h"
+#include "iltclientfilemgr.h"
 static IClientFileMgr* g_pIClientFileMgr;
 define_holder(IClientFileMgr, g_pIClientFileMgr);
 
@@ -229,7 +230,7 @@ static void FindBoundingInfo(ModelInstance* pModel, const LTVector& vModelPos, c
 	float fSrcRadius	= pModel->GetDims().Mag();
 
 	//now we need to run through all the attachments and extend the bounds
-	Attachment* pCurr = pModel->m_Attachments;
+	LTAttachment* pCurr = pModel->m_Attachments;
 
 	//now extend our bounds
 
@@ -371,7 +372,7 @@ static void RenderModelPieces( ModelInstance* pInstance )
 	}
 
 	//now get our rendering transforms
-	D3DMATRIX *pD3DTransforms = pInstance->GetRenderingTransforms();
+	D3DMATRIX *pD3DTransforms = (D3DMATRIX*)pInstance->GetRenderingTransforms();
 
 	//get the render style that we will be using on all of the models
 	CD3DRenderStyle* pRenderStyle	= g_RenderStateMgr.GetBackupRenderStyle();
@@ -430,7 +431,7 @@ static void RenderModelPieces( ModelInstance* pInstance )
 						LTMatrix mTrans;
 						if(pInstance->GetCachedTransform(((CD3DVAMesh*)pLOD)->GetBoneEffector(), mTrans))
 						{
-							DDMatrix mD3DTrans;
+							D3DMATRIX mD3DTrans;
 							Convert_DItoDD(mTrans, mD3DTrans);
 							((CD3DVAMesh*)pLOD)->Render(pInstance, mD3DTrans, pRenderStyle, nCurrPass);
 							IncFrameStat(eFS_ModelRender_NumVertexAnimatedPieces, 1);
@@ -520,7 +521,7 @@ static void RenderModelShadow( ModelInstance* pInstance, const LTVector& vModelP
 	RenderModelPieces(pInstance);
 
 	//now we need to render all attachments
-	Attachment* pCurr = pInstance->m_Attachments;
+	LTAttachment* pCurr = pInstance->m_Attachments;
 
 	while(pCurr)
 	{

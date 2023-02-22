@@ -3,7 +3,7 @@
 #include "render.h"
 
 //IClientFileMgr
-#include "client_filemgr.h"
+#include "iltclientfilemgr.h"
 static IClientFileMgr *client_file_mgr;
 define_holder(IClientFileMgr, client_file_mgr);
 
@@ -26,7 +26,7 @@ void CLTRenderMgr::Init()
 
 void CLTRenderMgr::Term()
 {
-	r_GetRenderStruct()->FreeDefaultData(DEFD_RENDER_TARGET);
+	r_GetRenderStruct()->FreeDefaultRenderTarget();
 }
 
 LTRESULT CLTRenderMgr::AddEffectShader (const char *pFileName, 
@@ -151,18 +151,14 @@ LTRESULT CLTRenderMgr::GetRenderTargetDims(HRENDERTARGET hRenderTarget, uint32& 
 
 LTRESULT CLTRenderMgr::StoreDefaultRenderTarget()
 {
-	r_GetRenderStruct()->SaveDefaultData(DEFD_RENDER_TARGET);
-	r_GetRenderStruct()->SaveDefaultData(DEFD_DEPTH_BUFFER);
+	r_GetRenderStruct()->SaveDefaultRenderTarget();
 
 	return LT_OK;
 }
 
 LTRESULT CLTRenderMgr::RestoreDefaultRenderTarget()
 {
-	if (!r_GetRenderStruct()->RestoreDefaultData(DEFD_RENDER_TARGET))
-		return LT_ERROR;
-
-	if (!r_GetRenderStruct()->RestoreDefaultData(DEFD_DEPTH_BUFFER))
+	if (!r_GetRenderStruct()->RestoreDefaultRenderTarget())
 		return LT_ERROR;
 
 	ilt_rendertarget_mgr->SetCurrentRenderTargetHandle(INVALID_RENDER_TARGET);

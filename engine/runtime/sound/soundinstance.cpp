@@ -5,6 +5,7 @@
 #include "de_objects.h"
 #include "clientmgr.h"
 #include "clientshell.h"
+#include "de_file.h"
 
 //	===========================================================================
 #ifdef USE_ABSTRACT_SOUND_INTERFACES

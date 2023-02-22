@@ -10,10 +10,6 @@ class CBaseConn;
 typedef void* HLTFileTree; //class HLTFileTree;
 struct FTClient;
 
-#ifndef __SYSFILE_H__
-#include "sysfile.h"
-#endif
-
 #ifndef __LTMODULE_H__
 #include "ltmodule.h"
 #endif

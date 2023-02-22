@@ -1,7 +1,7 @@
 
 #include "bdefs.h"
 #include "nexus.h"
-#include "syslthread.h"
+#include <lthread.h>
 
 
 

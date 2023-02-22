@@ -9,7 +9,7 @@ define_holder(IClientShell, i_client_shell);
 #include "3d_ops.h"
 #include "d3d_texture.h"
 #include "tagnodes.h"
-#include "renderstruct.h"
+#include "ltrenderstruct.h"
 #include "drawobjects.h"
 #include "d3d_renderworld.h"
 #include "de_mainworld.h"
@@ -23,7 +23,7 @@ define_holder(IClientShell, i_client_shell);
 #include "rendererconsolevars.h"
 
 //IWorldClientBSP holder
-#include "world_client_bsp.h"
+#include "iltworldclientbsp.h"
 static IWorldClientBSP *world_bsp_client;
 define_holder(IWorldClientBSP, world_bsp_client);
 

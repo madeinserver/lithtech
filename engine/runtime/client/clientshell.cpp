@@ -41,7 +41,7 @@
 //------------------------------------------------------------------
 
 //IWorldClientBSP holder
-#include "world_client_bsp.h"
+#include "iltworldclientbsp.h"
 static IWorldClientBSP *world_bsp_client;
 define_holder(IWorldClientBSP, world_bsp_client);
 
@@ -51,7 +51,7 @@ static IWorldSharedBSP *world_bsp_shared;
 define_holder(IWorldSharedBSP, world_bsp_shared);
 
 //IClientFileMgr
-#include "client_filemgr.h"
+#include "iltclientfilemgr.h"
 static IClientFileMgr *client_file_mgr;
 define_holder(IClientFileMgr, client_file_mgr);
 

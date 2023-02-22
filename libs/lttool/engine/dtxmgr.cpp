@@ -2,7 +2,6 @@
 #include "bdefs.h"
 #include "dtxmgr.h"
 
-
 uint32 g_ValidTextureSizes[] = { 1024, 512, 256, 128, 64, 32, 16, 8 };
 
 
@@ -66,25 +65,6 @@ void TextureData::SetupPFormat(PFormat *pFormat)
 // --------------------------------------------------------------------------------- //
 // dtx_ functions.
 // --------------------------------------------------------------------------------- //
-
-// Based on the value of bSkip, it either memset()s the memory to 0 or reads it from the file.
-static void dtx_ReadOrSkip(
-	LTBOOL bSkip,
-	ILTStream *pStream,
-	void *pData,
-	uint32 dataLen)
-{
-	if(bSkip)
-	{
-		memset(pData, 0, dataLen);
-		pStream->SeekTo(pStream->GetPos() + dataLen);
-	}
-	else
-	{
-		pStream->Read(pData, dataLen);
-	}
-}
-
 
 uint32 dtx_NumValidTextureSizes()
 {

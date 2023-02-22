@@ -4,9 +4,7 @@
 #ifndef __SLOADERTHREAD_H__
 #define __SLOADERTHREAD_H__
 
-#ifndef __SYSLTHREAD_H__
-#include "syslthread.h"
-#endif
+#include <lthread.h>
 
 struct UsedFile;
 

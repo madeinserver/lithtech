@@ -33,7 +33,7 @@ CD3DRenderStyle::~CD3DRenderStyle()
 	// Notify the interface that we're going away
 	if (g_pRenderStylesInterface)
 	{
-		((D3DRenderStyles*)g_pRenderStylesInterface)->OnDelete(this);
+		((RenderStyles*)g_pRenderStylesInterface)->OnDelete(this);
 	}
 
 	if (m_pD3DOptions)

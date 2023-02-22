@@ -29,7 +29,7 @@
 //------------------------------------------------------------------
 
 //a IClientFormatMgr interface
-#include "client_formatmgr.h"
+#include "iltclientformatmgr.h"
 static IClientFormatMgr *format_mgr;
 define_holder(IClientFormatMgr, format_mgr);
 

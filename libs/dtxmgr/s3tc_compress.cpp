@@ -1,6 +1,7 @@
-
-#include "bdefs.h"
+#include "ltbasedefs.h"
+#include "dtxmgr.h"
 #include "s3tc_compress.h"
+#include "dynarray.h"
 #include <ddraw.h>
 
 extern "C"
@@ -9,12 +10,12 @@ extern "C"
 };
 
 
-DRESULT S3TC_Compressor::CompressUsingLibrary()
+LTRESULT S3TC_Compressor::CompressUsingLibrary()
 {
 	DDSURFACEDESC ddsdInput, ddsdOutput;
-	DRESULT dRet;
+	LTRESULT dRet;
 	float weight[3];
-	DWORD encodeType;
+	uint32 encodeType;
 
 
 	// Init output stuff.
@@ -24,7 +25,7 @@ DRESULT S3TC_Compressor::CompressUsingLibrary()
 	if(!IsFormatCompressed(m_Format))
 		return LT_ERROR;
 
-	if(m_DataFormat.m_BPP != BPP_16 && m_DataFormat.m_BPP != BPP_32)
+	if(m_DataFormat.m_nBPP != BPP_16 && m_DataFormat.m_nBPP != BPP_32)
 		return LT_ERROR;
 
 	// Size must be a multiple of 4.
@@ -52,7 +53,7 @@ DRESULT S3TC_Compressor::CompressUsingLibrary()
 		
 	ddsdInput.ddpfPixelFormat.dwSize = sizeof(ddsdInput.ddpfPixelFormat);
 	ddsdInput.ddpfPixelFormat.dwRGBBitCount = 
-		(m_DataFormat.m_BPP == BPP_16) ? 16 : 32;
+		(m_DataFormat.m_nBPP == BPP_16) ? 16 : 32;
 	ddsdInput.ddpfPixelFormat.dwRGBAlphaBitMask = m_DataFormat.m_Masks[CP_ALPHA];
 	ddsdInput.ddpfPixelFormat.dwRBitMask = m_DataFormat.m_Masks[CP_RED];
 	ddsdInput.ddpfPixelFormat.dwGBitMask = m_DataFormat.m_Masks[CP_GREEN];
@@ -72,7 +73,7 @@ DRESULT S3TC_Compressor::CompressUsingLibrary()
 		encodeType = S3TC_ENCODE_RGB_FULL | S3TC_ENCODE_ALPHA_INTERPOLATED;
 
 	m_OutDataSize = S3TCgetEncodeSize(&ddsdInput, encodeType);
-	m_pOutData = new BYTE[m_OutDataSize];
+	m_pOutData = new uint8[m_OutDataSize];
 	if(m_pOutData)
 	{
 		S3TCencode(&ddsdInput, 
@@ -89,14 +90,14 @@ DRESULT S3TC_Compressor::CompressUsingLibrary()
 }
 
 
-BOOL ConvertTextureData(TextureData *pData, BPPIdent bpp)
+LTBOOL ConvertTextureData(TextureData *pData, BPPIdent bpp)
 {
-	DWORD iMipmap;
-	CMoDWordArray tempBuf;
+	uint32 iMipmap;
+	CMoDWordArray  tempBuf;
 	TextureMipData *pMip;
 	FormatMgr formatMgr;
 	FMConvertRequest cRequest;
-	DRESULT dResult;
+	LTRESULT LTRESULT;
 	S3TC_Compressor sCompress;
 
 	if((pData->m_Header.m_IFlags & DTX_CUBEMAP) && dtx_FindSection(pData, "CUBEMAPDATA"))
@@ -122,15 +123,14 @@ BOOL ConvertTextureData(TextureData *pData, BPPIdent bpp)
 				cRequest.m_SrcPitch = pMip->m_Pitch;
 				
 				cRequest.m_pDestFormat->InitPValueFormat();
-				cRequest.m_pDest = (BYTE*)tempBuf.GetArray();
-				cRequest.m_DestPitch = pMip->m_Width * sizeof(DWORD);
+				cRequest.m_pDest = (uint8*)tempBuf.GetArray();
+				cRequest.m_DestPitch = pMip->m_Width * sizeof(uint32);
 				
 				cRequest.m_Width = pMip->m_Width;
 				cRequest.m_Height = pMip->m_Height;
-				cRequest.m_Flags = 0;
 
-				dResult = formatMgr.ConvertPixels(&cRequest);
-				if(dResult != LT_OK)
+				LTRESULT = formatMgr.ConvertPixels(&cRequest);
+				if(LTRESULT != LT_OK)
 					return FALSE;
 
 				//update our current data pointer though to move onto the next mip
@@ -154,10 +154,10 @@ BOOL ConvertTextureData(TextureData *pData, BPPIdent bpp)
 					sCompress.m_pData = tempBuf.GetArray();
 					sCompress.m_Width = pMip->m_Width;
 					sCompress.m_Height = pMip->m_Height;
-					sCompress.m_Pitch = pMip->m_Width * sizeof(DWORD);
+					sCompress.m_Pitch = pMip->m_Width * sizeof(uint32);
 					sCompress.m_DataFormat.InitPValueFormat();
-					dResult = sCompress.CompressUsingLibrary();
-					if(dResult != LT_OK)
+					LTRESULT = sCompress.CompressUsingLibrary();
+					if(LTRESULT != LT_OK)
 					{
 						// Compressed formats must be a multiple of 4.
 						if((pMip->m_Width & 3) || (pMip->m_Height & 3))
@@ -214,15 +214,14 @@ BOOL ConvertTextureData(TextureData *pData, BPPIdent bpp)
 		cRequest.m_SrcPitch = pMip->m_Pitch;
 		
 		cRequest.m_pDestFormat->InitPValueFormat();
-		cRequest.m_pDest = (BYTE*)tempBuf.GetArray();
-		cRequest.m_DestPitch = pMip->m_Width * sizeof(DWORD);
+		cRequest.m_pDest = (uint8*)tempBuf.GetArray();
+		cRequest.m_DestPitch = pMip->m_Width * sizeof(uint32);
 		
 		cRequest.m_Width = pMip->m_Width;
 		cRequest.m_Height = pMip->m_Height;
-		cRequest.m_Flags = 0;
 
-		dResult = formatMgr.ConvertPixels(&cRequest);
-		if(dResult != LT_OK)
+		LTRESULT = formatMgr.ConvertPixels(&cRequest);
+		if(LTRESULT != LT_OK)
 			return FALSE;
 
 		
@@ -234,12 +233,12 @@ BOOL ConvertTextureData(TextureData *pData, BPPIdent bpp)
 				delete pMip->m_Data;
 			}
 
-			pMip->m_Data = (BYTE*)new DWORD[pMip->m_Width * pMip->m_Height * sizeof(DWORD)];
+			pMip->m_Data = (uint8*)new uint32[pMip->m_Width * pMip->m_Height * sizeof(uint32)];
 			if(!pMip->m_Data)
 				return FALSE;
 
-			memcpy(pMip->m_Data, tempBuf.GetArray(), pMip->m_Width * pMip->m_Height * sizeof(DWORD));
-			pMip->m_Pitch = pMip->m_Width * sizeof(DWORD);
+			memcpy(pMip->m_Data, tempBuf.GetArray(), pMip->m_Width * pMip->m_Height * sizeof(uint32));
+			pMip->m_Pitch = pMip->m_Width * sizeof(uint32);
 		}
 		else if(IsFormatCompressed(bpp))
 		{
@@ -253,10 +252,10 @@ BOOL ConvertTextureData(TextureData *pData, BPPIdent bpp)
 			sCompress.m_pData = tempBuf.GetArray();
 			sCompress.m_Width = pMip->m_Width;
 			sCompress.m_Height = pMip->m_Height;
-			sCompress.m_Pitch = pMip->m_Width * sizeof(DWORD);
+			sCompress.m_Pitch = pMip->m_Width * sizeof(uint32);
 			sCompress.m_DataFormat.InitPValueFormat();
-			dResult = sCompress.CompressUsingLibrary();
-			if(dResult != LT_OK)
+			LTRESULT = sCompress.CompressUsingLibrary();
+			if(LTRESULT != LT_OK)
 			{
 				// Compressed formats must be a multiple of 4.
 				if((pMip->m_Width & 3) || (pMip->m_Height & 3))
@@ -275,7 +274,7 @@ BOOL ConvertTextureData(TextureData *pData, BPPIdent bpp)
 				}
 			}
 			
-			pMip->m_Data = (BYTE*)sCompress.m_pOutData;
+			pMip->m_Data = (uint8*)sCompress.m_pOutData;
 			pMip->m_Pitch = 0;
 		}
 	}

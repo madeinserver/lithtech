@@ -1,8 +1,9 @@
 //////////////////////////////////////////////////////////////////////////////
 // String tool implementation
 
-#include "bdefs.h"
+#include "ltbasedefs.h"
 #include "strtools.h"
+#include <ctype.h>
 
 uint32 st_GetHashCode(const char *pString)
 {

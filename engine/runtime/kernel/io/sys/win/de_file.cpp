@@ -40,7 +40,7 @@
 #endif
 
 #ifndef __SYSLTHREAD_H__
-#include "syslthread.h"
+#include <lthread.h>
 #endif
 
 #include "syscounter.h"

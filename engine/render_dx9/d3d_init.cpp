@@ -8,7 +8,7 @@
 #include "d3d_device.h"
 #include "common_stuff.h"
 #include "d3d_utils.h"
-#include "renderstruct.h"
+#include "ltrenderstruct.h"
 #include "d3d_init.h"
 #include "d3d_texture.h"
 #include "d3d_draw.h"

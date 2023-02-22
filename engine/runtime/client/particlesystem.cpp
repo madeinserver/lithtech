@@ -32,7 +32,7 @@ extern LTBOOL g_CV_CollideParticles;
 //------------------------------------------------------------------
 
 //IWorldClientBSP holder
-#include "world_client_bsp.h"
+#include "iltworldclientbsp.h"
 static IWorldClientBSP *world_bsp_client;
 define_holder(IWorldClientBSP, world_bsp_client);
 

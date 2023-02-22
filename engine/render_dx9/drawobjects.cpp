@@ -3,7 +3,7 @@
 #include "d3d_convar.h"
 #include "drawobjects.h"
 #include "draw_canvas.h"
-#include "renderstruct.h"
+#include "ltrenderstruct.h"
 #include "d3d_draw.h"
 #include "common_draw.h"
 #include "setupmodel.h"

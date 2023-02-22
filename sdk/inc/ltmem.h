@@ -109,4 +109,28 @@ enum
 
 #endif
 
+extern void dfree(void* ptr);
+extern void* dalloc(uint32 size);
+
+static inline void* dalloc_z(uint32 size)
+{
+	void* ptr;
+
+	if (size == 0)
+	{
+		return 0;
+	}
+	else
+	{
+		ptr = dalloc(size);
+		if (ptr)
+		{
+			memset(ptr, 0, size);
+		}
+
+		return ptr;
+	}
+}
+
+
 #endif // __LTMEM_H__

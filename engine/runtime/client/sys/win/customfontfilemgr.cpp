@@ -6,7 +6,7 @@
 #include <algorithm>
 
 //IClientFileMgr
-#include "client_filemgr.h"
+#include "iltclientfilemgr.h"
 static IClientFileMgr *client_filemgr;
 define_holder(IClientFileMgr, client_filemgr);
 

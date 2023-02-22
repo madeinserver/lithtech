@@ -6,7 +6,7 @@
 
 #include "d3d_shell.h"
 #include "common_stuff.h"
-#include "renderstruct.h"
+#include "ltrenderstruct.h"
 #include "rendererconsolevars.h"
 #include <algorithm>
 

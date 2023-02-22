@@ -6,7 +6,7 @@
 #include "texturescriptevaluator.h"
 #include "texturescriptvarmgr.h"
 #include "common_draw.h"
-#include "renderstruct.h"
+#include "ltrenderstruct.h"
 
 #define MAX_CHANNELS	4
 

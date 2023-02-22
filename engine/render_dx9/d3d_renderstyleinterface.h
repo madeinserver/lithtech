@@ -13,13 +13,13 @@
 
 #include "iltrenderstyles.h"
 
-class D3DRenderStyles : public ILTRenderStyles
+class RenderStyles : public ILTRenderStyles
 {
 public:
-	declare_interface(D3DRenderStyles);
+	declare_interface(RenderStyles);
 
-	D3DRenderStyles()								{ };
-	virtual ~D3DRenderStyles()						{ };
+	RenderStyles()								{ };
+	virtual ~RenderStyles()						{ };
 
 	//******** Core Member Functions *********//
 	virtual CRenderStyle*			DuplicateRenderStyle(CRenderStyle* pRendStyle);				// Duplicate a render style (maybe you want to change it just for a certain object - you better dup it first, then change it, and set it).

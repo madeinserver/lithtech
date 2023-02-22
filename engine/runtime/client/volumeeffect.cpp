@@ -13,7 +13,7 @@
 #include "bdefs.h"
 #include "clientmgr.h"
 #include "volumeeffect.h"
-#include "client_filemgr.h"
+#include "iltclientfilemgr.h"
 
 static bool InitDynamicParticles( LTVolumeEffect* pVE, VolumeEffectInfo* pInfo )
 {

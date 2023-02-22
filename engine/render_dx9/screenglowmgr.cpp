@@ -1,7 +1,7 @@
 #include "precompile.h"
 #include "d3d_device.h"
 #include "d3d_shell.h"
-#include "renderstruct.h"
+#include "ltrenderstruct.h"
 #include "screenglowmgr.h"
 #include "common_draw.h"
 #include "d3d_renderworld.h"
@@ -14,7 +14,7 @@
 
 
 //Interface for the client file manager
-#include "client_filemgr.h"
+#include "iltclientfilemgr.h"
 static IClientFileMgr* g_pIClientFileMgr;
 define_holder(IClientFileMgr, g_pIClientFileMgr);
 

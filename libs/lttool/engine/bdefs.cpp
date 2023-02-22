@@ -26,30 +26,3 @@ char *g_ReturnErrString = "LT ERROR: %s returned %s (%s)";
 	{
 	}
 #endif
-
-
-#ifdef DALLOC_SIM
-	void* dalloc(DWORD size)
-	{
-		return malloc(size);
-	}
-
-	void* dalloc_z(DWORD size)
-	{
-		void *ret;
-
-		if(ret = malloc(size))
-		{
-			memset(ret, 0, size);
-		}
-
-		return ret;
-	}
-
-	void dfree(void *ptr)
-	{
-		free(ptr);
-	}
-#endif
-
-	  

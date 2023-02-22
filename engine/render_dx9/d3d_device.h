@@ -10,7 +10,7 @@
 #endif
 
 #ifndef __RENDEROBJECT_H__
-#include "renderobject.h"
+#include "ltrenderobject.h"
 #endif
 
 #ifndef __D3D_RENDERSTYLE_H__
@@ -19,6 +19,7 @@
 
 #include "d3d_device_wrapper.h"
 #include "lthread.h"
+#include "iltrender.h"
 
 
 // PROTOTYPES
@@ -69,7 +70,7 @@ public:
 	void					ResetDeviceVars();	// Reset all the device vars (this is a partial reset - for ALT-Tab type stuff)...
 	void					FreeAll();			// Frees all the member vars and resets afterwards...
 	void					FreeFrameTextures(); // Frees the previous frame and current frame texture buffers.
-	static CRenderObject*	CreateRenderObject(CRenderObject::RENDER_OBJECT_TYPES ObjectType);
+	static CRenderObject*	CreateRenderObject(RENDER_OBJECT_TYPES ObjectType);
 	static bool				DestroyRenderObject(CRenderObject* pObject);
 	CD3DRenderStyle*		CreateRenderStyle();
 	void					DestroyRenderStyle(CRenderStyle* pRenderStyle);
@@ -120,6 +121,11 @@ public:
 
 	IDirect3DSurface9*		m_pDefaultRenderTarget;
 	IDirect3DSurface9*		m_pDefaultDepthStencilBuffer;
+
+	// MIS: viewport /filter saving
+	DWORD m_nConsoleMinFilter, m_nConsoleMagFilter, m_nConsoleMipFilter;
+	bool m_bConsoleValidFilterStates;
+	D3DVIEWPORT9 m_consoleOldViewport;
 	
 private:
 	D3DMULTISAMPLE_TYPE		GetDefaultMultiSampleType(uint32 Samples);
@@ -147,7 +153,7 @@ private:
 extern CD3D_Device g_Device;					// The global D3D Device...
 #define PD3DDEVICE (g_Device.m_pD3DDevice)		// Use for quick access to the D3DDevice...
 
-static LPDIRECT3DDEVICE9 d3d_GetD3DDevice() { return PD3DDEVICE ? PD3DDEVICE->GetDevice() : 0; }	// For the RenderStruct...
+static void* d3d_GetDevice() { return PD3DDEVICE ? PD3DDEVICE->GetDevice() : 0; }	// For the RenderStruct...
 
 inline DWORD F2DW( FLOAT f ) { return *((DWORD*)&f); }
 

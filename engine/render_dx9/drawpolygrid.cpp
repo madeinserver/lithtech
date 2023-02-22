@@ -23,7 +23,6 @@ static IClientShell *i_client_shell;
 define_holder(IClientShell, i_client_shell);
 
 #include "3d_ops.h"
-#include "de_objects.h"
 #include "d3d_draw.h"
 #include "common_draw.h"
 #include "d3d_texture.h"
@@ -41,7 +40,7 @@ define_holder(IClientShell, i_client_shell);
 #include "rendererconsolevars.h"
 
 //Interface for the client file manager
-#include "client_filemgr.h"
+#include "iltclientfilemgr.h"
 static IClientFileMgr* g_pIClientFileMgr;
 define_holder(IClientFileMgr, g_pIClientFileMgr);
 

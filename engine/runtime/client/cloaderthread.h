@@ -1,9 +1,8 @@
 #ifndef __CLOADERTHREAD_H__
 #define __CLOADERTHREAD_H__
 
-#ifndef __SYSLTHREAD_H__
-#include "syslthread.h"
-#endif
+#include <lthread.h>
+
 
 struct FileIdentifier;
 

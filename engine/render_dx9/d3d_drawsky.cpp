@@ -7,7 +7,7 @@
 
 #include "precompile.h"
 #include "common_stuff.h"
-#include "renderstruct.h"
+#include "ltrenderstruct.h"
 #include "3d_ops.h"
 #include "common_draw.h"
 #include "drawsky.h"

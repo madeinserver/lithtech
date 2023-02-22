@@ -11,7 +11,7 @@
 #include "clientmgr.h"
 #include "sysfile.h"
 #include "de_objects.h"
-#include "client_filemgr.h"
+#include "iltclientfilemgr.h"
 
 
 Sprite* spr_Create(ILTStream *pStream)

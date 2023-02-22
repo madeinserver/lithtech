@@ -237,3 +237,12 @@ CSysThread::ThreadTerm()
 
 	return (STDLT_OK);
 }
+
+
+CSysThread::CSysThread()
+	: m_LocalWakeup(0),
+	m_hThread(NULL),
+	m_ThreadID(0)
+{
+	m_LocalWakeup = 0;
+} // CSysThread constructor

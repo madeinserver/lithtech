@@ -15,7 +15,7 @@
 #endif
 
 #ifndef __RENDEROBJECT_H__
-#include "renderobject.h"
+#include "ltrenderobject.h"
 #endif
 
 #ifndef __STDLITH_H__

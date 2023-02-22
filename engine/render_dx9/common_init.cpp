@@ -4,27 +4,25 @@
 #include "common_init.h"
 #include "tagnodes.h"
 #include "renderinfostruct.h"
-
+#include "ltmodule.h"
 #include "d3d_shell.h"
 #include "d3d_device.h"
 #include "d3d_texture.h"
 #include "d3d_draw.h"
 #include "drawobjects.h"
-#include "render.h"
 #include "rendershadowlist.h"
 #include "objectgroupmgr.h"
 #include "screenglowmgr.h"
 #include "rendererframestats.h"
+#include "ltrenderstruct.h"
+#include "iltrender.h"
+#include "LTEffectImpl.h"
 
 // Shadow texture map related includes...
 #include "shadows\d3dshadowtexture.h"
 
 
 RMode* g_pModeList;
-RMode* rdll_GetSupportedModes();
-void rdll_FreeModeList(RMode *pModes);
-void rdll_RenderDLLSetup(RenderStruct *pStruct);
-
 
 // ---------------------------------------------------------------- //
 // RenderStruct functions in other modules..
@@ -62,7 +60,7 @@ void d3d_BlitFromScreen(BlitRequest *pRequest);
 bool d3d_WarpToScreen(BlitRequest *pRequest);
 void d3d_MakeScreenShot(const char *pFilename);
 void d3d_MakeCubicEnvMap(const char* pszPrefix, uint32 nSize, const SceneDesc& InSceneDesc);
-LPDIRECT3DDEVICE9 d3d_GetD3DDevice();
+void* d3d_GetDevice();
 bool d3d_SetLightGroupColor(uint32 nID, const LTVector &vColor);
 LTRESULT d3d_SetOccluderEnabled(uint32 nID, bool bEnabled);
 LTRESULT d3d_GetOccluderEnabled(uint32 nID, bool *pEnabled);
@@ -294,97 +292,484 @@ void d3d_GetRenderInfo(RenderInfoStruct* pStruct)
 	}
 }
 
-// Note: if you want to use these in a launcher of some sort, you need to also add the 
-//	CD3D_Shell class. See the Launcher sample.
-RMode* rdll_GetSupportedModes() 
-{
-	// Make sure we've created our shell...
-	if (!PDIRECT3D) 
-		g_D3DShell.Create();
 
-	if (!PDIRECT3D) 
-		return NULL;
+bool            d3d_SaveDefaultData()
+{ 
+	//LPDIRECT3DSURFACE9 pBackSurface = NULL;
+	if (FAILED(PD3DDEVICE->GetRenderTarget(&g_Device.m_pDefaultRenderTarget)))
+	{
+		dsi_ConsolePrint("CLTRenderMgr::StoreDefaultRenderTarget() failed to get render target surface!");
+		return false;
+	}
 
-	g_pModeList = NULL;
-	g_D3DShell.GetSupportedModes(g_pModeList);
-	return g_pModeList;
+	if (FAILED(PD3DDEVICE->GetDepthStencilSurface(&g_Device.m_pDefaultDepthStencilBuffer)))
+	{
+		dsi_ConsolePrint("CLTRenderMgr::StoreDefaultRenderTarget() failed to get stencil surface!");
+		return false;
+	}
+
+	return true;
 }
 
-void rdll_FreeModeList(RMode* pModes)
+bool d3d_RestoreDefaultData()
 {
-	RMode* pCur = pModes;
-	while (pCur) 
+	if ((g_Device.m_pDefaultRenderTarget == NULL) || (g_Device.m_pDefaultDepthStencilBuffer == NULL))
 	{
-		RMode* pNext = pCur->m_pNext;
-		delete pCur;
-		pCur = pNext; 
+		return false;
+	}
+
+	if (FAILED(PD3DDEVICE->SetRenderTarget(g_Device.m_pDefaultRenderTarget, g_Device.m_pDefaultDepthStencilBuffer)))
+	{
+		dsi_ConsolePrint("CLTRenderMgr::RestoreDefaultRenderTarget() failed to set render target surface!");
+		return false;
+	}
+
+	// Release out hold on these surfaces
+	g_Device.m_pDefaultRenderTarget->Release();
+	g_Device.m_pDefaultDepthStencilBuffer->Release();
+	g_Device.m_pDefaultRenderTarget = NULL;
+	g_Device.m_pDefaultDepthStencilBuffer = NULL;
+
+	return true;
+}
+
+void            d3d_FreeDefaultData()
+{
+	if (g_Device.m_pRenderTarget)
+	{
+		g_Device.m_pRenderTarget->Release();
+		g_Device.m_pRenderTarget = NULL;
+
 	}
 }
 
-void rdll_RenderDLLSetup(RenderStruct *pStruct)
+LTRESULT d3d_GetDeviceCaps(LTGraphicsCaps* caps)
 {
-	g_pStruct = pStruct;
 
-	pStruct->Init						= d3d_Init;
-	pStruct->Term						= d3d_Term;
-	pStruct->GetD3DDevice				= d3d_GetD3DDevice;
-	pStruct->BindTexture				= d3d_BindTexture;
-	pStruct->UnbindTexture				= d3d_UnbindTexture;
-	pStruct->QueryDDSupport				= CTextureManager::QueryDDSupport;
-	pStruct->GetTextureDDFormat1		= CTextureManager::QueryDDFormat1;
-	pStruct->GetTextureDDFormat2		= CTextureManager::QueryDDFormat2;
-	pStruct->ConvertTexDataToDD			= CTextureManager::ConvertTexDataToDD;
-	pStruct->DrawPrimSetTexture			= CTextureManager::DrawPrimSetTexture;
-	pStruct->DrawPrimDisableTextures	= CTextureManager::DisableTextures;
-	pStruct->CreateContext				= d3d_CreateContext;
-	pStruct->DeleteContext				= d3d_DeleteContext;
-	pStruct->Clear						= d3d_Clear;
-	pStruct->Start3D					= CD3D_Device::Start3D;
-	pStruct->End3D						= CD3D_Device::End3D;
-	pStruct->IsIn3D						= CD3D_Device::IsIn3D;
-	pStruct->StartOptimized2D			= d3d_StartOptimized2D;
-	pStruct->EndOptimized2D				= d3d_EndOptimized2D;
-	pStruct->SetOptimized2DBlend		= d3d_SetOptimized2DBlend;
-	pStruct->GetOptimized2DBlend		= d3d_GetOptimized2DBlend;
-	pStruct->SetOptimized2DColor		= d3d_SetOptimized2DColor;
-	pStruct->GetOptimized2DColor		= d3d_GetOptimized2DColor;
-	pStruct->IsInOptimized2D			= d3d_IsInOptimized2D;
-	pStruct->OptimizeSurface			= d3d_OptimizeSurface;
-	pStruct->UnoptimizeSurface			= d3d_UnoptimizeSurface;
-	pStruct->RenderScene				= d3d_RenderScene;
-	pStruct->RenderCommand				= d3d_RenderCommand;
-	pStruct->SwapBuffers				= d3d_SwapBuffers;
-	pStruct->GetScreenFormat			= d3d_GetScreenFormat;
-	pStruct->CreateSurface				= d3d_CreateSurface;
-	pStruct->DeleteSurface				= d3d_DeleteSurface;
-	pStruct->GetSurfaceInfo				= d3d_GetSurfaceInfo;
-	pStruct->LockSurface				= d3d_LockSurface;
-	pStruct->UnlockSurface				= d3d_UnlockSurface;
-	pStruct->LockScreen					= d3d_LockScreen;
-	pStruct->UnlockScreen				= d3d_UnlockScreen;
-	pStruct->MakeScreenShot				= d3d_MakeScreenShot;
-	pStruct->MakeCubicEnvMap			= d3d_MakeCubicEnvMap;
-	pStruct->ReadConsoleVariables		= d3d_ReadConsoleVariables;
-	pStruct->GetRenderInfo				= d3d_GetRenderInfo;
-	pStruct->CreateRenderObject			= CD3D_Device::CreateRenderObject;
-	pStruct->DestroyRenderObject		= CD3D_Device::DestroyRenderObject;
-	pStruct->BlitToScreen				= d3d_BlitToScreen;
-	pStruct->BlitFromScreen				= d3d_BlitFromScreen;
-	pStruct->WarpToScreen				= d3d_WarpToScreen;
-	pStruct->LoadWorldData				= d3d_LoadWorldData;
-	pStruct->SetLightGroupColor			= d3d_SetLightGroupColor;
-	pStruct->SetOccluderEnabled			= d3d_SetOccluderEnabled;
-	pStruct->GetOccluderEnabled			= d3d_GetOccluderEnabled;
-	pStruct->GetTextureEffectVarID		= d3d_GetTextureEffectVarID;
-	pStruct->SetTextureEffectVar		= d3d_SetTextureEffectVar;
-	pStruct->IsObjectGroupEnabled		= CObjectGroupMgr::IsObjectGroupEnabled;
-	pStruct->SetObjectGroupEnabled		= CObjectGroupMgr::SetObjectGroupEnabled;
-	pStruct->SetAllObjectGroupEnabled	= CObjectGroupMgr::SetAllObjectGroupEnabled;
-	pStruct->AddGlowRenderStyleMapping	= d3d_AddGlowRenderStyleMapping;
-	pStruct->SetGlowDefaultRenderStyle	= d3d_SetGlowDefaultRenderStyle;
-	pStruct->SetNoGlowRenderStyle		= d3d_SetNoGlowRenderStyle;
+	if (!r_GetRenderStruct()->GetDevice())
+	{
+		return LT_ERROR;
+	}
 
-	//initialize our object group list
-	CObjectGroupMgr::InitObjectGroups();
+	D3DCAPS9 dcaps;
+	HRESULT hres = ((LPDIRECT3DDEVICE9)r_GetRenderStruct()->GetDevice())->GetDeviceCaps(&dcaps);
+
+	if (hres != D3D_OK)
+	{
+		return LT_ERROR;
+	}
+
+	caps->PixelShaderVersion = (uint32)dcaps.PixelShaderVersion;
+	caps->VertexShaderVersion = (uint32)dcaps.VertexShaderVersion;
 }
 
+LTRESULT d3d_SnapshotCurrentFrame()
+{
+	if (g_Device.m_pCurrentFrame == NULL)
+	{
+		IDirect3DSurface9* pSurface = NULL;
+		PD3DDEVICE->GetRenderTarget(&pSurface);
+
+		if (pSurface)
+		{
+			D3DSURFACE_DESC desc;
+			if (FAILED(pSurface->GetDesc(&desc)))
+			{
+				dsi_ConsolePrint("Failed to get surface desc: CLTRenderMgr::SnapshotCurrentFrame()");
+				return LT_ERROR;
+			}
+
+			D3DFORMAT iTargetFormat = desc.Format;
+
+			if (FAILED(PD3DDEVICE->CreateTexture(g_Device.GetModeInfo()->Width,
+				g_Device.GetModeInfo()->Height,
+				1,
+				D3DUSAGE_RENDERTARGET,
+				iTargetFormat,
+				D3DPOOL_DEFAULT,
+				(IDirect3DTexture9**)&g_Device.m_pCurrentFrame)))
+			{
+				dsi_ConsolePrint("Error creating %dx%d rendertarget texture: CLTRenderMgr::SnapshotCurrentFrame()", g_Device.GetModeInfo()->Width, g_Device.GetModeInfo()->Height);
+				pSurface->Release();
+				return LT_ERROR;
+			}
+		}
+
+		pSurface->Release();
+	}
+
+	IDirect3DSurface9* pSrcSurface = NULL;
+	if (FAILED(PD3DDEVICE->GetRenderTarget(&pSrcSurface)))
+	{
+		dsi_ConsolePrint("Failed to get the current RenderTarget: CLTRenderMgr::SnapshotCurrentFrame()");
+		return LT_ERROR;
+	}
+
+	IDirect3DSurface9* pDestSurface = NULL;
+	if (FAILED(g_Device.m_pCurrentFrame->GetSurfaceLevel(0, &pDestSurface)))
+	{
+		dsi_ConsolePrint("Failed to get the current RenderTexture surface: CLTRenderMgr::SnapshotCurrentFrame()");
+		return LT_ERROR;
+	}
+
+	if (pSrcSurface && pDestSurface)
+	{
+		if (FAILED(PD3DDEVICE->GetDevice()->StretchRect(pSrcSurface, NULL, pDestSurface, NULL, D3DTEXF_NONE)))
+		{
+			dsi_ConsolePrint("Failed to StretchRect: CLTRenderMgr::SnapshotCurrentFrame()");
+			return LT_ERROR;
+		}
+
+		pSrcSurface->Release();
+		pDestSurface->Release();
+	}
+
+	return LT_OK;
+}
+
+LTRESULT d3d_SaveCurrentFrameToPrevious()
+{
+	if (g_Device.m_pCurrentFrame == NULL)
+	{
+		dsi_ConsolePrint("Current frame is not valid, can not copy to previous frame buffer!: SaveCurrentFrameToPrevious()");
+		return LT_ERROR;
+	}
+
+	if (g_Device.m_pPreviousFrame == NULL)
+	{
+		IDirect3DSurface9* pSurface = NULL;
+		if (FAILED(g_Device.m_pCurrentFrame->GetSurfaceLevel(0, &pSurface)))
+		{
+			return LT_ERROR;
+		}
+
+		if (pSurface)
+		{
+			D3DSURFACE_DESC desc;
+			if (FAILED(pSurface->GetDesc(&desc)))
+			{
+				dsi_ConsolePrint("Failed to get surface desc: SaveCurrentFrameToPrevious()");
+				//FreeTextures();
+				return LT_ERROR;
+			}
+
+			D3DFORMAT iTargetFormat = desc.Format;
+
+			if (FAILED(PD3DDEVICE->CreateTexture(g_Device.GetModeInfo()->Width,
+				g_Device.GetModeInfo()->Height,
+				1,
+				D3DUSAGE_RENDERTARGET,
+				iTargetFormat,
+				D3DPOOL_DEFAULT,
+				(IDirect3DTexture9**)&g_Device.m_pPreviousFrame)))
+			{
+				dsi_ConsolePrint("Error creating %dx%d rendertarget texture: SaveCurrentFrameToPrevious()", g_Device.GetModeInfo()->Width, g_Device.GetModeInfo()->Height);
+				//FreeTextures();
+				pSurface->Release();
+				return LT_ERROR;
+			}
+		}
+
+		pSurface->Release();
+	}
+
+	IDirect3DSurface9* pSrcSurface = NULL;
+	if (FAILED(g_Device.m_pCurrentFrame->GetSurfaceLevel(0, &pSrcSurface)))
+	{
+		return LT_ERROR;
+	}
+
+	IDirect3DSurface9* pDestSurface = NULL;
+	if (FAILED(g_Device.m_pPreviousFrame->GetSurfaceLevel(0, &pDestSurface)))
+	{
+		dsi_ConsolePrint("Failed to get the current RenderTexture surface: SaveCurrentFrameToPrevious()");
+		return LT_ERROR;
+	}
+
+	if (pSrcSurface && pDestSurface)
+	{
+		if (FAILED(PD3DDEVICE->GetDevice()->StretchRect(pSrcSurface, NULL, pDestSurface, NULL, D3DTEXF_NONE)))
+		{
+			dsi_ConsolePrint("Failed to StretchRect: SaveCurrentFrameToPrevious()");
+			return LT_ERROR;
+		}
+
+		pSrcSurface->Release();
+		pDestSurface->Release();
+	}
+
+	return LT_OK;
+}
+
+LTRESULT d3d_UploadCurrentFrameToEffect(LTEffectShader* pEffect, const char* szParam)
+{
+	LTEffectImpl* pEffectImpl = (LTEffectImpl*)pEffect;
+	if (pEffectImpl && (szParam[0] != '\0'))
+	{
+		ID3DXEffect* pD3DEffect = pEffectImpl->GetEffect();
+
+		if (pD3DEffect && g_Device.m_pCurrentFrame)
+		{
+			if (FAILED(pD3DEffect->SetTexture(szParam, g_Device.m_pCurrentFrame)))
+			{
+				return LT_ERROR;
+			}
+			else
+			{
+				// It worked!
+				return LT_OK;
+			}
+		}
+	}
+
+	return LT_ERROR;
+}
+
+LTRESULT d3d_UploadPreviousFrameToEffect(LTEffectShader* pEffect, const char* szParam)
+{
+	LTEffectImpl* pEffectImpl = (LTEffectImpl*)pEffect;
+	if (pEffectImpl && (szParam[0] != '\0'))
+	{
+		ID3DXEffect* pD3DEffect = pEffectImpl->GetEffect();
+
+		if (pD3DEffect && g_Device.m_pPreviousFrame)
+		{
+			if (FAILED(pD3DEffect->SetTexture(szParam, g_Device.m_pPreviousFrame)))
+			{
+				return LT_ERROR;
+			}
+			else
+			{
+				// It worked!
+				return LT_OK;
+			}
+		}
+	}
+
+	return LT_ERROR;
+}
+
+void            d3d_SetConsoleView()
+{
+	PD3DDEVICE->GetViewport(&g_Device.m_consoleOldViewport);
+
+	D3DVIEWPORT9 viewportData;
+	viewportData.X = 0;
+	viewportData.Y = 0;
+	viewportData.Width = g_ScreenWidth;
+	viewportData.Height = g_ScreenHeight;
+	viewportData.MinZ = 0;
+	viewportData.MaxZ = 1.0f;
+	HRESULT hResult = D3D_CALL(PD3DDEVICE->SetViewport(&viewportData));
+
+}
+
+void            d3d_UnsetConsoleView()
+{
+	//Restore previous viewport
+	PD3DDEVICE->SetViewport(&g_Device.m_consoleOldViewport);
+}
+
+void            d3d_SetConsoleTextRenderMode()
+{
+	g_Device.m_bConsoleValidFilterStates = true;
+
+	if (FAILED(PD3DDEVICE->GetSamplerState(0, D3DSAMP_MINFILTER, &g_Device.m_nConsoleMinFilter)))
+		g_Device.m_bConsoleValidFilterStates = false;
+	if (FAILED(PD3DDEVICE->GetSamplerState(0, D3DSAMP_MAGFILTER, &g_Device.m_nConsoleMagFilter)))
+		g_Device.m_bConsoleValidFilterStates = false;
+	if (FAILED(PD3DDEVICE->GetSamplerState(0, D3DSAMP_MIPFILTER, &g_Device.m_nConsoleMipFilter)))
+		g_Device.m_bConsoleValidFilterStates = false;
+
+	if (!g_Device.m_bConsoleValidFilterStates)
+	{
+		PD3DDEVICE->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
+		PD3DDEVICE->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
+		PD3DDEVICE->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_POINT);
+	}
+}
+void            d3d_UnsetConsoleTextRenderMode()
+{
+	if (g_Device.m_bConsoleValidFilterStates)
+	{
+		PD3DDEVICE->SetSamplerState(0, D3DSAMP_MINFILTER, g_Device.m_nConsoleMinFilter);
+		PD3DDEVICE->SetSamplerState(0, D3DSAMP_MAGFILTER, g_Device.m_nConsoleMagFilter);
+		PD3DDEVICE->SetSamplerState(0, D3DSAMP_MIPFILTER, g_Device.m_nConsoleMipFilter);
+	}
+}
+
+void d3d_SetMatrixInfo(uint32 i, LTMatrix mtx, void* pOut)
+{
+	D3DMATRIX* dmtx = (D3DMATRIX*)pOut;
+	Convert_DItoDD(mtx, dmtx[i]);
+}
+
+void d3d_FreeMatrix(void* pData)
+{
+	D3DMATRIX* dmtx = (D3DMATRIX*)pData;
+	delete dmtx;
+}
+
+void d3d_AllocateMatrix(uint32 nNumNodes, void** pOut)
+{
+	DDMatrix* mtx;
+	LT_MEM_TRACK_ALLOC(mtx = new DDMatrix[nNumNodes],
+		LT_MEM_TYPE_OBJECT);
+
+	*pOut = mtx;
+}
+
+class D3DRenderSys : public ILTRenderSys
+{
+public:
+	bool Init() { return true; }
+	void Term() {}
+
+	void Setup(LTRenderStruct* pStruct)
+	{
+		g_pStruct = pStruct;
+
+		pStruct->Init = d3d_Init;
+		pStruct->Term = d3d_Term;
+		pStruct->GetDevice = d3d_GetDevice;
+		pStruct->BindTexture = d3d_BindTexture;
+		pStruct->UnbindTexture = d3d_UnbindTexture;
+		pStruct->QueryDDSupport = CTextureManager::QueryDDSupport;
+		pStruct->GetTextureDDFormat1 = CTextureManager::QueryDDFormat1;
+		pStruct->GetTextureDDFormat2 = CTextureManager::QueryDDFormat2;
+		pStruct->ConvertTexDataToDD = CTextureManager::ConvertTexDataToDD;
+		pStruct->DrawPrimSetTexture = CTextureManager::DrawPrimSetTexture;
+		pStruct->DrawPrimDisableTextures = CTextureManager::DisableTextures;
+		pStruct->CreateContext = d3d_CreateContext;
+		pStruct->DeleteContext = d3d_DeleteContext;
+		pStruct->Clear = d3d_Clear;
+		pStruct->Start3D = CD3D_Device::Start3D;
+		pStruct->End3D = CD3D_Device::End3D;
+		pStruct->IsIn3D = CD3D_Device::IsIn3D;
+		pStruct->StartOptimized2D = d3d_StartOptimized2D;
+		pStruct->EndOptimized2D = d3d_EndOptimized2D;
+		pStruct->SetOptimized2DBlend = d3d_SetOptimized2DBlend;
+		pStruct->GetOptimized2DBlend = d3d_GetOptimized2DBlend;
+		pStruct->SetOptimized2DColor = d3d_SetOptimized2DColor;
+		pStruct->GetOptimized2DColor = d3d_GetOptimized2DColor;
+		pStruct->IsInOptimized2D = d3d_IsInOptimized2D;
+		pStruct->OptimizeSurface = d3d_OptimizeSurface;
+		pStruct->UnoptimizeSurface = d3d_UnoptimizeSurface;
+		pStruct->RenderScene = d3d_RenderScene;
+		pStruct->RenderCommand = d3d_RenderCommand;
+		pStruct->SwapBuffers = d3d_SwapBuffers;
+		pStruct->GetScreenFormat = d3d_GetScreenFormat;
+		pStruct->CreateSurface = d3d_CreateSurface;
+		pStruct->DeleteSurface = d3d_DeleteSurface;
+		pStruct->GetSurfaceInfo = d3d_GetSurfaceInfo;
+		pStruct->LockSurface = d3d_LockSurface;
+		pStruct->UnlockSurface = d3d_UnlockSurface;
+		pStruct->LockScreen = d3d_LockScreen;
+		pStruct->UnlockScreen = d3d_UnlockScreen;
+		pStruct->MakeScreenShot = d3d_MakeScreenShot;
+		pStruct->MakeCubicEnvMap = d3d_MakeCubicEnvMap;
+		pStruct->ReadConsoleVariables = d3d_ReadConsoleVariables;
+		pStruct->GetRenderInfo = d3d_GetRenderInfo;
+		pStruct->CreateRenderObject = CD3D_Device::CreateRenderObject;
+		pStruct->DestroyRenderObject = CD3D_Device::DestroyRenderObject;
+		pStruct->BlitToScreen = d3d_BlitToScreen;
+		pStruct->BlitFromScreen = d3d_BlitFromScreen;
+		pStruct->WarpToScreen = d3d_WarpToScreen;
+		pStruct->LoadWorldData = d3d_LoadWorldData;
+		pStruct->SetLightGroupColor = d3d_SetLightGroupColor;
+		pStruct->SetOccluderEnabled = d3d_SetOccluderEnabled;
+		pStruct->GetOccluderEnabled = d3d_GetOccluderEnabled;
+		pStruct->GetTextureEffectVarID = d3d_GetTextureEffectVarID;
+		pStruct->SetTextureEffectVar = d3d_SetTextureEffectVar;
+		pStruct->IsObjectGroupEnabled = CObjectGroupMgr::IsObjectGroupEnabled;
+		pStruct->SetObjectGroupEnabled = CObjectGroupMgr::SetObjectGroupEnabled;
+		pStruct->SetAllObjectGroupEnabled = CObjectGroupMgr::SetAllObjectGroupEnabled;
+		pStruct->AddGlowRenderStyleMapping = d3d_AddGlowRenderStyleMapping;
+		pStruct->SetGlowDefaultRenderStyle = d3d_SetGlowDefaultRenderStyle;
+		pStruct->SetNoGlowRenderStyle = d3d_SetNoGlowRenderStyle;
+
+		pStruct->SaveDefaultRenderTarget = d3d_SaveDefaultData;
+		pStruct->RestoreDefaultRenderTarget = d3d_RestoreDefaultData;
+		pStruct->FreeDefaultRenderTarget = d3d_FreeDefaultData;
+		pStruct->GetDeviceCaps = d3d_GetDeviceCaps;
+		pStruct->SnapshotCurrentFrame = d3d_SnapshotCurrentFrame;
+		pStruct->SaveCurrentFrameToPrevious = d3d_SaveCurrentFrameToPrevious;
+		pStruct->UploadCurrentFrameToEffect = d3d_UploadCurrentFrameToEffect;
+		pStruct->UploadPreviousFrameToEffect = d3d_UploadPreviousFrameToEffect;
+
+		pStruct->SetConsoleView = d3d_SetConsoleView;
+		pStruct->UnsetConsoleView = d3d_UnsetConsoleView;
+		pStruct->SetConsoleTextRenderMode = d3d_SetConsoleTextRenderMode;
+		pStruct->UnsetConsoleTextRenderMode = d3d_UnsetConsoleTextRenderMode;
+
+		pStruct->AllocateMatrix = d3d_AllocateMatrix;
+		pStruct->FreeMatrix = d3d_FreeMatrix;
+		pStruct->SetMatrixInfo = d3d_SetMatrixInfo;
+
+		//initialize our object group list
+		CObjectGroupMgr::InitObjectGroups();
+	}
+
+
+	// Note: if you want to use these in a launcher of some sort, you need to also add the 
+	//	CD3D_Shell class. See the Launcher sample.
+	RMode* GetSupportedModes()
+	{
+		// Make sure we've created our shell...
+		if (!PDIRECT3D)
+			g_D3DShell.Create();
+
+		if (!PDIRECT3D)
+			return NULL;
+
+		g_pModeList = NULL;
+		g_D3DShell.GetSupportedModes(g_pModeList);
+		return g_pModeList;
+	}
+
+
+	void FreeModeList(RMode* pModes)
+	{
+		RMode* pCur = pModes;
+		while (pCur)
+		{
+			RMode* pNext = pCur->m_pNext;
+			delete pCur;
+			pCur = pNext;
+		}
+	}
+
+public:
+	static D3DRenderSys m_Sys;
+	static char* m_pcSysDesc;
+};
+
+// ---------------------------------------------------------------- //
+// DLL export functions.
+// ---------------------------------------------------------------- //
+
+D3DRenderSys D3DRenderSys::m_Sys;
+char* D3DRenderSys::m_pcSysDesc = "*** directx9 render driver ***";
+
+extern "C"
+{
+	LTMODULE_EXPORT char* RenderSysDesc();
+	LTMODULE_EXPORT ILTRenderSys* RenderSysMake();
+}
+
+char* RenderSysDesc()
+{
+	return D3DRenderSys::m_pcSysDesc;
+}
+
+ILTRenderSys* RenderSysMake()
+{
+	return &D3DRenderSys::m_Sys;
+}
+
+#ifdef _WIN32
+bool WINAPI DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)
+{
+	return true;
+}
+#endif

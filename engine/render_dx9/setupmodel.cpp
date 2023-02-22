@@ -2,7 +2,7 @@
 
 #include "setupmodel.h"
 #include "common_stuff.h"
-#include "renderstruct.h"
+#include "ltrenderstruct.h"
 #include "fullintersectline.h"
  
 #include "common_draw.h"
@@ -28,7 +28,7 @@
 //------------------------------------------------------------------
 
 //IWorldClientBSP holder
-#include "world_client_bsp.h"
+#include "iltworldclientbsp.h"
 static IWorldClientBSP *world_bsp_client;
 define_holder(IWorldClientBSP, world_bsp_client);
 
@@ -450,7 +450,7 @@ bool ModelDraw::ShouldDrawShadows(ModelInstance* pInstance, const ModelHookData&
 static void DistributeIDToAttachments(LTObject* pObject, uint16 nParentInfoIndex)
 {
 	//run through the attachments
-	for(Attachment* pAttachment = pObject->m_Attachments; pAttachment; pAttachment = pAttachment->m_pNext)
+	for(LTAttachment* pAttachment = pObject->m_Attachments; pAttachment; pAttachment = pAttachment->m_pNext)
 	{
 		//get the object
 		LTObject* pAttachObject = g_pIFindObj->FindObjectClient(pAttachment->m_nChildID);
@@ -670,16 +670,9 @@ void ModelDraw::QueueModelPieces(ModelInstance* pInstance, const ModelHookData& 
 		// setup the nodes we need to render this mesh.
 		pInstance->SetupLODNodePath(pLOD);
 		
-		CRenderModelPieceList::GetSingleton().QueuePiece(pInstance, pPiece, pLOD, pInstance->GetRenderingTransforms(), &DeviceLightList, bTexture, &HookData);
+		CRenderModelPieceList::GetSingleton().QueuePiece(pInstance, pPiece, pLOD, (D3DMATRIX*)pInstance->GetRenderingTransforms(), &DeviceLightList, bTexture, &HookData);
 	}
 }
-
-
-
-
-
-
-
 
 
 

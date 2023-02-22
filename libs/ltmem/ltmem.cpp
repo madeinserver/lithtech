@@ -197,5 +197,3 @@ void* LTMemReAlloc(void* pOldMem, uint32 nNewSize)
 	return realloc(pOldMem, nNewSize);
 #endif
 }
-
-

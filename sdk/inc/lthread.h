@@ -8,9 +8,19 @@
 #include "ltinteger.h"
 #endif
 
-#ifndef __SYSTHREAD_H__
-#include "systhread.h"
+#ifndef __ITHREAD_H__
+#include "ithread.h"
 #endif
+
+#include "goodlinklist.h"
+
+#ifdef _WIN32
+#include <Windows.h>
+#undef PostMessage
+#else
+#include <pthread.h>
+#endif
+
 
 // Thread priorities go from 0 to LTPRI_MAX.
 #define LTPRI_LOWEST    ThreadLow
@@ -21,28 +31,110 @@
 // How much data each LThreadMessage contains..
 #define NUM_THREADMESSAGE_DATA  4
 
-
 // Arbitrary.. hope we don't get a thread with this ID!
 //#define LCS_INVALIDTHREADID	0xFECDAEDC
 
+
 class LThread;
+
+//
+// CLASS: CSysSyncVar
+//
+class CSysSyncVar : public ISyncVar {
+public:
+    CSysSyncVar();
+    ~CSysSyncVar();
+    // implement this interface (see IThread.h)
+    ESyncResult Begin();
+    ESyncResult End();
+    ESyncResult Wait();
+protected:
+#ifdef _WIN32
+    HANDLE m_hMutex;
+#else
+    pthread_mutex_t	m_Mutex;
+#endif
+}; // CSysSyncVar
+
+//
+// CLASS: CSysSerialVar
+//
+class CSysSerialVar : public ISerialVar
+{
+public:
+    CSysSerialVar();
+    ~CSysSerialVar();
+    // implement this interface (see IThread.h)
+    ESyncResult Lock();
+    ESyncResult Unlock();
+protected:
+    friend class CSysEventVar;
+
+#ifdef _WIN32
+    CRITICAL_SECTION m_CritSect;
+#else
+    pthread_mutex_t	m_Mutex;
+    // attributes for mutex object
+    pthread_mutexattr_t m_MutexAttr;
+#endif
+};
+
+//
+// CLASS: CSysThread
+//
+class CSysThread : public IThread
+{
+public:
+    CSysThread();
+    // implement the pure vitural interface defined in ithread.h
+    virtual ESTDLTResults Run(EThreadPriority pri = ThreadNormal);
+    virtual ESTDLTResults Wakeup();
+    virtual ESTDLTResults Term(bool blocking = true); // avoid using this function if possible!
+    virtual void          WaitForTerm();
+
+protected:
+    // these methods are not in IThread
+
+#ifdef _WIN32
+    bool    IsInThisThread() const;
+#else
+    pthread_t	m_ThreadID;
+    pthread_cond_t	m_ThreadCond;
+    pthread_mutex_t	m_ThreadMutex;
+    pthread_mutex_t	m_WakeupMutex;
+    uint32          m_WakeupCnt;
+
+    bool	IsInThisThread() const { return pthread_self() == m_ThreadID; }
+#endif
+
+    bool    IsThreadActive() const;
+    static  unsigned int __stdcall  ThreadLaunch(void* pWhichThread);
+    virtual void                    ThreadRun() = 0;
+    virtual ESTDLTResults           ThreadInit();
+    virtual ESTDLTResults           ThreadTerm();
+    virtual void                    Sleep();
+protected:
+    // not portable
+    int     LTPriToWinPri(EThreadPriority pri);
+    HANDLE  GetWinThreadHandle() { return m_hThread; }
+    DWORD   GetWinThreadId() { return m_ThreadID; }
+private:
+    // data members
+    CSysSerialVar m_Lock; // thread-safe access to m_LocalWakeup
+    int m_LocalWakeup;
+    HANDLE m_hThread;
+    unsigned int m_ThreadID;
+}; // CSysThread
 
 
 // Used to synchronize access to things.
-class LCriticalSection : public CSysSerialVar 
-{
-
-	typedef CSysSerialVar super;
-	
+class LCriticalSection : public CSysSerialVar {
+    typedef CSysSerialVar super;
 public:
 
-    LCriticalSection() 
-	{ 
-	// [dlj] removed because criticals can lock more than once per thread 
-//	#ifdef _DEBUG
-//		m_CurThreadID = LCS_INVALIDTHREADID; 
-//	#endif
-	}
+    LCriticalSection()
+    {
+    }
 
     // When you make a critical section, it might not be able to intialize.
     // You should check it with IsValid() before using it.
@@ -53,15 +145,10 @@ public:
     void        Enter();
     void        Leave();
 
+#ifndef _WIN32
 private:
-    
     uint32      m_CS[6];    // CRITICAL_SECTION m_CS (CRITICAL_SECTIONs are 24 bytes)
-
-	// [dlj] removed because criticals can lock more than once per thread 
-    // Used for debug checks..
-//    #ifdef _DEBUG
-//        pthread_t      m_CurThreadID;
-//    #endif
+#endif
 };
 
 
@@ -196,10 +283,16 @@ public:
 
 private:
     
+#ifdef _WIN32
     // Internal Windows stuff.
+    uint32          m_Handle;       // HANDLE m_Handle
+    uint32          m_ThreadID;
+    uint32          m_hStopEvent;   // HANDLE - Notification to shut down
+#else
     pthread_t       m_ThreadID;
     bool            m_bRunning;
     bool            m_bTerminate;
+#endif
 };
 
 

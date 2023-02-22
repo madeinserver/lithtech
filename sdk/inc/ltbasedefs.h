@@ -1511,6 +1511,16 @@ This data gets sent up and passed into OnClientEnterWorld on the server.
     uint32 m_ClientDataLen;
 };
 
+
+//an enumeration describing the different forms of supported light attenuations
+enum ELightAttenuationType
+{
+	eAttenuation_D3D,
+	eAttenuation_Linear,
+	eAttenuation_Quartic
+};
+
+
 /*!
 Parsing stuff.
 */
@@ -2406,6 +2416,14 @@ struct LTRGBColor
 	};
 };
 
+// Returned by GetTreeType.
+enum TreeType
+{
+	RezFileTree,
+	DosTree
+};
+
+
 class LTEffectShader
 {
 public:
@@ -2481,41 +2499,6 @@ protected:
 	char 				m_FileName[_MAX_PATH]; 	// shader filename
 	LTEffectShader*		m_pNext; 				// next in list
 };
-
-
-// Bits-per-pixel identifiers.
-enum BPPIdent
-{
-    BPP_8P = 0,       // 8 bit palettized
-    BPP_8,          // 8 bit RGB
-    BPP_16,
-    BPP_32,
-    BPP_S3TC_DXT1,
-    BPP_S3TC_DXT3,
-    BPP_S3TC_DXT5,
-    BPP_32P,        //this was added for true color pallete support
-    BPP_24,
-    NUM_BIT_TYPES
-};
-
-// This is what is used to represent a color value in a particular format.
-union GenericColor {
-    uint32  dwVal;
-    uint16  wVal;
-    uint8   bVal;
-};
-
-// A palette color.
-struct RPaletteColor {
-    union {
-        struct {
-            unsigned char   a, r, g, b;
-        } rgb;
-
-        uint32 dword;
-    };
-};
-
 
 /*!
 Exported function so that game modules hooking into the engine can access the memory library

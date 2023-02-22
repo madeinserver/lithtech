@@ -1,12 +1,12 @@
 
-#ifndef __PIXELFORMAT_H__
-#define __PIXELFORMAT_H__
+#ifndef __PIXELFORMAT_T_H__
+#define __PIXELFORMAT_T_H__
 
     #ifndef __LTPVALUE_H__
 	#include "ltpvalue.h"
     #endif
 
-#include "ltpformat.h"
+	#include "ltpixelformat.h"
 
 
 	// 0-8 inclusive.
@@ -20,24 +20,6 @@
 
 
 	class FormatMgr;
-
-	// RGB masks for RGB 565:
-	#define RGB565_RSHIFT	8 // Left shift.
-	#define RGB565_GSHIFT	3 // Left shift.
-	#define RGB565_BSHIFT	3 // Right shift.
-	
-	#define RGB565_RMASK	0xF800
-	#define RGB565_GMASK	0x7E0
-	#define RGB565_BMASK	0x1F
-
-	// RGB masks for RGB 555:
-	#define RGB555_RMASK	0x7C00
-	#define RGB555_GMASK	0x3E0
-	#define RGB555_BMASK	0x1F
-
-	#define RGB555_RSHIFT	7 // Left shift.
-	#define RGB555_GSHIFT	2 // Left shift.
-	#define RGB555_BSHIFT	3 // Right shift.
 
 
 	// This is what is used to represent a color value in a particular format.

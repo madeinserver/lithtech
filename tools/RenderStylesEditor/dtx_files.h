@@ -15,19 +15,6 @@
 #define CURRENT_DTX_VERSION			-5						// m_Version in the DTX header.
 #define DTX_COMMANDSTRING_LEN		128
 
-// Bits-per-pixel identifiers.
-enum BPPIdent {
-	BPP_8P=0,												// 8 bit palettized
-	BPP_8,													// 8 bit RGB
-	BPP_16,
-	BPP_32,
-	BPP_S3TC_DXT1,
-	BPP_S3TC_DXT3,
-	BPP_S3TC_DXT5,
-	BPP_32P,												//! this was added for true color pallete support
-	BPP_24,
-	NUM_BIT_TYPES };
-
 #define DTX_FULLBRITE       (1<<0)  // This DTX has fullbrite colors.
 #define DTX_PREFER16BIT     (1<<1)  // Use 16-bit, even if in 32-bit mode.
 #define DTX_MIPSALLOCED     (1<<2)  // Used to make some of the tools stuff easier..

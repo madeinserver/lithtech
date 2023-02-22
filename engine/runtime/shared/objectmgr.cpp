@@ -14,6 +14,8 @@
 #include "ltobjref.h"
 #include "polygrid.h"
 
+#include "render.h"
+
 //ILTRenderStyles
 #include "iltrenderstyles.h"
 static ILTRenderStyles* renderstyles;
@@ -413,6 +415,7 @@ ModelInstance::ModelInstance()
 	// Cached Transforms 
 	m_CachedTransforms			= NULL;
 	m_CachedTransformInfo		= NULL;
+	m_RenderingTransforms		= NULL;
 
     m_LastDirLightAmount		= -1.0f;
 	m_nRenderInfoIndex			= INVALID_MODEL_INFO_INDEX;
@@ -959,6 +962,13 @@ void ModelInstance::EnableTransformCache()
 	LT_MEM_TRACK_ALLOC( m_CachedTransformInfo= new SCachedTransformInfo [ nNumNodes ], 
 						LT_MEM_TYPE_OBJECT);
 
+	// only allocate rendering transforms if on the client.
+	if (GetCSType() == ClientType)
+	{
+		assert(r_GetRenderStruct()); // hmmm...
+		r_GetRenderStruct()->AllocateMatrix(nNumNodes, &m_RenderingTransforms);
+	}
+
 	ResetCachedTransformNodeStates();
 }
 
@@ -975,6 +985,13 @@ void ModelInstance::DisableTransformCache()
 
 	delete [] m_CachedTransformInfo;
 	m_CachedTransformInfo= NULL ;
+
+	if (m_RenderingTransforms)
+	{
+		assert(r_GetRenderStruct());
+		r_GetRenderStruct()->FreeMatrix(m_RenderingTransforms);
+		m_RenderingTransforms = NULL;
+	}
 }
 
 // ------------------------------------------------------------------------
@@ -1366,6 +1383,32 @@ void ModelInstance::DisableCollisionObjects()
 		m_ModelOBBs = NULL;
 		m_NumOBBs = 0;
 	}
+}
+
+void* ModelInstance::GetRenderingTransforms()
+{
+	UpdateCachedTransformsWithPath();
+
+	// only do this if we're the client
+	if (GetCSType() == ClientType)
+	{
+		// Apply the inverse global transform of the bind pos to create 
+		// a difference transform between bind pose and animated pose. 
+		// This is what d3d needs.
+		for (uint32 i = 0; i < GetModelDB()->NumNodes(); ++i)
+		{
+			// if we need to update rendering transform do it.
+			// if not already done and eval'd by transform maker.
+			if (!IsNodeEvaluatedRendering(i) && IsNodeEvaluated(i))
+			{
+				assert(r_GetRenderStruct());
+				r_GetRenderStruct()->SetMatrixInfo(i, m_CachedTransforms[i] * GetModelDB()->GetNode(i)->GetInvGlobalTransform(), m_RenderingTransforms);
+				SetNodeEvaluatedRendering(i, true);
+			}
+		}
+	}
+
+	return m_RenderingTransforms;
 }
  
 // ------------------------------------------------------------------------

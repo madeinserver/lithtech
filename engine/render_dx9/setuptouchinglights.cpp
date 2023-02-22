@@ -3,7 +3,6 @@
 #include "3d_ops.h"
 #include "common_stuff.h"
 #include "fixedpoint.h"
-#include "de_objects.h"
 #include "d3d_texture.h"
 #include "d3d_draw.h"
 #include "iltclient.h"
@@ -16,7 +15,7 @@
 // ---------------------------------------------------------------- //
 
 //IWorldClientBSP holder
-#include "world_client_bsp.h"
+#include "iltworldclientbsp.h"
 static IWorldClientBSP *pWorldBSPClient;
 define_holder(IWorldClientBSP, pWorldBSPClient);
 

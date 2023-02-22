@@ -150,21 +150,6 @@ void* dalloc(uint32 size)
 	return ptr;
 }
 
-
-void* dalloc_z(uint32 size)
-{
-	void *ret;
-
-	ret = dalloc(size);
-	if(ret)
-	{
-		memset(ret, 0, size);
-	}
-
-	return ret;
-}
-
-
 void dfree(void *ptr)
 {
 	if(!ptr)

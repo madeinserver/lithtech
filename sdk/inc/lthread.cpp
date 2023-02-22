@@ -1,13 +1,15 @@
 
-#include "bdefs.h"
+#include "ltbasedefs.h"
 #include "lthread.h"
-
+#include "object_bank.h"
 
 // How long the threads sleep between checking messages.
 #define THREAD_SLEEP_INTERVAL 20
 
 // Arbitrary.. hope we don't get a thread with this ID!
 #define LCS_INVALIDTHREADID	0xFECDAEDC
+
+#define RETURN_ERROR(a, b, c) return a
 
 
 static ObjectBank<LThreadMessage> g_LThreadMessageBank;
@@ -239,6 +241,16 @@ ESTDLTResults LThread::Term()
 	m_Incoming.Clear();
 	m_Outgoing.Clear();
 	return super::Term();
+}
+
+ESTDLTResults LThread::ThreadInit()
+{
+	return super::ThreadInit();
+}
+
+ESTDLTResults LThread::ThreadTerm()
+{
+	return super::ThreadTerm();
 }
 
 

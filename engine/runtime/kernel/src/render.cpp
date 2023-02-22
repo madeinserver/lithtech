@@ -20,7 +20,7 @@
 //------------------------------------------------------------------
 
 //IClientFileMgr
-#include "client_filemgr.h"
+#include "iltclientfilemgr.h"
 static IClientFileMgr *client_file_mgr;
 define_holder(IClientFileMgr, client_file_mgr);
 
@@ -39,6 +39,7 @@ define_holder(IClientShell, i_client_shell);
 static ILTCommon *ilt_common_client;
 define_holder_to_instance(ILTCommon, ilt_common_client, Client);
 
+LTRESULT dtx_Create(ILTStream* pStream, TextureData** ppOut, uint32& nBaseWidth, uint32& nBaseHeight);
 
 
 
@@ -652,6 +653,43 @@ void r_InitRenderStruct(bool bFullClear)
     g_Render.m_GlobalLightDir.Norm();
 }
 
+void r_LinkSharedTexture(HTEXTURE hTexture)
+{
+	dl_AddHead(&g_pClientMgr->m_SharedTextures, &hTexture->m_Link, hTexture);
+}
+
+void r_LinkTextureData(TextureData* pTextureData)
+{
+	dl_AddHead(&g_SysCache.m_List, &pTextureData->m_Link, pTextureData);
+	g_SysCache.m_CurMem += pTextureData->m_AllocSize;
+}
+
+void r_FreeSharedTexture(HTEXTURE hTexture)
+{
+	g_pClientMgr->FreeSharedTexture(hTexture);
+}
+
+HTEXTURE r_AllocateSharedTexture()
+{
+	return g_pClientMgr->m_SharedTextureBank.Allocate();
+}
+
+void r_InitInternalStruct()
+{
+	LTInternalAccess* acc = &g_Render.m_access;
+
+	acc->LoadSystemTexture = r_LoadSystemTexture;
+	acc->UnloadSystemTexture = r_UnloadSystemTexture;
+	acc->BindTexture = r_BindTexture;
+	acc->UnbindTexture = r_UnbindTexture;
+	acc->AllocateSharedTexture = r_AllocateSharedTexture;
+	acc->FreeSharedTexture = r_FreeSharedTexture;
+	acc->LinkSharedTexture = r_LinkSharedTexture;
+	acc->GetTextureInfo = r_GetTextureInfo;
+	acc->GetTextureData = r_GetTextureData;
+	acc->LinkTextureData = r_LinkTextureData;
+}
+
 bool g_bFirstTimeInit = true;
 LTRESULT r_InitRender(RMode *pMode)
 {
@@ -682,6 +720,9 @@ LTRESULT r_InitRender(RMode *pMode)
 
 	if (!GetRenderSys())
 		return LT_ERROR;
+
+	// MIS: Initialize the access to the internal callback
+	r_InitInternalStruct();
 
 	// Set up the LTRenderStruct.
 	GetRenderSys()->Setup(&g_Render);

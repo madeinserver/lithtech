@@ -23,10 +23,6 @@ class IAggregateShader;
 #include "d3d_device.h"
 #endif
 
-#ifndef __DE_OBJECTS_H__
-#include "de_objects.h"
-#endif
-
 #ifndef __D3D_UTILS_H__
 #include "d3d_utils.h"
 #endif

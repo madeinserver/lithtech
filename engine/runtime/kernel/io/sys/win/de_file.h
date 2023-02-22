@@ -20,14 +20,6 @@
 typedef void* HLTFileTree;  // A file tree identifier.
 
 
-// Returned by GetTreeType.
-enum TreeType
-{
-	RezFileTree,
-	DosTree
-};
-
-
 #define DIRECTORY_TYPE	0
 #define FILE_TYPE		1
 

@@ -79,19 +79,6 @@ static char g_dtxUtilHelp[NUM_ARGS][200] =
 //-------------------------------------------------------------------------------------------------
 
 
-void* dalloc(unsigned int size)
-{
-	return (char*)malloc((size_t)size);
-}
-
-
-
-void dfree(void *ptr)
-{
-	free(ptr);
-}
-
-
 
 void* DefStdlithAlloc(unsigned int size)
 {

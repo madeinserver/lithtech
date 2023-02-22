@@ -12,7 +12,7 @@
 #include "stringmgr.h"
 
 // Client-side world interface
-#include "world_client_bsp.h"
+#include "iltworldclientbsp.h"
 static IWorldClientBSP *g_pWorld;
 define_holder(IWorldClientBSP, g_pWorld);
 

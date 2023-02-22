@@ -8,7 +8,7 @@
 #include "d3d_shell.h"
 #include "common_stuff.h"
 #include "d3d_utils.h"
-#include "renderstruct.h"
+#include "ltrenderstruct.h"
 #include "3d_ops.h"
 #include "d3d_texture.h"
 #include "d3dmeshrendobj_rigid.h"
@@ -592,7 +592,7 @@ void CD3D_Device::SetupViewport(uint32 iLeft, uint32 iRight, uint32 iTop, uint32
 }
 
 // Creates the requested Render Object and returns to the Engine...
-CRenderObject* CD3D_Device::CreateRenderObject(CRenderObject::RENDER_OBJECT_TYPES ObjectType)
+CRenderObject* CD3D_Device::CreateRenderObject(RENDER_OBJECT_TYPES ObjectType)
 {
 	CRenderObject* pNewObject = NULL;			// Create the Sucka...
 	switch (ObjectType)

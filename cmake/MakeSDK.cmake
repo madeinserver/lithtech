@@ -6,41 +6,46 @@ macro(my_install TARGET TYPE DEST COMPONENT)
     endif()
 endmacro()
 
-macro(my_install_engine TARGET COMPONENT)
+macro(my_install_engine TARGET COMPONENT SUFFIX)
     install(TARGETS ${TARGET} CONFIGURATIONS "RelWithDebInfo" COMPONENT ${COMPONENT} 
-        RUNTIME DESTINATION bin
-        LIBRARY DESTINATION bin
-        ARCHIVE DESTINATION lib
+        RUNTIME DESTINATION bin${SUFFIX}
+        LIBRARY DESTINATION bin${SUFFIX}
+        ARCHIVE DESTINATION lib${SUFFIX}
     )
 
     install(TARGETS ${TARGET} CONFIGURATIONS "Debug" COMPONENT ${COMPONENT} 
-        RUNTIME DESTINATION bin/debug
-        LIBRARY DESTINATION bin/debug
-        ARCHIVE DESTINATION lib/debug
+        RUNTIME DESTINATION bin${SUFFIX}/debug
+        LIBRARY DESTINATION bin${SUFFIX}/debug
+        ARCHIVE DESTINATION lib${SUFFIX}/debug
     )
 endmacro()
 
-macro(my_install_engine_pdb TARGET COMPONENT)
-    install(FILES $<TARGET_PDB_FILE:${TARGET}> CONFIGURATIONS "RelWithDebInfo" DESTINATION bin COMPONENT ${COMPONENT} OPTIONAL)
-    install(FILES $<TARGET_PDB_FILE:${TARGET}> CONFIGURATIONS "Debug" DESTINATION bin/debug COMPONENT ${COMPONENT} OPTIONAL)
+macro(my_install_engine_pdb TARGET COMPONENT SUFFIX)
+    install(FILES $<TARGET_PDB_FILE:${TARGET}> CONFIGURATIONS "RelWithDebInfo" DESTINATION bin${SUFFIX} COMPONENT ${COMPONENT} OPTIONAL)
+    install(FILES $<TARGET_PDB_FILE:${TARGET}> CONFIGURATIONS "Debug" DESTINATION bin${SUFFIX}/debug COMPONENT ${COMPONENT} OPTIONAL)
 endmacro()
 
 # install the engine
-my_install_engine(lithtech Runtime)
-my_install_engine(server Runtime)
-my_install_engine(ltmsg Runtime)
-my_install_engine(ltsdk Development)
-my_install_engine_pdb(lithtech Runtime)
-my_install_engine_pdb(server Runtime)
-my_install_engine_pdb(ltmsg Runtime)
+my_install_engine(lithtech Runtime "")
+my_install_engine(server Runtime "")
+my_install_engine(ltmsg Runtime "")
+my_install_engine(ltsdk Development "")
+my_install_engine_pdb(lithtech Runtime "")
+my_install_engine_pdb(server Runtime "")
+my_install_engine_pdb(ltmsg Runtime "")
 
 if (WIN32)
-    my_install_engine(SoundDx8 Runtime)
-    my_install_engine_pdb(SoundDx8 Runtime)
-else()
-    my_install_engine(SoundNull Runtime)
-    my_install_engine_pdb(SoundNull Runtime)
+    # Defualt is dx on Windows
+    my_install_engine(SoundDx8 Runtime "")
+    my_install_engine_pdb(SoundDx8 Runtime "")
+    my_install_engine(RenderDx9 Runtime "")
+    my_install_engine_pdb(RenderDx9 Runtime "")
 endif()
+
+my_install_engine(SoundNull Runtime "/nulldrv")
+my_install_engine_pdb(SoundNull Runtime "/nulldrv")
+my_install_engine(RenderNull Runtime "/nulldrv")
+my_install_engine_pdb(RenderNull Runtime "/nulldrv")
 
 # install tools
 if (NOT LT_NO_TOOLS)

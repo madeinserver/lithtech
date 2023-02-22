@@ -9,7 +9,7 @@
     #endif
 
     #ifndef __PIXELFORMAT_H__
-	#include "pixelformat.h"
+	#include "ltpixelformat.h"
     #endif
 
 
@@ -153,8 +153,9 @@
 	public:
 
 		uint32	m_Width, m_Height;
-
+		void* m_DataHeader;
 		uint8	*m_Data;
+		int      m_dataSize;
 		int32	m_Pitch; // Pitch in bytes.
 	};
 
@@ -191,6 +192,7 @@
 
 		BaseResHeader		m_ResHeader;
 		DtxHeader			m_Header;
+		PFormat				m_PFormat;
 		LTLink				m_Link;			// For DirectEngine, NOT a render DLL.
 		uint32				m_AllocSize;	// Allocation size,
 
@@ -198,10 +200,12 @@
 
 		// Stuff the DTX loader doesn't touch (doesn't even intialize).
 		SharedTexture		*m_pSharedTexture;	// From whence it came..
+		uint32              m_Flags;			// Flags for the renderer. Combination of the TF_ flags above.
 
 		// This is where the pixels go.
 		uint8				*m_pDataBuffer;
-		
+		int                  m_bufSize;
+
 		TextureMipData		m_Mips[MAX_DTX_MIPMAPS];
 	};
 
@@ -220,11 +224,11 @@
 	// If bSkipImageData is TRUE, then it won't actually read the color data in.. this is useful
 	// if you just want the header and data sections.
 	// If the file is a handle, pass in NULL for pStream.
-	LTRESULT dtx_Create(ILTStream *pStream, int32 nFileHandle, TextureData **ppOut, LTBOOL bLoadSections, LTBOOL bSkipImageData=FALSE);
+	LTRESULT dtx_Create(ILTStream *pStream, int32 nFileHandle, TextureData **ppOut, LTBOOL bLoadSections, LTBOOL bSkipImageData = LTFALSE);
 
 	// Allocates the texture and initializes the mipmap data pointers.
 	TextureData* dtx_Alloc(BPPIdent bpp, uint32 baseWidth, uint32 baseHeight, uint32 nMipmaps,
-		uint32 *pAllocSize, uint32 *pTextureDataSize);
+		uint32 *pAllocSize, uint32 *pTextureDataSize, uint32 iFlags = NULL);
 
 	// resize the texture data, but retain all other information
 	LTRESULT dtx_Resize( TextureData* data, BPPIdent bpp, uint32 baseWidth, uint32 baseHeight );
@@ -248,6 +252,8 @@
 
 	// Build all the mipmaps.
 	void dtx_BuildMipmaps(TextureData *pData);
+
+	void dtx_ReadOrSkip(LTBOOL bSkip, ILTStream* pStream, int32 nFileHandle, void* pData, uint32 dataLen);
 
 
 #endif  // __DTXMGR_H__

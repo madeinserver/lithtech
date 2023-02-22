@@ -2,7 +2,7 @@
 #include "precompile.h"
 
 #include "d3dmeshrendobj_skel.h"
-#include "renderstruct.h"
+#include "ltrenderstruct.h"
 #include "ltb.h"
 #include "d3d_device.h"
 #include "d3d_texture.h"

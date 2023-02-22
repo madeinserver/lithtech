@@ -1,9 +1,9 @@
 #include "precompile.h"
 
-#include "pixelformat.h"
+#include "ltpixelformat.h"
 #include "d3d_surface.h"
 #include "d3d_texture.h"
-#include "renderstruct.h"
+#include "ltrenderstruct.h"
 #include "common_stuff.h"
 #include "d3d_draw.h"
 #include "3d_ops.h"

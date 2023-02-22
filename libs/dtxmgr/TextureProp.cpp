@@ -8,13 +8,13 @@
 //
 //------------------------------------------------------------------
 
-#include "stdafx.h"
+#include "ltbasedefs.h"
 #include "TextureProp.h"
-#include "bdefs.h"
-#include "dtxmgr_lib.h"
-#include "ltcompat.h"
-#include "sysstreamsim.h"
+#include "dtxmgr.h"
 #include "s3tc_compress.h"
+#include "dynarray.h"
+
+extern ILTStream* streamsim_Open(const char* pFilename, const char* pAccess);
 
 inline LTBOOL IsBPPCompressed(BPPIdent ident)
 {
@@ -70,7 +70,7 @@ bool TextureProp::Init(const char *pFilename, int nFileHandle)
 		return false;
 	}
 
-	DStream *pStream = NULL;
+	ILTStream*pStream = NULL;
 	if(pFilename)
 	{
 		// Open the file.
@@ -82,7 +82,7 @@ bool TextureProp::Init(const char *pFilename, int nFileHandle)
 	}
 
 	// Load the texture from file.
-	DRESULT dResult = dtx_Create(pStream, nFileHandle, &m_pTexture, FALSE);
+	LTRESULT dResult = dtx_Create(pStream, nFileHandle, &m_pTexture, LTFALSE);
 
 	if(pStream)
 	{
@@ -90,7 +90,7 @@ bool TextureProp::Init(const char *pFilename, int nFileHandle)
 		pStream = NULL;
 	}
 
-	if (dResult != DE_OK)
+	if (dResult != LT_OK)
 	{
 		return false;
 	}
@@ -164,7 +164,7 @@ bool TextureProp::Save(const char *pFilename, int nFileHandle)
 		return false;
 	}
 
-	DStream *pStream = NULL;
+	ILTStream *pStream = NULL;
 	if(pFilename)
 	{
 		// Open the file.
@@ -235,8 +235,8 @@ bool TextureProp::GetTextureRGBAData(void* pBuffer, int nMaxBufferSize)
 	cRequest.m_pSrc 		= pMip->m_Data;
 	cRequest.m_SrcPitch 	= pMip->m_Pitch;
 	cRequest.m_pDestFormat->InitPValueFormat();
-	cRequest.m_pDest 		= (BYTE*)rgbData.GetArray();
-	cRequest.m_DestPitch 	= pMip->m_Width * sizeof(DWORD);
+	cRequest.m_pDest 		= (uint8*)rgbData.GetArray();
+	cRequest.m_DestPitch 	= pMip->m_Width * sizeof(uint32);
 	cRequest.m_Width 		= pMip->m_Width;
 	cRequest.m_Height 		= pMip->m_Height;
 
@@ -246,13 +246,13 @@ bool TextureProp::GetTextureRGBAData(void* pBuffer, int nMaxBufferSize)
 		return false;
 	}
 
-	DWORD *pInLine = (DWORD*)rgbData.GetArray();
-	DWORD a, r, g, b;
+	uint32 *pInLine = (uint32*)rgbData.GetArray();
+	uint32 a, r, g, b;
 
 	unsigned iBuf = 0;
-	for (DWORD y = 0; y < pMip->m_Height; ++y)
+	for (uint32 y = 0; y < pMip->m_Height; ++y)
 	{
-		for (DWORD x = 0; x < pMip->m_Width; ++x)
+		for (uint32 x = 0; x < pMip->m_Width; ++x)
 		{
 			PValue_Get(pInLine[x], a, r, g, b);
 

@@ -6,14 +6,6 @@
 
 #define DIRECT3D_VERSION        0x0900
 
-// bdefs fix
-#define __NEXUS_H__
-#define __GAMEMATH_H__
-
-#ifndef __BDEFS_H__
-#include "bdefs.h"
-#endif
-
 #ifndef __LTBASEDEFS_H__
 #include "ltbasedefs.h"
 #endif
@@ -46,7 +38,10 @@
  
 #define FASTCALL __fastcall
 
- 
+#include "d3dddstructs.h"
+#include "ltrenderstruct.h"
+#include "sharedtexture.h"
+
 // STL
 #pragma warning(disable : 4786)
 #include <vector>
@@ -56,5 +51,10 @@ using namespace std;
 #endif
 #endif  // __PRECOMPILE_H__
 
+class ModelInstance;
+DDMatrix* GetRenderingTransforms(ModelInstance* instance);
 
+// skip...
+#define dsi_ConsolePrint(fmt, ...)
 
+extern LTRenderStruct* r_GetRenderStruct();

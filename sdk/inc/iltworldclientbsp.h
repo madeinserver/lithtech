@@ -2,23 +2,21 @@
 #define __WORLD_CLIENT_BSP_H__
 
 #ifndef __WORLD_CLIENT_H__
-#include "world_client.h"
+#include "iltworldclient.h"
 #endif
 
-#ifndef __DE_MAINWORLD_H__
-#include "de_mainworld.h"
-#endif
-
-#ifndef __LOADSTATUS_H__
 #include "loadstatus.h"
-#endif
 
 class MainWorld;
 class WorldTree;
+class WorldData;
+class WorldModelInstance;
+class WorldPoly;
 
 //
 //BSP specific world interface.
 //
+
 
 class IWorldClientBSP : public IWorldClient {
   public:

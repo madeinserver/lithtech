@@ -1,5 +1,5 @@
 #include "bdefs.h"
-#include "client_filemgr.h"
+#include "iltclientfilemgr.h"
 #include "sysfile.h"
 #include "ftclient.h"
 #include "console.h"

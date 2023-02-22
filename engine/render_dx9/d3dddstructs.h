@@ -19,12 +19,7 @@
 #define __D3D9TYPES_H__
 #endif
 
-//#include "de_world.h"	// I admit that this is ugly, but I needed to define this in two places to avoid some header dependency problems (it's also defined in DDStructDefines.h). If you're reading this, I truly am sorry. -JE
-#ifndef LTRGBColorANDLTRGB
-#define LTRGBColorANDLTRGB
-//struct LTRGB		{ uint8 b, g, r, a; };
-union LTRGBColor	{ LTRGB rgb; uint32 dwordVal; };
-#endif
+#include "ltbasedefs.h"
 
 struct D3DCOLOR_DEF	{ union { struct { uint8 a, r, g, b; }; uint32 dword; }; };
 

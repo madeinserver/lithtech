@@ -389,7 +389,7 @@ void* nr_GetDevice() {
 	return NULL;
 } 
 
-PFormat nr_GetTextureDDFormat1(BPPIdent BPP, uint32 iFlags) { return PFormat(); }
+DDFormat nr_GetTextureDDFormat1(BPPIdent BPP, uint32 iFlags) { return 0; }
 bool            nr_QueryDDSupport(PFormat* Format) { return false; }
 bool            nr_GetTextureDDFormat2(BPPIdent BPP, uint32 iFlags, PFormat* pFormat) { return false; }
 bool            nr_ConvertTexDataToDD(uint8* pSrcData, PFormat* SrcFormat, uint32 SrcWidth, uint32 SrcHeight, uint8* pDstData, PFormat* DstFormat, BPPIdent eDstType, uint32 nDstFlags, uint32 DstWidth, uint32 DstHeight)
@@ -454,9 +454,9 @@ int             nr_GetFrameStats(LTRendererStats& refStats) { return 0; }
 bool            nr_GetBackBuffer(HBACKBUFFER* pBackBuffer) { return false; }
 void            nr_ReleaseBackBuffer(HBACKBUFFER pBackBuffer) {}
 
-bool            nr_SaveDefaultData(uint32 data) { return false; }
-bool            nr_RestoreDefaultData(uint32 data) { return false; }
-void            nr_FreeDefaultData(uint32 data) {}
+bool            nr_SaveDefaultData() { return false; }
+bool            nr_RestoreDefaultData() { return false; }
+void            nr_FreeDefaultData() {}
 LTRESULT nr_GetDeviceCaps(LTGraphicsCaps* caps) { return LT_ERROR; }
 LTRESULT nr_SnapshotCurrentFrame() { return LT_ERROR; }
 LTRESULT nr_SaveCurrentFrameToPrevious() { return LT_ERROR; }
@@ -466,6 +466,21 @@ void            nr_SetConsoleView() {}
 void            nr_UnsetConsoleView() {}
 void            nr_SetConsoleTextRenderMode() {}
 void            nr_UnsetConsoleTextRenderMode() {}
+
+void nr_SetMatrixInfo(uint32 i, LTMatrix mtx, void* pOut)
+{
+
+}
+
+void nr_FreeMatrix(void* pData)
+{
+
+}
+
+void nr_AllocateMatrix(uint32 nNumNodes, void** pOut)
+{
+
+}
 
 class NullRenderSys : public ILTRenderSys
 {
@@ -580,9 +595,9 @@ public:
 		pStruct->GetBackBuffer = nr_GetBackBuffer;
 		pStruct->ReleaseBackBuffer = nr_ReleaseBackBuffer;
 
-		pStruct->SaveDefaultData = nr_SaveDefaultData;
-		pStruct->RestoreDefaultData = nr_RestoreDefaultData;
-		pStruct->FreeDefaultData = nr_FreeDefaultData;
+		pStruct->SaveDefaultRenderTarget = nr_SaveDefaultData;
+		pStruct->RestoreDefaultRenderTarget = nr_RestoreDefaultData;
+		pStruct->FreeDefaultRenderTarget = nr_FreeDefaultData;
 		pStruct->GetDeviceCaps = nr_GetDeviceCaps;
 		pStruct->SnapshotCurrentFrame = nr_SnapshotCurrentFrame;
 		pStruct->SaveCurrentFrameToPrevious = nr_SaveCurrentFrameToPrevious;
@@ -593,6 +608,10 @@ public:
 		pStruct->UnsetConsoleView = nr_UnsetConsoleView;
 		pStruct->SetConsoleTextRenderMode = nr_SetConsoleTextRenderMode;
 		pStruct->UnsetConsoleTextRenderMode = nr_UnsetConsoleTextRenderMode;
+
+		pStruct->AllocateMatrix = nr_AllocateMatrix;
+		pStruct->FreeMatrix = nr_FreeMatrix;
+		pStruct->SetMatrixInfo = nr_SetMatrixInfo;
 	}
 
 

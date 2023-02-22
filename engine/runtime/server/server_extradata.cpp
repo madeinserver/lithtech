@@ -9,7 +9,7 @@
 #include "server_extradata.h"
 #include "smoveabstract.h"
 #include "animtracker.h"
-#include "syslthread.h"
+#include <lthread.h>
 #include "dhashtable.h"
 #include "ftserv.h"
 #include "ltobjectcreate.h"

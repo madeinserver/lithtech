@@ -7,7 +7,7 @@
 #include "common_draw.h"
 #include "d3d_device.h"
 #include "d3d_texture.h"
-#include "renderstruct.h"
+#include "ltrenderstruct.h"
 #include "d3d_draw.h"
 #include "d3d_renderworld.h"
 #include "d3d_renderblock.h"
@@ -31,7 +31,8 @@
 #include "texturescriptinstance.h"
 
 //for loading and managing the sprite data
-#include "client_filemgr.h"
+#include "iltclientfilemgr.h"
+#include "lightmapdefs.h"
 #include "setupobject.h"
 
 // Shader types we're going to get from the processor

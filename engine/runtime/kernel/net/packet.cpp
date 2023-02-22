@@ -1,7 +1,7 @@
 
 #include "bdefs.h"
 #include "packet.h"
-#include "syslthread.h"
+#include <lthread.h>
 
 
 // special interlock for LINUX

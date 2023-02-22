@@ -23,12 +23,6 @@ uint32 dm_GetNumAllocations();
 
 extern void* operator new(size_t size, void *ptr, char z);
 
-// C dalloc/dfree functions.
-void* dalloc(uint32 size);
-void* dalloc_z(uint32 size);	// Allocate and zero-init.
-
-void dfree(void *ptr);
-
 #endif  // __DE_MEMORY_H__
 
 

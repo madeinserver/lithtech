@@ -1,12 +1,14 @@
-
-#include "stdafx.h"
-#include "bdefs.h"
-#include <windows.h>
-#include "dtxmgr_lib.h"
-
+#include "ltbasedefs.h"
+#include "ltmem.h"
+#include "dtxmgr.h"
+#include "ltpixelformat.h"
+#include <Windows.h>
 
 uint32 g_ValidTextureSizes[] = { 1024, 512, 256, 128, 64, 32, 16, 8 };
+int g_dtxInMemSize = 0;
 
+#define RETURN_ERROR(debugLevel, fnName, err) return err
+#define RETURN_ERROR_PARAM(debugLevel, fnName, err, args) return err
 
 // --------------------------------------------------------------------------------- //
 // TextureMipData.
@@ -27,9 +29,10 @@ TextureMipData::TextureMipData()
 
 TextureData::TextureData()
 {
-	m_pDataBuffer = LTNULL;
+	m_pSharedTexture = NULL;
+	m_pDataBuffer = NULL;
+	m_bufSize = 0;
 }
-
 
 TextureData::~TextureData()
 {
@@ -42,9 +45,8 @@ TextureData::~TextureData()
 		{
 			if(m_Mips[i].m_Data)
 			{
-				//dfree(m_Mips[i].m_Data);
-				delete [] m_Mips[i].m_Data;
-				m_Mips[i].m_Data = NULL;
+				g_dtxInMemSize -= m_Mips[i].m_dataSize;
+				dfree(m_Mips[i].m_Data);
 			}
 		}
 	}
@@ -54,7 +56,9 @@ TextureData::~TextureData()
 
 	if(m_pDataBuffer)
 	{
-		delete [] m_pDataBuffer;
+		delete[] m_pDataBuffer;
+		g_dtxInMemSize -= m_bufSize;
+		m_bufSize = 0;
 	}
 
 	// Free the sections;
@@ -76,7 +80,7 @@ void TextureData::SetupPFormat(PFormat *pFormat)
 LTRESULT win_Read(int32 nFileHandle, void* pData, int nDataLen, int &nNumBytesRead)
 {
 	DWORD dwNumBytesRead = 0;
-	BOOL bResult = ReadFile((HANDLE)nFileHandle, pData, nDataLen, &dwNumBytesRead, NULL);
+	LTBOOL bResult = ReadFile((HANDLE)nFileHandle, pData, nDataLen, &dwNumBytesRead, NULL);
 
 	nNumBytesRead = (int)dwNumBytesRead;
 
@@ -91,7 +95,7 @@ LTRESULT win_Read(int32 nFileHandle, void* pData, int nDataLen, int &nNumBytesRe
 LTRESULT win_Write(int32 nFileHandle, void* pData, int nDataLen, int &nNumBytesWritten)
 {
 	DWORD dwNumBytesWritten = 0;
-	BOOL bResult = WriteFile((HANDLE)nFileHandle, pData, nDataLen, &dwNumBytesWritten, NULL);
+	LTBOOL bResult = WriteFile((HANDLE)nFileHandle, pData, nDataLen, &dwNumBytesWritten, NULL);
 
 	nNumBytesWritten = (int)dwNumBytesWritten;
 
@@ -113,42 +117,6 @@ LTRESULT win_SetFilePointer(int32 nFileHandle, int nDataLen, int32 dwFlags = FIL
 // --------------------------------------------------------------------------------- //
 // dtx_ functions.
 // --------------------------------------------------------------------------------- //
-
-// Based on the value of bSkip, it either memset()s the memory to 0 or reads it from the file.
-static void dtx_ReadOrSkip(
-	LTBOOL bSkip,
-	ILTStream *pStream,
-	int32 nFileHandle,
-	void *pData,
-	uint32 dataLen)
-{
-	if(bSkip)
-	{
-		memset(pData, 0, dataLen);
-
-		if(pStream)
-		{
-			pStream->SeekTo(pStream->GetPos() + dataLen);
-		}
-		else
-		{
-			//SetFilePointer((HANDLE)nFileHandle, dataLen, NULL, FILE_CURRENT);
-			win_SetFilePointer(nFileHandle, dataLen, FILE_CURRENT);
-		}
-	}
-	else
-	{
-		if(pStream)
-		{
-			pStream->Read(pData, dataLen);
-		}
-		else
-		{
-			int nNumBytesRead = 0;
-			win_Read(nFileHandle, pData, dataLen, nNumBytesRead);
-		}
-	}
-}
 
 uint32 dtx_NumValidTextureSizes()
 {
@@ -172,7 +140,7 @@ LTBOOL dtx_IsTextureSizeValid(uint32 size)
 
 
 TextureData* dtx_Alloc(BPPIdent bpp, uint32 baseWidth, uint32 baseHeight, uint32 nMipmaps,
-	uint32 *pAllocSize, uint32 *pTextureDataSize)
+	uint32 *pAllocSize, uint32 *pTextureDataSize, uint32 iFlags)
 {
 	TextureData *pRet;
 	TextureMipData *pMip;
@@ -197,25 +165,35 @@ TextureData* dtx_Alloc(BPPIdent bpp, uint32 baseWidth, uint32 baseHeight, uint32
 	width = baseWidth;
 	height = baseHeight;
 
+	uint32 dataHeaderSize = 0;
+
 	for(i=0; i < nMipmaps; i++)
 	{
-		size = CalcImageSize(bpp, width, height);
+		size = CalcImageSize(bpp, width, height) + dataHeaderSize;
+		if (iFlags & DTX_CUBEMAP)
+		{
+			size *= 6;
+		}
+
 		textureDataSize += size;
 
 		width >>= 1;
 		height >>= 1;
 	}
 
-	pRet = new TextureData;
+	LT_MEM_TRACK_ALLOC(pRet = new TextureData, LT_MEM_TYPE_TEXTURE);
 	if(!pRet)
 		return LTNULL;
 
-	pRet->m_pDataBuffer = new uint8[textureDataSize];
+	LT_MEM_TRACK_ALLOC(pRet->m_pDataBuffer = new uint8[textureDataSize], LT_MEM_TYPE_TEXTURE);
 	if(!pRet->m_pDataBuffer)
 	{
 		delete pRet;
 		return LTNULL;
 	}
+
+	pRet->m_bufSize = textureDataSize;
+	g_dtxInMemSize += textureDataSize;
 
 	pRet->m_ResHeader.m_Type = LT_RESTYPE_DTX;
 	pRet->m_Header.m_ResType = LT_RESTYPE_DTX;
@@ -236,6 +214,7 @@ TextureData* dtx_Alloc(BPPIdent bpp, uint32 baseWidth, uint32 baseHeight, uint32
 										//  before the line that set's m_ExtraLong[...] to 0
 										//  which nulls out the call to SetBPPIdent.
 	pRet->m_pSharedTexture = LTNULL;
+	pRet->m_Flags = 0;
 
 	// Setup the mipmap structures.
 	pOutData = pRet->m_pDataBuffer;
@@ -248,24 +227,42 @@ TextureData* dtx_Alloc(BPPIdent bpp, uint32 baseWidth, uint32 baseHeight, uint32
 
 		pMip->m_Width = width;
 		pMip->m_Height = height;
-		pMip->m_Data = pOutData;
+		pMip->m_DataHeader = pOutData;
+		pMip->m_Data = pOutData + dataHeaderSize;
+		pMip->m_dataSize = CalcImageSize(bpp, width, height);
 
-		if(bpp == BPP_32)
+		switch (bpp) {
+		case BPP_32:
 			pMip->m_Pitch = (int32)width * sizeof(uint32);
-		else if(bpp == BPP_32P)		//! we now have a new type of texture that dtx understands...
-			pMip->m_Pitch = width;	//  BPP_32P is a texture that has a true color pallete
-		else
+			break;
+		case BPP_32P:
+			pMip->m_Pitch = width;	//  BPP_32P: texture w/ true color pallete
+			break;
+		case BPP_16:
+			pMip->m_Pitch = (int32)width * sizeof(uint16);
+			break;
+		default:
 			pMip->m_Pitch = 0;
+			break;
+		}
 
-		size = CalcImageSize(bpp, width, height);
+		size = pMip->m_dataSize + dataHeaderSize;
+		if (iFlags & DTX_CUBEMAP)
+		{
+			size *= 6;
+		}
+
 		pOutData += size;
 
 		width >>= 1;
 		height >>= 1;
 	}
 	
-	if(pAllocSize) *pAllocSize = pRet->m_AllocSize;
-	if(pTextureDataSize) *pTextureDataSize = textureDataSize;
+	if(pAllocSize)
+		*pAllocSize = pRet->m_AllocSize;
+
+	if(pTextureDataSize)
+		*pTextureDataSize = textureDataSize;
 
 	return pRet;
 }
@@ -706,7 +703,7 @@ void dtx_SetupDTXFormat(TextureData *pData, PFormat *pFormat)
 	dtx_SetupDTXFormat2(pData->m_Header.GetBPPIdent(), pFormat);
 }
 
-
+// Warning: This isn't very reliable - assumes either 32 bit or compressed...
 void dtx_SetupDTXFormat2(BPPIdent bpp, PFormat *pFormat)
 {
 	if(bpp == BPP_32)

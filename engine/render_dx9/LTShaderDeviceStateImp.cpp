@@ -16,7 +16,7 @@
 #include "LTShaderDeviceStateImp.h"
 #include "d3d_device.h"
 #include "common_draw.h"
-#include "renderstruct.h"
+#include "ltrenderstruct.h"
 
 
 

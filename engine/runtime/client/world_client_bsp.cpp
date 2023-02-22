@@ -4,11 +4,11 @@
 
 #include "bdefs.h"
 
-#include "world_client_bsp.h"
+#include "iltworldclientbsp.h"
 #include "de_mainworld.h"
 #include "fullintersectline.h"
 #include "impl_common.h"
-#include "client_filemgr.h"
+#include "iltclientfilemgr.h"
 #include "clientmgr.h"
 #include "sprite.h"
 #include "render.h"

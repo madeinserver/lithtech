@@ -9,7 +9,7 @@
 #	include "d3d_convar.h"
 #endif
 
-struct RenderStruct;
+struct LTRenderStruct;
 
 // Both renderers use this for the render contexts.
 struct RenderContext 
@@ -22,7 +22,7 @@ struct RenderContext
 
 extern bool		g_bRunWindowed;
 
-extern RenderStruct* g_pStruct;
+extern LTRenderStruct* g_pStruct;
 extern uint32	g_ScreenWidth, g_ScreenHeight;
 extern HWND		g_hWnd;
 

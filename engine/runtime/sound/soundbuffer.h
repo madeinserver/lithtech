@@ -2,7 +2,7 @@
 #define __SOUNDBUFFER_H__
 
 #ifndef __CLIENT_FILEMGR_H__
-#include "client_filemgr.h"
+#include "iltclientfilemgr.h"
 #endif
 
 #ifndef __WAVE_H__

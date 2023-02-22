@@ -19,6 +19,7 @@ source_group("" FILES ${SRC})
 add_library(ltsdk STATIC ${ESD} ${LTD} ${LTI} ${PHY} ${STATE} ${SYS_WIN} ${SYS_LINUX} ${SRC})
 target_include_directories(ltsdk PUBLIC ${CMAKE_CURRENT_LIST_DIR} ${CMAKE_CURRENT_LIST_DIR}/sys/win ${CMAKE_CURRENT_LIST_DIR}/sys/linux ${CMAKE_CURRENT_LIST_DIR}/libltdiagnostics ${CMAKE_CURRENT_LIST_DIR}/libltinfo ${CMAKE_CURRENT_LIST_DIR}/state_mgr ${CMAKE_CURRENT_LIST_DIR}/physics ${CMAKE_CURRENT_LIST_DIR}/esd)
 target_compile_definitions(ltsdk PUBLIC $<$<CONFIG:RELEASSE>:_FINAL>;)
+target_link_libraries(ltsdk PUBLIC stdlith)
 
 if (WIN32)
 	target_compile_definitions(ltsdk PUBLIC -DWIN32 -D__WINDOWS -D_WIN32_WINNT=0x501 -D_WIN32_WINDOWS=0x501 -D_WIN32_IE=0x501 -DWINVER=0x501) # Windows XP

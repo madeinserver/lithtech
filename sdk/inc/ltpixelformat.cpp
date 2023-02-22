@@ -1,7 +1,6 @@
-
-#include "bdefs.h"
-#include "pixelformat.h"
-
+#include "ltbasedefs.h"
+#include "ltpixelformat.h"
+#include <assert.h>
 
 #define SRC_8	(*pSrc)
 #define SRC_16	(*((uint16*)pSrc))
@@ -64,20 +63,20 @@ static uint32 g_FullAlphaValues[16] =
 class Abstract_Word
 {
 public:
-	static uint32	GetShift()	{return 1;}
-	static void		Set(void *pDest, uint32 index, uint16 val)
+	static uint32	GetShift() { return 1; }
+	static void		Set(void* pDest, uint32 index, uint16 val)
 	{
 		((uint16*)pDest)[index] = val;
 	}
-	static void		Mask(void *pDest, uint32 index, uint32 mask)
+	static void		Mask(void* pDest, uint32 index, uint32 mask)
 	{
 		((uint16*)pDest)[index] &= (uint16)mask;
 	}
-	static void		Or(void *pDest, uint32 index, uint16 mask)
+	static void		Or(void* pDest, uint32 index, uint16 mask)
 	{
 		((uint16*)pDest)[index] |= mask;
 	}
-	
+
 	uint16	m_Ident[4];
 	uint16	m_AlphaValues[16];
 };
@@ -86,20 +85,20 @@ public:
 class Abstract_DWord
 {
 public:
-	static uint32	GetShift()	{return 2;}
-	static void		Set(void *pDest, uint32 index, uint32 val)
+	static uint32	GetShift() { return 2; }
+	static void		Set(void* pDest, uint32 index, uint32 val)
 	{
 		((uint32*)pDest)[index] = val;
 	}
-	static void		Mask(void *pDest, uint32 index, uint32 mask)
+	static void		Mask(void* pDest, uint32 index, uint32 mask)
 	{
 		((uint32*)pDest)[index] &= mask;
 	}
-	static void		Or(void *pDest, uint32 index, uint32 mask)
+	static void		Or(void* pDest, uint32 index, uint32 mask)
 	{
 		((uint32*)pDest)[index] |= mask;
 	}
-	
+
 	uint32	m_Ident[4];
 	uint32	m_AlphaValues[16];
 };
@@ -112,32 +111,33 @@ public:
 class CC_8PtoBF
 {
 public:
-	
-	void Init(const FormatMgr *pFormatMgr, const FMConvertRequest *pRequest)
+
+	void Init(const FormatMgr* pFormatMgr, const FMConvertRequest* pRequest)
 	{
 		m_pSrcPalette = pRequest->m_pSrcPalette;
 	}
 
-	uint32 DoConvert(uint8 *pSrc)
+	uint32 DoConvert(uint8* pSrc)
 	{
-		return ((uint32)m_pSrcPalette[*pSrc].rgb.r << 16) | 
+		return ((uint32)m_pSrcPalette[*pSrc].rgb.r << 16) |
 			((uint32)m_pSrcPalette[*pSrc].rgb.g << 8) |
 			((uint32)m_pSrcPalette[*pSrc].rgb.b);
 	}
-		
-	void Convert(uint8 *pSrc, uint8 *pDest)
+
+	void Convert(uint8* pSrc, uint8* pDest)
 	{
 		DEST_32 = DoConvert(pSrc);
 	}
 
-	void ConvertTrans(uint8 *pSrc, uint8 *pDest, uint32 uTransColor) {
+	void ConvertTrans(uint8* pSrc, uint8* pDest, uint32 uTransColor) {
 		uint32 iSrcColor = DoConvert(pSrc);
-		if (iSrcColor != uTransColor) DEST_32 = iSrcColor; }
+		if (iSrcColor != uTransColor) DEST_32 = iSrcColor;
+	}
 
-	void IncSrc(uint8* &pPos) {pPos += sizeof(uint8);}
-	void IncDest(uint8* &pPos) {pPos += sizeof(uint32);}
+	void IncSrc(uint8*& pPos) { pPos += sizeof(uint8); }
+	void IncDest(uint8*& pPos) { pPos += sizeof(uint32); }
 
-	const RPaletteColor	*m_pSrcPalette;
+	const RPaletteColor* m_pSrcPalette;
 };
 
 
@@ -145,12 +145,12 @@ class BaseAnyToBF
 {
 public:
 
-	void Init(const FormatMgr *pFormatMgr, const FMConvertRequest *pRequest)
+	void Init(const FormatMgr* pFormatMgr, const FMConvertRequest* pRequest)
 	{
 		Init(pFormatMgr, pRequest->m_pSrcFormat);
 	}
 
-	void Init(const FormatMgr *pFormatMgr, const PFormat *pSrcFormat)
+	void Init(const FormatMgr* pFormatMgr, const PFormat* pSrcFormat)
 	{
 		m_pScaleMaps[0] = pFormatMgr->m_ScaleTo8[pSrcFormat->m_nBits[0]];
 		m_pScaleMaps[1] = pFormatMgr->m_ScaleTo8[pSrcFormat->m_nBits[1]];
@@ -159,8 +159,8 @@ public:
 		m_pSrcFormat = pSrcFormat;
 	}
 
-	const PFormat	*m_pSrcFormat;
-	const uint8		*m_pScaleMaps[NUM_COLORPLANES];
+	const PFormat* m_pSrcFormat;
+	const uint8* m_pScaleMaps[NUM_COLORPLANES];
 };
 
 
@@ -168,7 +168,7 @@ class CC_8toBF : public BaseAnyToBF
 {
 public:
 
-	uint32 DoConvert(uint8 *pSrc)
+	uint32 DoConvert(uint8* pSrc)
 	{
 		uint32 dest[4];
 
@@ -181,17 +181,18 @@ public:
 		return (dest[CP_ALPHA] << 24) | (dest[CP_RED] << 16) | (dest[CP_GREEN] << 8) | dest[CP_BLUE];
 	}
 
-	void Convert(uint8 *pSrc, uint8 *pDest)
+	void Convert(uint8* pSrc, uint8* pDest)
 	{
 		DEST_32 = DoConvert(pSrc);
 	}
 
-	void ConvertTrans(uint8 *pSrc, uint8 *pDest, uint32 uTransColor) {
+	void ConvertTrans(uint8* pSrc, uint8* pDest, uint32 uTransColor) {
 		uint32 iSrcColor = DoConvert(pSrc);
-		if (iSrcColor != uTransColor) DEST_32 = iSrcColor; }
+		if (iSrcColor != uTransColor) DEST_32 = iSrcColor;
+	}
 
-	void IncSrc(uint8* &pPos) {pPos += sizeof(uint8);}
-	void IncDest(uint8* &pPos) {pPos += sizeof(uint32);}
+	void IncSrc(uint8*& pPos) { pPos += sizeof(uint8); }
+	void IncDest(uint8*& pPos) { pPos += sizeof(uint32); }
 };
 
 
@@ -199,7 +200,7 @@ class CC_16toBF : public BaseAnyToBF
 {
 public:
 
-	uint32 DoConvert(uint8 *pSrc)
+	uint32 DoConvert(uint8* pSrc)
 	{
 		uint32 dest[4];
 
@@ -212,24 +213,25 @@ public:
 		return (dest[CP_ALPHA] << 24) | (dest[CP_RED] << 16) | (dest[CP_GREEN] << 8) | dest[CP_BLUE];
 	}
 
-	void Convert(uint8 *pSrc, uint8 *pDest)
+	void Convert(uint8* pSrc, uint8* pDest)
 	{
 		DEST_32 = DoConvert(pSrc);
 	}
 
-	void ConvertTrans(uint8 *pSrc, uint8 *pDest, uint32 uTransColor) {
+	void ConvertTrans(uint8* pSrc, uint8* pDest, uint32 uTransColor) {
 		uint32 iSrcColor = DoConvert(pSrc);
-		if (iSrcColor != uTransColor) DEST_32 = iSrcColor; }
+		if (iSrcColor != uTransColor) DEST_32 = iSrcColor;
+	}
 
-	void IncSrc(uint8* &pPos) {pPos += sizeof(uint16);}
-	void IncDest(uint8* &pPos) {pPos += sizeof(uint32);}
+	void IncSrc(uint8*& pPos) { pPos += sizeof(uint16); }
+	void IncDest(uint8*& pPos) { pPos += sizeof(uint32); }
 };
 
 
 class CC_32toBF : public BaseAnyToBF
 {
 public:
-	uint32 DoConvert(uint8 *pSrc)
+	uint32 DoConvert(uint8* pSrc)
 	{
 		uint32 dest[4];
 
@@ -242,72 +244,77 @@ public:
 		return (dest[CP_ALPHA] << 24) | (dest[CP_RED] << 16) | (dest[CP_GREEN] << 8) | dest[CP_BLUE];
 	}
 
-	void Convert(uint8 *pSrc, uint8 *pDest)
+	void Convert(uint8* pSrc, uint8* pDest)
 	{
 		DEST_32 = DoConvert(pSrc);
 	}
 
-	void ConvertTrans(uint8 *pSrc, uint8 *pDest, uint32 uTransColor) {
+	void ConvertTrans(uint8* pSrc, uint8* pDest, uint32 uTransColor) {
 		uint32 iSrcColor = DoConvert(pSrc);
-		if (iSrcColor != uTransColor) DEST_32 = iSrcColor; }
+		if (iSrcColor != uTransColor) DEST_32 = iSrcColor;
+	}
 
-	void IncSrc(uint8* &pPos) {pPos += sizeof(uint32);}
-	void IncDest(uint8* &pPos) {pPos += sizeof(uint32);}
+	void IncSrc(uint8*& pPos) { pPos += sizeof(uint32); }
+	void IncDest(uint8*& pPos) { pPos += sizeof(uint32); }
 };
 
 class CC_24toBF : public BaseAnyToBF
 {
 public:
-	void Convert(uint8 *pSrc, uint8 *pDest) {
+	void Convert(uint8* pSrc, uint8* pDest) {
 		pDest[0] = pSrc[2];
 		pDest[1] = pSrc[1];
 		pDest[2] = pSrc[0];
-		pDest[3] = 0x00; }
+		pDest[3] = 0x00;
+	}
 
-	void ConvertTrans(uint8 *pSrc, uint8 *pDest, uint32 uTransColor) {
+	void ConvertTrans(uint8* pSrc, uint8* pDest, uint32 uTransColor) {
 		uint32 iSrcColor = (pSrc[0] << 16) | (pSrc[1] << 8) | (pSrc[2]);
-		if (iSrcColor != uTransColor) { 
+		if (iSrcColor != uTransColor) {
 			pDest[0] = pSrc[2];
 			pDest[1] = pSrc[1];
 			pDest[2] = pSrc[0];
-			pDest[3] = 0x00; } }
+			pDest[3] = 0x00;
+		}
+	}
 
-	void IncSrc(uint8* &pPos)	{ pPos += sizeof(uint8) * 3; }
-	void IncDest(uint8* &pPos)	{ pPos += sizeof(uint32); }
+	void IncSrc(uint8*& pPos) { pPos += sizeof(uint8) * 3; }
+	void IncDest(uint8*& pPos) { pPos += sizeof(uint32); }
 };
 
 //! this class handles the conversion of a BPP_32P into BF (what is BF???), 
 class CC_32PtoBF
 {
 public:
-	
-	void Init(FormatMgr *pFormatMgr, const FMConvertRequest *pRequest)
+
+	void Init(FormatMgr* pFormatMgr, const FMConvertRequest* pRequest)
 	{
 		// need to set pRequest->m_pSrcPalette
 		m_pSrcPalette = pRequest->m_pSrcPalette;
 	}
 
-	uint32 DoConvert(uint8 *pSrc)
+	uint32 DoConvert(uint8* pSrc)
 	{
-		return	((uint32)m_pSrcPalette[*pSrc].rgb.a << 24) | 
-				((uint32)m_pSrcPalette[*pSrc].rgb.r << 16) | 
-				((uint32)m_pSrcPalette[*pSrc].rgb.g << 8)  |
-				((uint32)m_pSrcPalette[*pSrc].rgb.b);
+		return	((uint32)m_pSrcPalette[*pSrc].rgb.a << 24) |
+			((uint32)m_pSrcPalette[*pSrc].rgb.r << 16) |
+			((uint32)m_pSrcPalette[*pSrc].rgb.g << 8) |
+			((uint32)m_pSrcPalette[*pSrc].rgb.b);
 	}
-		
-	void Convert(uint8 *pSrc, uint8 *pDest)
+
+	void Convert(uint8* pSrc, uint8* pDest)
 	{
 		DEST_32 = DoConvert(pSrc);
 	}
 
-	void ConvertTrans(uint8 *pSrc, uint8 *pDest, uint32 uTransColor) {
+	void ConvertTrans(uint8* pSrc, uint8* pDest, uint32 uTransColor) {
 		uint32 iSrcColor = DoConvert(pSrc);
-		if (iSrcColor != uTransColor) DEST_32 = iSrcColor; }
+		if (iSrcColor != uTransColor) DEST_32 = iSrcColor;
+	}
 
-	void IncSrc(uint8* &pPos) {pPos += sizeof(uint8);}
-	void IncDest(uint8* &pPos) {pPos += sizeof(uint32);}
+	void IncSrc(uint8*& pPos) { pPos += sizeof(uint8); }
+	void IncDest(uint8*& pPos) { pPos += sizeof(uint32); }
 
-	RPaletteColor *m_pSrcPalette;
+	RPaletteColor* m_pSrcPalette;
 };
 
 
@@ -315,12 +322,12 @@ class BaseBFToAny
 {
 public:
 
-	void Init(const FormatMgr *pFormatMgr, const FMConvertRequest *pRequest)
+	void Init(const FormatMgr* pFormatMgr, const FMConvertRequest* pRequest)
 	{
 		Init(pFormatMgr, pRequest->m_pDestFormat);
 	}
 
-	void Init(const FormatMgr *pFormatMgr, const PFormat *pDestFormat)
+	void Init(const FormatMgr* pFormatMgr, const PFormat* pDestFormat)
 	{
 		m_pDestFormat = pDestFormat;
 		m_pScaleMaps[0] = &pFormatMgr->m_ScaleFrom8[m_pDestFormat->m_nBits[0]];
@@ -329,8 +336,8 @@ public:
 		m_pScaleMaps[3] = &pFormatMgr->m_ScaleFrom8[m_pDestFormat->m_nBits[3]];
 	}
 
-	const ScaleFrom8Table	*m_pScaleMaps[NUM_COLORPLANES];
-	const PFormat			*m_pDestFormat;
+	const ScaleFrom8Table* m_pScaleMaps[NUM_COLORPLANES];
+	const PFormat* m_pDestFormat;
 };
 
 
@@ -338,28 +345,29 @@ class CC_BFto8 : public BaseBFToAny
 {
 public:
 
-	uint8 DoConvert(uint8 *pSrc)
+	uint8 DoConvert(uint8* pSrc)
 	{
 		uint8 ret;
 
-		ret =  (*m_pScaleMaps[0])[SRC_32 >> 24] << m_pDestFormat->m_FirstBits[0];
+		ret = (*m_pScaleMaps[0])[SRC_32 >> 24] << m_pDestFormat->m_FirstBits[0];
 		ret |= (*m_pScaleMaps[1])[(SRC_32 >> 16) & 0xFF] << m_pDestFormat->m_FirstBits[1];
-		ret |= (*m_pScaleMaps[2])[(SRC_32 >>  8) & 0xFF] << m_pDestFormat->m_FirstBits[2];
+		ret |= (*m_pScaleMaps[2])[(SRC_32 >> 8) & 0xFF] << m_pDestFormat->m_FirstBits[2];
 		ret |= (*m_pScaleMaps[3])[SRC_32 & 0xFF] << m_pDestFormat->m_FirstBits[3];
 
 		return ret;
 	}
 
-	void Convert(uint8 *pSrc, uint8 *pDest)
+	void Convert(uint8* pSrc, uint8* pDest)
 	{
 		DEST_8 = DoConvert(pSrc);
 	}
 
-	void ConvertTrans(uint8 *pSrc, uint8 *pDest, uint32 uTransColor) {
-		if (SRC_32 != uTransColor) DEST_8 = DoConvert(pSrc); }
+	void ConvertTrans(uint8* pSrc, uint8* pDest, uint32 uTransColor) {
+		if (SRC_32 != uTransColor) DEST_8 = DoConvert(pSrc);
+	}
 
-	void IncSrc(uint8* &pPos) {pPos += sizeof(uint32);}
-	void IncDest(uint8* &pPos) {pPos += sizeof(uint8);}
+	void IncSrc(uint8*& pPos) { pPos += sizeof(uint32); }
+	void IncDest(uint8*& pPos) { pPos += sizeof(uint8); }
 };
 
 //! this will convert to 8-bit palletized
@@ -367,28 +375,29 @@ class CC_BFto8P : public BaseBFToAny
 {
 public:
 
-	uint8 DoConvert(uint8 *pSrc)
+	uint8 DoConvert(uint8* pSrc)
 	{
 		uint8 ret;
 
-		ret =  (*m_pScaleMaps[0])[SRC_32 >> 24] << m_pDestFormat->m_FirstBits[0];
+		ret = (*m_pScaleMaps[0])[SRC_32 >> 24] << m_pDestFormat->m_FirstBits[0];
 		ret |= (*m_pScaleMaps[1])[(SRC_32 >> 16) & 0xFF] << m_pDestFormat->m_FirstBits[1];
-		ret |= (*m_pScaleMaps[2])[(SRC_32 >>  8) & 0xFF] << m_pDestFormat->m_FirstBits[2];
+		ret |= (*m_pScaleMaps[2])[(SRC_32 >> 8) & 0xFF] << m_pDestFormat->m_FirstBits[2];
 		ret |= (*m_pScaleMaps[3])[SRC_32 & 0xFF] << m_pDestFormat->m_FirstBits[3];
 
 		return ret;
 	}
 
-	void Convert(uint8 *pSrc, uint8 *pDest)
+	void Convert(uint8* pSrc, uint8* pDest)
 	{
 		DEST_8 = DoConvert(pSrc);
 	}
 
-	void ConvertTrans(uint8 *pSrc, uint8 *pDest, uint32 uTransColor) {
-		if (SRC_32 != uTransColor) DEST_8 = DoConvert(pSrc); }
+	void ConvertTrans(uint8* pSrc, uint8* pDest, uint32 uTransColor) {
+		if (SRC_32 != uTransColor) DEST_8 = DoConvert(pSrc);
+	}
 
-	void IncSrc(uint8* &pPos) {pPos += sizeof(uint32);}
-	void IncDest(uint8* &pPos) {pPos += sizeof(uint8);}
+	void IncSrc(uint8*& pPos) { pPos += sizeof(uint32); }
+	void IncDest(uint8*& pPos) { pPos += sizeof(uint8); }
 };
 
 
@@ -396,28 +405,29 @@ class CC_BFto16 : public BaseBFToAny
 {
 public:
 
-	uint16 DoConvert(uint8 *pSrc)
+	uint16 DoConvert(uint8* pSrc)
 	{
 		uint16 ret;
 
-		ret  = (uint16)(*m_pScaleMaps[0])[SRC_32 >> 24] << m_pDestFormat->m_FirstBits[0];
+		ret = (uint16)(*m_pScaleMaps[0])[SRC_32 >> 24] << m_pDestFormat->m_FirstBits[0];
 		ret |= (uint16)(*m_pScaleMaps[1])[(SRC_32 >> 16) & 0xFF] << m_pDestFormat->m_FirstBits[1];
-		ret |= (uint16)(*m_pScaleMaps[2])[(SRC_32 >>  8) & 0xFF] << m_pDestFormat->m_FirstBits[2];
+		ret |= (uint16)(*m_pScaleMaps[2])[(SRC_32 >> 8) & 0xFF] << m_pDestFormat->m_FirstBits[2];
 		ret |= (uint16)(*m_pScaleMaps[3])[SRC_32 & 0xFF] << m_pDestFormat->m_FirstBits[3];
 
 		return ret;
 	}
 
-	void Convert(uint8 *pSrc, uint8 *pDest)
+	void Convert(uint8* pSrc, uint8* pDest)
 	{
 		DEST_16 = DoConvert(pSrc);
 	}
 
-	void ConvertTrans(uint8 *pSrc, uint8 *pDest, uint32 uTransColor) {
-		if (SRC_32 != uTransColor) DEST_16 = DoConvert(pSrc); }
+	void ConvertTrans(uint8* pSrc, uint8* pDest, uint32 uTransColor) {
+		if (SRC_32 != uTransColor) DEST_16 = DoConvert(pSrc);
+	}
 
-	void IncSrc(uint8* &pPos) {pPos += sizeof(uint32);}
-	void IncDest(uint8* &pPos) {pPos += sizeof(uint16);}
+	void IncSrc(uint8*& pPos) { pPos += sizeof(uint32); }
+	void IncDest(uint8*& pPos) { pPos += sizeof(uint16); }
 };
 
 
@@ -425,28 +435,29 @@ class CC_BFto32 : public BaseBFToAny
 {
 public:
 
-	uint32 DoConvert(uint8 *pSrc)
+	uint32 DoConvert(uint8* pSrc)
 	{
 		uint32 ret;
 
-		ret  = (uint32)(*m_pScaleMaps[0])[SRC_32 >> 24] << m_pDestFormat->m_FirstBits[0];
+		ret = (uint32)(*m_pScaleMaps[0])[SRC_32 >> 24] << m_pDestFormat->m_FirstBits[0];
 		ret |= (uint32)(*m_pScaleMaps[1])[(SRC_32 >> 16) & 0xFF] << m_pDestFormat->m_FirstBits[1];
-		ret |= (uint32)(*m_pScaleMaps[2])[(SRC_32 >>  8) & 0xFF] << m_pDestFormat->m_FirstBits[2];
+		ret |= (uint32)(*m_pScaleMaps[2])[(SRC_32 >> 8) & 0xFF] << m_pDestFormat->m_FirstBits[2];
 		ret |= (uint32)(*m_pScaleMaps[3])[SRC_32 & 0xFF] << m_pDestFormat->m_FirstBits[3];
 
 		return ret;
 	}
 
-	void Convert(uint8 *pSrc, uint8 *pDest)
+	void Convert(uint8* pSrc, uint8* pDest)
 	{
 		DEST_32 = DoConvert(pSrc);
 	}
 
-	void ConvertTrans(uint8 *pSrc, uint8 *pDest, uint32 uTransColor) {
-		if (SRC_32 != uTransColor) DEST_32 = DoConvert(pSrc); }
+	void ConvertTrans(uint8* pSrc, uint8* pDest, uint32 uTransColor) {
+		if (SRC_32 != uTransColor) DEST_32 = DoConvert(pSrc);
+	}
 
-	void IncSrc(uint8* &pPos) {pPos += sizeof(uint32);}
-	void IncDest(uint8* &pPos) {pPos += sizeof(uint32);}
+	void IncSrc(uint8*& pPos) { pPos += sizeof(uint32); }
+	void IncDest(uint8*& pPos) { pPos += sizeof(uint32); }
 };
 
 
@@ -455,7 +466,7 @@ public:
 // Conversion functions.
 // ------------------------------------------------------------------------------ //
 
-inline void or_cpy(uint8 *pSrc, uint8 *pDest, uint32 nDWords, uint32 nWords, uint32 nBytes)
+inline void or_cpy(uint8* pSrc, uint8* pDest, uint32 nDWords, uint32 nWords, uint32 nBytes)
 {
 	uint32 count;
 
@@ -463,27 +474,30 @@ inline void or_cpy(uint8 *pSrc, uint8 *pDest, uint32 nDWords, uint32 nWords, uin
 	while (count) {
 		--count;
 		DEST_32 |= SRC_32;
-		pSrc  += sizeof(uint32);
-		pDest += sizeof(uint32); }
+		pSrc += sizeof(uint32);
+		pDest += sizeof(uint32);
+	}
 
 	count = nWords;
 	while (count) {
 		--count;
 		DEST_16 |= SRC_16;
 		pDest += sizeof(uint16);
-		pSrc  += sizeof(uint16); }
+		pSrc += sizeof(uint16);
+	}
 
 	count = nBytes;
 	while (count) {
 		--count;
 		*pDest |= *pSrc;
-		++pSrc; ++pDest; }
+		++pSrc; ++pDest;
+	}
 }
 
 // Note: GenericCopy doesn't really support trans color keying (need to use the converts)...
-LTRESULT GenericCopy(FormatMgr *pFormatMgr, const FMConvertRequest *pRequest, LTRGB* pTransColor)
+LTRESULT GenericCopy(FormatMgr* pFormatMgr, const FMConvertRequest* pRequest, LTRGB* pTransColor)
 {
-	uint8 *pSrcLine, *pDestLine;
+	uint8* pSrcLine, * pDestLine;
 	uint32 count, bytesPerLine;
 	uint32 copySize;
 
@@ -495,44 +509,44 @@ LTRESULT GenericCopy(FormatMgr *pFormatMgr, const FMConvertRequest *pRequest, LT
 	count = pRequest->m_Height;
 
 	// Shouldn't ever get here with this.
-	if(pRequest->m_pSrcFormat->IsCompressed() != pRequest->m_pDestFormat->IsCompressed())
+	if (pRequest->m_pSrcFormat->IsCompressed() != pRequest->m_pDestFormat->IsCompressed())
 	{
 		ASSERT(LTFALSE);
 		return LT_ERROR;
 	}
 
 	// If the data is compressed, it's just a linear block of memory.
-	if(pRequest->m_pSrcFormat->IsCompressed())
+	if (pRequest->m_pSrcFormat->IsCompressed())
 	{
 		ASSERT(pRequest->m_pSrcFormat->GetType() == pRequest->m_pDestFormat->GetType());
 		copySize = CalcImageSize(pRequest->m_pSrcFormat->GetType(), pRequest->m_Width, pRequest->m_Height);
 		memcpy(pRequest->m_pDest, pRequest->m_pSrc, copySize);
 		return LT_OK;
 	}
-	
-	while (count) 
+
+	while (count)
 	{
 		count--;
 		memcpy(pDestLine, pSrcLine, bytesPerLine);
-		pSrcLine  += pRequest->m_SrcPitch;
-		pDestLine += pRequest->m_DestPitch; 
+		pSrcLine += pRequest->m_SrcPitch;
+		pDestLine += pRequest->m_DestPitch;
 	}
 
-	return LT_OK;	
+	return LT_OK;
 }
 
 
 // This function converts from the source format to the generic 32-bit format
 // through the converter you specify.
 template<class C>
-LTRESULT Convert1Pass(FormatMgr *pFormatMgr, const FMConvertRequest *pRequest, C *pConverterClass, LTRGB* pTransColor)
+LTRESULT Convert1Pass(FormatMgr* pFormatMgr, const FMConvertRequest* pRequest, C* pConverterClass, LTRGB* pTransColor)
 {
-	uint8 *pSrcLine, *pDestLine, *pSrcPos, *pDestPos;
+	uint8* pSrcLine, * pDestLine, * pSrcPos, * pDestPos;
 	uint32 yCount, xCount;
-	PFormat *pSrcFormat;
+	PFormat* pSrcFormat;
 	C converter;
 	uint32 u32TransColor;
-	if (pTransColor) { u32TransColor = RGBA_MAKE(pTransColor->r,pTransColor->g,pTransColor->b,pTransColor->a); }
+	if (pTransColor) { u32TransColor = RGBA_MAKE(pTransColor->r, pTransColor->g, pTransColor->b, pTransColor->a); }
 
 	converter.Init(pFormatMgr, pRequest);
 	pSrcFormat = pRequest->m_pSrcFormat;
@@ -546,31 +560,31 @@ LTRESULT Convert1Pass(FormatMgr *pFormatMgr, const FMConvertRequest *pRequest, C
 		pSrcPos = pSrcLine;
 		pDestPos = pDestLine;
 		xCount = pRequest->m_Width;
-		
-		if (pTransColor) 
+
+		if (pTransColor)
 		{
-			while (xCount) 
+			while (xCount)
 			{
 				--xCount;
-				
-				converter.ConvertTrans(pSrcPos, pDestPos,u32TransColor);
+
+				converter.ConvertTrans(pSrcPos, pDestPos, u32TransColor);
 				converter.IncSrc(pSrcPos);
-				converter.IncDest(pDestPos); 
-			} 
+				converter.IncDest(pDestPos);
+			}
 		}
-		else 
+		else
 		{
-			while (xCount) 
+			while (xCount)
 			{
 				--xCount;
-	
+
 				converter.Convert(pSrcPos, pDestPos);
 				converter.IncSrc(pSrcPos);
-				converter.IncDest(pDestPos); 
+				converter.IncDest(pDestPos);
 			}
 		}
 
-		pSrcLine  += pRequest->m_SrcPitch;
+		pSrcLine += pRequest->m_SrcPitch;
 		pDestLine += pRequest->m_DestPitch;
 	}
 
@@ -580,15 +594,15 @@ LTRESULT Convert1Pass(FormatMgr *pFormatMgr, const FMConvertRequest *pRequest, C
 // This function converts from the source format to the generic 32-bit format, then
 // to the destination format through the converters you specify.
 template<class S, class D>
-LTRESULT Convert2Pass(FormatMgr *pFormatMgr, const FMConvertRequest *pRequest, S *pSrcTo32Bit, D *p32BitToDest, LTRGB* pTransColor)
+LTRESULT Convert2Pass(FormatMgr* pFormatMgr, const FMConvertRequest* pRequest, S* pSrcTo32Bit, D* p32BitToDest, LTRGB* pTransColor)
 {
-	uint8 *pSrcLine, *pDestLine, *pSrcPos, *pDestPos;
+	uint8* pSrcLine, * pDestLine, * pSrcPos, * pDestPos;
 	uint32 yCount, xCount;
-	PFormat *pSrcFormat;
+	PFormat* pSrcFormat;
 	S srcConvert;
 	D destConvert;
-	uint32 tempPixel,u32TransColor;
-	if (pTransColor) { u32TransColor = RGBA_MAKE(pTransColor->r,pTransColor->g,pTransColor->b,pTransColor->a); }
+	uint32 tempPixel, u32TransColor;
+	if (pTransColor) { u32TransColor = RGBA_MAKE(pTransColor->r, pTransColor->g, pTransColor->b, pTransColor->a); }
 
 	srcConvert.Init(pFormatMgr, pRequest);
 	destConvert.Init(pFormatMgr, pRequest);
@@ -604,31 +618,31 @@ LTRESULT Convert2Pass(FormatMgr *pFormatMgr, const FMConvertRequest *pRequest, S
 		pSrcPos = pSrcLine;
 		pDestPos = pDestLine;
 		xCount = pRequest->m_Width;
-		
-		if (pTransColor) 
+
+		if (pTransColor)
 		{
-			while (xCount) 
+			while (xCount)
 			{
 				--xCount;
-				
+
 				srcConvert.Convert(pSrcPos, (uint8*)&tempPixel);
-				if (u32TransColor != tempPixel) 
-					destConvert.Convert((uint8*)&tempPixel, pDestPos);			
-			
+				if (u32TransColor != tempPixel)
+					destConvert.Convert((uint8*)&tempPixel, pDestPos);
+
 				srcConvert.IncSrc(pSrcPos);
-				destConvert.IncDest(pDestPos); 
-			} 
+				destConvert.IncDest(pDestPos);
+			}
 		}
 
-		while (xCount) 
+		while (xCount)
 		{
 			--xCount;
-			
+
 			srcConvert.Convert(pSrcPos, (uint8*)&tempPixel);
-			destConvert.Convert((uint8*)&tempPixel, pDestPos);			
-		
+			destConvert.Convert((uint8*)&tempPixel, pDestPos);
+
 			srcConvert.IncSrc(pSrcPos);
-			destConvert.IncDest(pDestPos); 
+			destConvert.IncDest(pDestPos);
 		}
 
 		pSrcLine += pRequest->m_SrcPitch;
@@ -642,19 +656,19 @@ LTRESULT Convert2Pass(FormatMgr *pFormatMgr, const FMConvertRequest *pRequest, S
 // All the conversion function callbacks.
 // --------------------------------------------------------------------------------- //
 
-LTRESULT Convert8Pto8(FormatMgr *pFormatMgr, const FMConvertRequest *pRequest, LTRGB* pTransColor)
+LTRESULT Convert8Pto8(FormatMgr* pFormatMgr, const FMConvertRequest* pRequest, LTRGB* pTransColor)
 {
 	return Convert2Pass(pFormatMgr, pRequest, (CC_8PtoBF*)LTNULL, (CC_BFto8*)LTNULL, pTransColor);
 }
 
-LTRESULT Convert8Pto16(FormatMgr *pFormatMgr, const FMConvertRequest *pRequest, LTRGB* pTransColor)
+LTRESULT Convert8Pto16(FormatMgr* pFormatMgr, const FMConvertRequest* pRequest, LTRGB* pTransColor)
 {
 	return Convert2Pass(pFormatMgr, pRequest, (CC_8PtoBF*)LTNULL, (CC_BFto16*)LTNULL, pTransColor);
 }
 
-LTRESULT Convert8Pto32(FormatMgr *pFormatMgr, const FMConvertRequest *pRequest, LTRGB* pTransColor)
+LTRESULT Convert8Pto32(FormatMgr* pFormatMgr, const FMConvertRequest* pRequest, LTRGB* pTransColor)
 {
-	if(pRequest->m_pDestFormat->IsSameFormat(&pFormatMgr->m_32BitFormat))
+	if (pRequest->m_pDestFormat->IsSameFormat(&pFormatMgr->m_32BitFormat))
 	{
 		return Convert1Pass(pFormatMgr, pRequest, (CC_8PtoBF*)LTNULL, pTransColor);
 	}
@@ -664,11 +678,11 @@ LTRESULT Convert8Pto32(FormatMgr *pFormatMgr, const FMConvertRequest *pRequest, 
 	}
 }
 
-LTRESULT Convert8to8(FormatMgr *pFormatMgr, const FMConvertRequest *pRequest, LTRGB* pTransColor)
+LTRESULT Convert8to8(FormatMgr* pFormatMgr, const FMConvertRequest* pRequest, LTRGB* pTransColor)
 {
 	if (pRequest->m_pSrcFormat->IsSameFormat(pRequest->m_pDestFormat) && !pTransColor)
-	{	
-		return GenericCopy(pFormatMgr, pRequest,NULL);
+	{
+		return GenericCopy(pFormatMgr, pRequest, NULL);
 	}
 	else
 	{
@@ -676,14 +690,14 @@ LTRESULT Convert8to8(FormatMgr *pFormatMgr, const FMConvertRequest *pRequest, LT
 	}
 }
 
-LTRESULT Convert8to16(FormatMgr *pFormatMgr, const FMConvertRequest *pRequest, LTRGB* pTransColor)
+LTRESULT Convert8to16(FormatMgr* pFormatMgr, const FMConvertRequest* pRequest, LTRGB* pTransColor)
 {
 	return Convert2Pass(pFormatMgr, pRequest, (CC_8toBF*)LTNULL, (CC_BFto16*)LTNULL, pTransColor);
 }
 
-LTRESULT Convert8to32(FormatMgr *pFormatMgr, const FMConvertRequest *pRequest, LTRGB* pTransColor)
+LTRESULT Convert8to32(FormatMgr* pFormatMgr, const FMConvertRequest* pRequest, LTRGB* pTransColor)
 {
-	if(pRequest->m_pDestFormat->IsSameFormat(&pFormatMgr->m_32BitFormat))
+	if (pRequest->m_pDestFormat->IsSameFormat(&pFormatMgr->m_32BitFormat))
 	{
 		return Convert1Pass(pFormatMgr, pRequest, (CC_8toBF*)LTNULL, pTransColor);
 	}
@@ -693,16 +707,16 @@ LTRESULT Convert8to32(FormatMgr *pFormatMgr, const FMConvertRequest *pRequest, L
 	}
 }
 
-LTRESULT Convert16to8(FormatMgr *pFormatMgr, const FMConvertRequest *pRequest, LTRGB* pTransColor)
+LTRESULT Convert16to8(FormatMgr* pFormatMgr, const FMConvertRequest* pRequest, LTRGB* pTransColor)
 {
 	return Convert2Pass(pFormatMgr, pRequest, (CC_16toBF*)LTNULL, (CC_BFto8*)LTNULL, pTransColor);
 }
 
-LTRESULT Convert16to16(FormatMgr *pFormatMgr, const FMConvertRequest *pRequest, LTRGB* pTransColor)
+LTRESULT Convert16to16(FormatMgr* pFormatMgr, const FMConvertRequest* pRequest, LTRGB* pTransColor)
 {
-	if(pRequest->m_pSrcFormat->IsSameFormat(pRequest->m_pDestFormat) && !pTransColor)
-	{	
-		return GenericCopy(pFormatMgr, pRequest,NULL);
+	if (pRequest->m_pSrcFormat->IsSameFormat(pRequest->m_pDestFormat) && !pTransColor)
+	{
+		return GenericCopy(pFormatMgr, pRequest, NULL);
 	}
 	else
 	{
@@ -710,9 +724,9 @@ LTRESULT Convert16to16(FormatMgr *pFormatMgr, const FMConvertRequest *pRequest, 
 	}
 }
 
-LTRESULT Convert16to32(FormatMgr *pFormatMgr, const FMConvertRequest *pRequest, LTRGB* pTransColor)
+LTRESULT Convert16to32(FormatMgr* pFormatMgr, const FMConvertRequest* pRequest, LTRGB* pTransColor)
 {
-	if(pRequest->m_pDestFormat->IsSameFormat(&pFormatMgr->m_32BitFormat))
+	if (pRequest->m_pDestFormat->IsSameFormat(&pFormatMgr->m_32BitFormat))
 	{
 		return Convert1Pass(pFormatMgr, pRequest, (CC_16toBF*)LTNULL, pTransColor);
 	}
@@ -722,11 +736,11 @@ LTRESULT Convert16to32(FormatMgr *pFormatMgr, const FMConvertRequest *pRequest, 
 	}
 }
 
-LTRESULT Convert32to8P(FormatMgr *pFormatMgr, const FMConvertRequest *pRequest, LTRGB* pTransColor)
+LTRESULT Convert32to8P(FormatMgr* pFormatMgr, const FMConvertRequest* pRequest, LTRGB* pTransColor)
 {
 	// OutputDebugString("\nConvert32to8P");
 
-	if(pRequest->m_pSrcFormat->IsSameFormat(&pFormatMgr->m_32BitFormat))
+	if (pRequest->m_pSrcFormat->IsSameFormat(&pFormatMgr->m_32BitFormat))
 	{
 		return Convert1Pass(pFormatMgr, pRequest, (CC_BFto8*)LTNULL, pTransColor);
 	}
@@ -736,9 +750,9 @@ LTRESULT Convert32to8P(FormatMgr *pFormatMgr, const FMConvertRequest *pRequest, 
 	}
 }
 
-LTRESULT Convert32to8(FormatMgr *pFormatMgr, const FMConvertRequest *pRequest, LTRGB* pTransColor)
+LTRESULT Convert32to8(FormatMgr* pFormatMgr, const FMConvertRequest* pRequest, LTRGB* pTransColor)
 {
-	if(pRequest->m_pSrcFormat->IsSameFormat(&pFormatMgr->m_32BitFormat))
+	if (pRequest->m_pSrcFormat->IsSameFormat(&pFormatMgr->m_32BitFormat))
 	{
 		return Convert1Pass(pFormatMgr, pRequest, (CC_BFto8*)LTNULL, pTransColor);
 	}
@@ -748,9 +762,9 @@ LTRESULT Convert32to8(FormatMgr *pFormatMgr, const FMConvertRequest *pRequest, L
 	}
 }
 
-LTRESULT Convert32to16(FormatMgr *pFormatMgr, const FMConvertRequest *pRequest, LTRGB* pTransColor)
+LTRESULT Convert32to16(FormatMgr* pFormatMgr, const FMConvertRequest* pRequest, LTRGB* pTransColor)
 {
-	if(pRequest->m_pSrcFormat->IsSameFormat(&pFormatMgr->m_32BitFormat))
+	if (pRequest->m_pSrcFormat->IsSameFormat(&pFormatMgr->m_32BitFormat))
 	{
 		return Convert1Pass(pFormatMgr, pRequest, (CC_BFto16*)LTNULL, pTransColor);
 	}
@@ -760,21 +774,21 @@ LTRESULT Convert32to16(FormatMgr *pFormatMgr, const FMConvertRequest *pRequest, 
 	}
 }
 
-LTRESULT Convert24to16(FormatMgr *pFormatMgr, const FMConvertRequest *pRequest, LTRGB* pTransColor)
+LTRESULT Convert24to16(FormatMgr* pFormatMgr, const FMConvertRequest* pRequest, LTRGB* pTransColor)
 {
 	return Convert2Pass(pFormatMgr, pRequest, (CC_24toBF*)LTNULL, (CC_BFto16*)LTNULL, pTransColor);
 }
 
-LTRESULT Convert24to32(FormatMgr *pFormatMgr, const FMConvertRequest *pRequest, LTRGB* pTransColor)
+LTRESULT Convert24to32(FormatMgr* pFormatMgr, const FMConvertRequest* pRequest, LTRGB* pTransColor)
 {
 	return Convert1Pass(pFormatMgr, pRequest, (CC_24toBF*)LTNULL, pTransColor);
 }
 
-LTRESULT Convert32to32(FormatMgr *pFormatMgr, const FMConvertRequest *pRequest, LTRGB* pTransColor)
+LTRESULT Convert32to32(FormatMgr* pFormatMgr, const FMConvertRequest* pRequest, LTRGB* pTransColor)
 {
-	if(pRequest->m_pDestFormat->IsSameFormat(&pFormatMgr->m_32BitFormat) && !pTransColor)
+	if (pRequest->m_pDestFormat->IsSameFormat(&pFormatMgr->m_32BitFormat) && !pTransColor)
 	{
-		return GenericCopy(pFormatMgr, pRequest,NULL);
+		return GenericCopy(pFormatMgr, pRequest, NULL);
 	}
 	else
 	{
@@ -783,20 +797,20 @@ LTRESULT Convert32to32(FormatMgr *pFormatMgr, const FMConvertRequest *pRequest, 
 }
 
 //! Conversion functions for BPP_32P
-LTRESULT Convert32Pto16(FormatMgr *pFormatMgr, const FMConvertRequest *pRequest, LTRGB* pTransColor)
+LTRESULT Convert32Pto16(FormatMgr* pFormatMgr, const FMConvertRequest* pRequest, LTRGB* pTransColor)
 {
 	return Convert2Pass(pFormatMgr, pRequest, (CC_32PtoBF*)LTNULL, (CC_BFto16*)LTNULL, pTransColor);
 }
 
-LTRESULT Convert32Pto32(FormatMgr *pFormatMgr, const FMConvertRequest *pRequest, LTRGB* pTransColor)
+LTRESULT Convert32Pto32(FormatMgr* pFormatMgr, const FMConvertRequest* pRequest, LTRGB* pTransColor)
 {
 	return Convert2Pass(pFormatMgr, pRequest, (CC_32PtoBF*)LTNULL, (CC_BFto32*)LTNULL, pTransColor);
-}					   
-					   
+}
+
 
 template<class C, class A>
-LTRESULT ConvertDXTGeneric(FormatMgr *pFormatMgr,
-	const FMConvertRequest *pRequest, C *pConvert, A *pAbstract)
+LTRESULT ConvertDXTGeneric(FormatMgr* pFormatMgr,
+	const FMConvertRequest* pRequest, C* pConvert, A* pAbstract)
 {
 	A abstract;
 	C ccBFtoGeneric;
@@ -805,26 +819,26 @@ LTRESULT ConvertDXTGeneric(FormatMgr *pFormatMgr,
 	uint32 xBlock, yBlock;
 	uint32 ident32[4];
 	uint32 comp[2][4];
-	uint8 *pSrcPos8;
-	uint16 *pSrcPos16;
-	void *pDestPos;
+	uint8* pSrcPos8;
+	uint16* pSrcPos16;
+	void* pDestPos;
 	uint16 val1, val2;
 	uint32 i, blockData, bytesPerBlockShift, alphaExtra, invAlphaMask;
 	LTBOOL bAlpha, bInterpolatedAlpha;
 	uint32 tempIndex;
 	uint32 alphaData[2], alphaShift, defaultPValueAlphaMask, defaultByteAlphaMask;
-	uint8 *pAlphaScaleTable;
+	uint8* pAlphaScaleTable;
 
 
 	// Will we be decompressing with alpha?
 	defaultPValueAlphaMask = PVALUE_ALPHAMASK;
 	defaultByteAlphaMask = 0xFF;
 	bAlpha = bInterpolatedAlpha = LTFALSE;
-	if(pRequest->m_pSrcFormat->GetType() == BPP_S3TC_DXT3)
+	if (pRequest->m_pSrcFormat->GetType() == BPP_S3TC_DXT3)
 	{
 		bAlpha = LTTRUE;
 	}
-	else if(pRequest->m_pSrcFormat->GetType() == BPP_S3TC_DXT5)
+	else if (pRequest->m_pSrcFormat->GetType() == BPP_S3TC_DXT5)
 	{
 		bAlpha = bInterpolatedAlpha = LTTRUE;
 
@@ -832,7 +846,7 @@ LTRESULT ConvertDXTGeneric(FormatMgr *pFormatMgr,
 		pAlphaScaleTable = pFormatMgr->m_ScaleFrom8[
 			pRequest->m_pDestFormat->m_nBits[CP_ALPHA]].GetArray();
 
-		defaultByteAlphaMask = defaultPValueAlphaMask = 0;
+			defaultByteAlphaMask = defaultPValueAlphaMask = 0;
 	}
 
 	invAlphaMask = ~pRequest->m_pDestFormat->m_Masks[CP_ALPHA];
@@ -840,12 +854,12 @@ LTRESULT ConvertDXTGeneric(FormatMgr *pFormatMgr,
 	cc16toBF.Init(pFormatMgr, &pFormatMgr->m_RGB565Format);
 	ccBFtoGeneric.Init(pFormatMgr, pRequest->m_pDestFormat);
 
-	if(bAlpha)
+	if (bAlpha)
 	{
 		bytesPerBlockShift = 4;
 		alphaExtra = 8; // 8 bytes of alpha data.
-		
-		for(i=0; i < 16; i++)
+
+		for (i = 0; i < 16; i++)
 		{
 			ccBFtoGeneric.Convert((uint8*)&g_FullAlphaValues[i], (uint8*)&abstract.m_AlphaValues[i]);
 		}
@@ -860,11 +874,11 @@ LTRESULT ConvertDXTGeneric(FormatMgr *pFormatMgr,
 	nBlocksY = pRequest->m_Height >> 2;
 
 	// For each block...
-	for(yBlock=0; yBlock < nBlocksY; yBlock++)
+	for (yBlock = 0; yBlock < nBlocksY; yBlock++)
 	{
-		for(xBlock=0; xBlock < nBlocksX; xBlock++)
+		for (xBlock = 0; xBlock < nBlocksX; xBlock++)
 		{
-			pSrcPos8 = pRequest->m_pSrc + (xBlock<<bytesPerBlockShift) + ((yBlock*nBlocksX)<<bytesPerBlockShift);
+			pSrcPos8 = pRequest->m_pSrc + (xBlock << bytesPerBlockShift) + ((yBlock * nBlocksX) << bytesPerBlockShift);
 			pSrcPos8 += alphaExtra;
 			pSrcPos16 = (uint16*)pSrcPos8;
 
@@ -884,20 +898,20 @@ LTRESULT ConvertDXTGeneric(FormatMgr *pFormatMgr,
 			ident32[1] |= defaultPValueAlphaMask;
 
 			// Convert to output format.
-			if(val1 > val2)
+			if (val1 > val2)
 			{
 				// 4-color block, alpha is opaque.
 				ident32[2] = PValue_Set(
 					defaultByteAlphaMask,
-					(comp[0][1]*2 + comp[1][1]) / 3,
-					(comp[0][2]*2 + comp[1][2]) / 3,
-					(comp[0][3]*2 + comp[1][3]) / 3);
-				
+					(comp[0][1] * 2 + comp[1][1]) / 3,
+					(comp[0][2] * 2 + comp[1][2]) / 3,
+					(comp[0][3] * 2 + comp[1][3]) / 3);
+
 				ident32[3] = PValue_Set(
 					defaultByteAlphaMask,
-					(comp[0][1] + comp[1][1]*2) / 3,
-					(comp[0][2] + comp[1][2]*2) / 3,
-					(comp[0][3] + comp[1][3]*2) / 3);
+					(comp[0][1] + comp[1][1] * 2) / 3,
+					(comp[0][2] + comp[1][2] * 2) / 3,
+					(comp[0][3] + comp[1][3] * 2) / 3);
 			}
 			else
 			{
@@ -918,45 +932,45 @@ LTRESULT ConvertDXTGeneric(FormatMgr *pFormatMgr,
 
 			// The next 4 bytes are the pixel data.
 			blockData = *((uint32*)(pSrcPos8 + 4));
-			pDestPos = pRequest->m_pDest + 
-				((yBlock<<2) * pRequest->m_DestPitch) + (xBlock<<(2+A::GetShift()));
-			
+			pDestPos = pRequest->m_pDest +
+				((yBlock << 2) * pRequest->m_DestPitch) + (xBlock << (2 + A::GetShift()));
+
 			DECODE_LINE(0);
 			DECODE_LINE(8);
 			DECODE_LINE(16);
 			DECODE_LINE(24);
 
 			// Read in the alpha block?
-			if(bAlpha)
+			if (bAlpha)
 			{
-				pDestPos = pRequest->m_pDest + 
-					((yBlock<<2) * pRequest->m_DestPitch) + (xBlock<<(2+A::GetShift()));
+				pDestPos = pRequest->m_pDest +
+					((yBlock << 2) * pRequest->m_DestPitch) + (xBlock << (2 + A::GetShift()));
 
-				pSrcPos8 = pRequest->m_pSrc + (xBlock<<bytesPerBlockShift) + ((yBlock*nBlocksX)<<bytesPerBlockShift);
+				pSrcPos8 = pRequest->m_pSrc + (xBlock << bytesPerBlockShift) + ((yBlock * nBlocksX) << bytesPerBlockShift);
 
-				if(bInterpolatedAlpha)
+				if (bInterpolatedAlpha)
 				{
 					// 2 bytes for the alpha values.
 					ALPHAVAL[0] = *pSrcPos8;
-					ALPHAVAL[1] = *(pSrcPos8+1);
+					ALPHAVAL[1] = *(pSrcPos8 + 1);
 
-					if(ALPHAVAL[0] > ALPHAVAL[1])
+					if (ALPHAVAL[0] > ALPHAVAL[1])
 					{
 						// 8 values going between these alpha values.
-						ALPHAVAL[2] = (ALPHAVAL[0]*6 + ALPHAVAL[1]*1) / 7;
-						ALPHAVAL[3] = (ALPHAVAL[0]*5 + ALPHAVAL[1]*2) / 7;
-						ALPHAVAL[4] = (ALPHAVAL[0]*4 + ALPHAVAL[1]*3) / 7;
-						ALPHAVAL[5] = (ALPHAVAL[0]*3 + ALPHAVAL[1]*4) / 7;
-						ALPHAVAL[6] = (ALPHAVAL[0]*2 + ALPHAVAL[1]*5) / 7;
-						ALPHAVAL[7] = (ALPHAVAL[0]*1 + ALPHAVAL[1]*6) / 7;
+						ALPHAVAL[2] = (ALPHAVAL[0] * 6 + ALPHAVAL[1] * 1) / 7;
+						ALPHAVAL[3] = (ALPHAVAL[0] * 5 + ALPHAVAL[1] * 2) / 7;
+						ALPHAVAL[4] = (ALPHAVAL[0] * 4 + ALPHAVAL[1] * 3) / 7;
+						ALPHAVAL[5] = (ALPHAVAL[0] * 3 + ALPHAVAL[1] * 4) / 7;
+						ALPHAVAL[6] = (ALPHAVAL[0] * 2 + ALPHAVAL[1] * 5) / 7;
+						ALPHAVAL[7] = (ALPHAVAL[0] * 1 + ALPHAVAL[1] * 6) / 7;
 					}
 					else
 					{
 						// 6 values going between these alpha values.  The others are 0 and 0xFF.						
-						ALPHAVAL[2] = (ALPHAVAL[0]*4 + ALPHAVAL[1]*1) / 5;
-						ALPHAVAL[3] = (ALPHAVAL[0]*3 + ALPHAVAL[1]*2) / 5;
-						ALPHAVAL[4] = (ALPHAVAL[0]*2 + ALPHAVAL[1]*3) / 5;
-						ALPHAVAL[5] = (ALPHAVAL[0]*1 + ALPHAVAL[1]*4) / 5;
+						ALPHAVAL[2] = (ALPHAVAL[0] * 4 + ALPHAVAL[1] * 1) / 5;
+						ALPHAVAL[3] = (ALPHAVAL[0] * 3 + ALPHAVAL[1] * 2) / 5;
+						ALPHAVAL[4] = (ALPHAVAL[0] * 2 + ALPHAVAL[1] * 3) / 5;
+						ALPHAVAL[5] = (ALPHAVAL[0] * 1 + ALPHAVAL[1] * 4) / 5;
 						ALPHAVAL[6] = 0;
 						ALPHAVAL[7] = 0xFF;
 					}
@@ -973,29 +987,29 @@ LTRESULT ConvertDXTGeneric(FormatMgr *pFormatMgr,
 
 					// 6 bytes for the pixels (3 bits per pixel, 16 pixels, 
 					// 3*16=48 bits=6 bytes).  
-					alphaData[0] = *((uint32*)(pSrcPos8+2));
-					alphaData[1] = *((uint16*)(pSrcPos8+6));
+					alphaData[0] = *((uint32*)(pSrcPos8 + 2));
+					alphaData[1] = *((uint16*)(pSrcPos8 + 6));
 
 					// Row 1.
-						READROW_NORMAL(0, 0);
+					READROW_NORMAL(0, 0);
 
 					// Row 2.
-						READROW_NORMAL(0, 12);
+					READROW_NORMAL(0, 12);
 
 					// Row 3.	
-						A::Or(pDestPos, 0, ALPHAVAL[(alphaData[0] >> 24) & 0x7]);
-						A::Or(pDestPos, 1, ALPHAVAL[(alphaData[0] >> 27) & 0x7]);
+					A::Or(pDestPos, 0, ALPHAVAL[(alphaData[0] >> 24) & 0x7]);
+					A::Or(pDestPos, 1, ALPHAVAL[(alphaData[0] >> 27) & 0x7]);
 
-						// As luck would have it, one of the pixels spans the border.
-						tempIndex = alphaData[0] >> 30; // Get the 2 LSoBs.
-						tempIndex |= (alphaData[1] & 0x1) << 2; // The MSoB.
-						A::Or(pDestPos, 2, ALPHAVAL[tempIndex]);
+					// As luck would have it, one of the pixels spans the border.
+					tempIndex = alphaData[0] >> 30; // Get the 2 LSoBs.
+					tempIndex |= (alphaData[1] & 0x1) << 2; // The MSoB.
+					A::Or(pDestPos, 2, ALPHAVAL[tempIndex]);
 
-						A::Or(pDestPos, 3, ALPHAVAL[(alphaData[1] >> 1) & 0x7]);
-						pDestPos = (uint8*)pDestPos + pRequest->m_DestPitch;
+					A::Or(pDestPos, 3, ALPHAVAL[(alphaData[1] >> 1) & 0x7]);
+					pDestPos = (uint8*)pDestPos + pRequest->m_DestPitch;
 
 					// Row 4.
-						READROW_NORMAL(1, 4);
+					READROW_NORMAL(1, 4);
 				}
 				else
 				{
@@ -1014,12 +1028,12 @@ LTRESULT ConvertDXTGeneric(FormatMgr *pFormatMgr,
 }
 
 
-LTRESULT ConvertDXTto16(FormatMgr *pFormatMgr, const FMConvertRequest *pRequest, LTRGB* pTransColor)
+LTRESULT ConvertDXTto16(FormatMgr* pFormatMgr, const FMConvertRequest* pRequest, LTRGB* pTransColor)
 {
 	return ConvertDXTGeneric(pFormatMgr, pRequest, (CC_BFto16*)LTNULL, (Abstract_Word*)LTNULL);
 }
 
-LTRESULT ConvertDXTto32(FormatMgr *pFormatMgr, const FMConvertRequest *pRequest, LTRGB* pTransColor)
+LTRESULT ConvertDXTto32(FormatMgr* pFormatMgr, const FMConvertRequest* pRequest, LTRGB* pTransColor)
 {
 	return ConvertDXTGeneric(pFormatMgr, pRequest, (CC_BFto32*)LTNULL, (Abstract_DWord*)LTNULL);
 }
@@ -1031,8 +1045,8 @@ LTRESULT ConvertDXTto32(FormatMgr *pFormatMgr, const FMConvertRequest *pRequest,
 
 // Takes a pixel in the base format and converts to D's format.
 template<class D>
-inline void CVP_FromPValueTemplate(FormatMgr *pFormatMgr,
-	PFormat *pFormat, uint8 *pSrc, uint8 *pDest, D *p32BitToDest)
+inline void CVP_FromPValueTemplate(FormatMgr* pFormatMgr,
+	PFormat* pFormat, uint8* pSrc, uint8* pDest, D* p32BitToDest)
 {
 	D destConvert;
 
@@ -1040,25 +1054,25 @@ inline void CVP_FromPValueTemplate(FormatMgr *pFormatMgr,
 	destConvert.Convert(pSrc, pDest);
 }
 
-void CPV_BFto8(FormatMgr *pFormatMgr, PFormat *pFormat, uint8 *pSrc, uint8 *pDest)
+void CPV_BFto8(FormatMgr* pFormatMgr, PFormat* pFormat, uint8* pSrc, uint8* pDest)
 {
 	CVP_FromPValueTemplate(pFormatMgr, pFormat, pSrc, pDest, (CC_BFto8*)LTNULL);
 }
 
-void CPV_BFto16(FormatMgr *pFormatMgr, PFormat *pFormat, uint8 *pSrc, uint8 *pDest)
+void CPV_BFto16(FormatMgr* pFormatMgr, PFormat* pFormat, uint8* pSrc, uint8* pDest)
 {
 	CVP_FromPValueTemplate(pFormatMgr, pFormat, pSrc, pDest, (CC_BFto16*)LTNULL);
 }
 
-void CPV_BFto32(FormatMgr *pFormatMgr, PFormat *pFormat, uint8 *pSrc, uint8 *pDest)
+void CPV_BFto32(FormatMgr* pFormatMgr, PFormat* pFormat, uint8* pSrc, uint8* pDest)
 {
 	CVP_FromPValueTemplate(pFormatMgr, pFormat, pSrc, pDest, (CC_BFto32*)LTNULL);
 }
 
 
 template<class D>
-inline void CVP_ToPValueTemplate(FormatMgr *pFormatMgr,
-	PFormat *pFormat, uint8 *pSrc, uint8 *pDest, D *pToPValue)
+inline void CVP_ToPValueTemplate(FormatMgr* pFormatMgr,
+	PFormat* pFormat, uint8* pSrc, uint8* pDest, D* pToPValue)
 {
 	D destConvert;
 
@@ -1066,17 +1080,17 @@ inline void CVP_ToPValueTemplate(FormatMgr *pFormatMgr,
 	destConvert.Convert(pSrc, pDest);
 }
 
-void CPV_8toBF(FormatMgr *pFormatMgr, PFormat *pFormat, uint8 *pSrc, uint8 *pDest)
+void CPV_8toBF(FormatMgr* pFormatMgr, PFormat* pFormat, uint8* pSrc, uint8* pDest)
 {
 	CVP_ToPValueTemplate(pFormatMgr, pFormat, pSrc, pDest, (CC_8toBF*)LTNULL);
 }
 
-void CPV_16toBF(FormatMgr *pFormatMgr, PFormat *pFormat, uint8 *pSrc, uint8 *pDest)
+void CPV_16toBF(FormatMgr* pFormatMgr, PFormat* pFormat, uint8* pSrc, uint8* pDest)
 {
 	CVP_ToPValueTemplate(pFormatMgr, pFormat, pSrc, pDest, (CC_16toBF*)LTNULL);
 }
 
-void CPV_32toBF(FormatMgr *pFormatMgr, PFormat *pFormat, uint8 *pSrc, uint8 *pDest)
+void CPV_32toBF(FormatMgr* pFormatMgr, PFormat* pFormat, uint8* pSrc, uint8* pDest)
 {
 	CVP_ToPValueTemplate(pFormatMgr, pFormat, pSrc, pDest, (CC_32toBF*)LTNULL);
 }
@@ -1085,15 +1099,15 @@ void CPV_32toBF(FormatMgr *pFormatMgr, PFormat *pFormat, uint8 *pSrc, uint8 *pDe
 // ------------------------------------------------------------------------------ //
 // Function tables.
 // ------------------------------------------------------------------------------ //
-typedef LTRESULT (*ConvertPixelsFn)(FormatMgr *pFormatMgr, const FMConvertRequest *pRequest, LTRGB* pTransColor);
-typedef void (*ConvertPValueFn)(FormatMgr *pFormatMgr, PFormat *pFormat, uint8 *pSrc, uint8 *pDest);
+typedef LTRESULT(*ConvertPixelsFn)(FormatMgr* pFormatMgr, const FMConvertRequest* pRequest, LTRGB* pTransColor);
+typedef void (*ConvertPValueFn)(FormatMgr* pFormatMgr, PFormat* pFormat, uint8* pSrc, uint8* pDest);
 
 ConvertPixelsFn g_ConvertPixelsFns[NUM_BIT_TYPES][NUM_BIT_TYPES] =
 {
 	GenericCopy,	Convert8Pto8,	Convert8Pto16,	Convert8Pto32,	LTNULL,		LTNULL,		LTNULL,			LTNULL,			LTNULL,
 	LTNULL,			Convert8to8,	Convert8to16,	Convert8to32,	LTNULL,		LTNULL,		LTNULL,			LTNULL,			LTNULL,
-	LTNULL,			Convert16to8,	Convert16to16,	Convert16to32,	LTNULL,		LTNULL,		LTNULL,			LTNULL,			LTNULL,	
-	LTNULL,			Convert32to8,	Convert32to16,	Convert32to32,	LTNULL,		LTNULL,		LTNULL,			LTNULL,			LTNULL,	
+	LTNULL,			Convert16to8,	Convert16to16,	Convert16to32,	LTNULL,		LTNULL,		LTNULL,			LTNULL,			LTNULL,
+	LTNULL,			Convert32to8,	Convert32to16,	Convert32to32,	LTNULL,		LTNULL,		LTNULL,			LTNULL,			LTNULL,
 	LTNULL,			LTNULL,			ConvertDXTto16, ConvertDXTto32,	GenericCopy,LTNULL,		LTNULL,			LTNULL,			LTNULL,
 	LTNULL,			LTNULL,			ConvertDXTto16, ConvertDXTto32,	LTNULL,		GenericCopy,LTNULL,			LTNULL,			LTNULL,
 	LTNULL,			LTNULL,			ConvertDXTto16, ConvertDXTto32,	LTNULL,		LTNULL,		GenericCopy,	LTNULL,			LTNULL,
@@ -1120,36 +1134,36 @@ ConvertPValueFn g_ConvertToPValueFns[NUM_BIT_TYPES] =
 
 // Figures out where the bits start and end.  left is the MSB, right is the LSB.
 // (left will be a greater number than right).
-static void GetMaskBounds(uint32 mask, uint32 *pLeft, uint32 *pRight)
+static void GetMaskBounds(uint32 mask, uint32* pLeft, uint32* pRight)
 {
 	uint32 testMask, i;
 
 	// Starting with 1, find out where the mask starts.
 	*pRight = 0;
 	testMask = 1;
-	for(i=0; i < 32; i++)
+	for (i = 0; i < 32; i++)
 	{
-		if(testMask & mask)
+		if (testMask & mask)
 			break;
-		
+
 		testMask <<= 1;
 		(*pRight)++;
 	}
 
 	// Now find where it ends.
 	*pLeft = *pRight;
-	for(i=0; i < 32; i++)
+	for (i = 0; i < 32; i++)
 	{
-		if(!(testMask & mask))
+		if (!(testMask & mask))
 			break;
-		
+
 		testMask <<= 1;
 		(*pLeft)++;
 	}
 }
 
 
-static void SetBitCountAndRightShift(PFormat *pFormat, uint32 iPlane)
+static void SetBitCountAndRightShift(PFormat* pFormat, uint32 iPlane)
 {
 	uint32 left, right;
 
@@ -1157,6 +1171,43 @@ static void SetBitCountAndRightShift(PFormat *pFormat, uint32 iPlane)
 	pFormat->m_nBits[iPlane] = left - right;
 	pFormat->m_FirstBits[iPlane] = right;
 }
+
+//the bytes per pixel for each format type, (0 if not applicable)
+const uint32 g_PixelBytes[NUM_BIT_TYPES] = { 1, 1, 2, 4, 0, 0, 0, 1, 3, };
+
+void PFormat::Init(BPPIdent Type, uint32 aMask, uint32 rMask, uint32 gMask, uint32 bMask)
+{
+
+	m_eType = Type;
+	m_nBPP = g_PixelBytes[m_eType] * 8;
+	m_Masks[CP_ALPHA] = aMask;
+	m_Masks[CP_RED] = rMask;
+	m_Masks[CP_GREEN] = gMask;
+	m_Masks[CP_BLUE] = bMask;
+
+	for (uint32 i = 0; i < NUM_COLORPLANES; i++)
+	{
+		SetBitCountAndRightShift(this, i);
+	}
+}
+
+
+void PFormat::InitPValueFormat()
+{
+	Init(BPP_32, PVALUE_ALPHAMASK, PVALUE_REDMASK, PVALUE_GREENMASK, PVALUE_BLUEMASK);
+}
+
+bool PFormat::IsSameFormat(PFormat* pOther) const
+{
+	return
+		m_eType == pOther->m_eType &&
+		m_nBPP == pOther->m_nBPP &&
+		m_Masks[0] == pOther->m_Masks[0] &&
+		m_Masks[1] == pOther->m_Masks[1] &&
+		m_Masks[2] == pOther->m_Masks[2] &&
+		m_Masks[3] == pOther->m_Masks[3];
+}
+
 
 // ------------------------------------------------------------------------------ //
 // FMConvertRequest.
@@ -1178,27 +1229,27 @@ FMConvertRequest::FMConvertRequest()
 
 LTBOOL FMConvertRequest::IsValid() const
 {
-	if(m_pSrcFormat && m_pSrc && 
-		m_pDestFormat && m_pDest && 
+	if (m_pSrcFormat && m_pSrc &&
+		m_pDestFormat && m_pDest &&
 		m_Width != 0xFFFFFFFF && m_Height != 0xFFFFFFFF)
 	{
 		// (Compressed data doesn't have a pitch value).
-		if(!m_pSrcFormat->IsCompressed())
+		if (!m_pSrcFormat->IsCompressed())
 		{
-			if(m_SrcPitch == 0xFFFFFFFF)
+			if (m_SrcPitch == 0xFFFFFFFF)
 				return LTFALSE;
 		}
 
-		if(!m_pDestFormat->IsCompressed())
+		if (!m_pDestFormat->IsCompressed())
 		{
-			if(m_DestPitch == 0xFFFFFFFF)
+			if (m_DestPitch == 0xFFFFFFFF)
 				return LTFALSE;
 		}
 
-		if(m_pSrcFormat->IsCompressed() || m_pDestFormat->IsCompressed())
+		if (m_pSrcFormat->IsCompressed() || m_pDestFormat->IsCompressed())
 		{
 			// Compressed images must be 4x4 blocks.
-			if((m_Width & 3) || (m_Height & 3))
+			if ((m_Width & 3) || (m_Height & 3))
 			{
 				ASSERT(LTFALSE);
 				return LTFALSE;
@@ -1206,16 +1257,16 @@ LTBOOL FMConvertRequest::IsValid() const
 		}
 
 		// Make sure it has a palette if it's 8 bit.
-		if(m_pSrcFormat->GetType() == BPP_8P)
+		if (m_pSrcFormat->GetType() == BPP_8P)
 		{
-			if(!m_pSrcPalette)
+			if (!m_pSrcPalette)
 				return LTFALSE;
 		}
 
 		// Make sure it has a palette if it's 8 bit.
-		if(m_pSrcFormat->GetType() == BPP_32P)
+		if (m_pSrcFormat->GetType() == BPP_32P)
 		{
-			if(!m_pSrcPalette)
+			if (!m_pSrcPalette)
 				return LTFALSE;
 		}
 
@@ -1258,12 +1309,12 @@ FormatMgr::FormatMgr()
 }
 
 
-LTRESULT FormatMgr::ConvertPixels(const FMConvertRequest *pRequest, LTRGB* pTransColor)
+LTRESULT FormatMgr::ConvertPixels(const FMConvertRequest* pRequest, LTRGB* pTransColor)
 {
 	ConvertPixelsFn fn;
 
 
-	if(!pRequest->IsValid())
+	if (!pRequest->IsValid())
 	{
 		ASSERT(LTFALSE);
 		return LT_ERROR;
@@ -1271,7 +1322,7 @@ LTRESULT FormatMgr::ConvertPixels(const FMConvertRequest *pRequest, LTRGB* pTran
 
 	// Do generic conversion.
 	fn = g_ConvertPixelsFns[pRequest->m_pSrcFormat->GetType()][pRequest->m_pDestFormat->GetType()];
-	if(!fn)
+	if (!fn)
 	{
 		return LT_UNSUPPORTED;
 	}
@@ -1280,16 +1331,16 @@ LTRESULT FormatMgr::ConvertPixels(const FMConvertRequest *pRequest, LTRGB* pTran
 }
 
 
-LTRESULT FormatMgr::FillRect(FMRectRequest *pRequest)
+LTRESULT FormatMgr::FillRect(FMRectRequest* pRequest)
 {
-	uint8 *pOutLine;
-	uint16 *pOut16;
-	uint32 *pOut32;
+	uint8* pOutLine;
+	uint16* pOut16;
+	uint32* pOut32;
 	uint32 xCounter, yCounter, rectWidth;
 	GenericColor outColor;
 
 
-	if(!pRequest->IsValid() ||
+	if (!pRequest->IsValid() ||
 		(pRequest->m_pDestFormat->GetType() != BPP_16 && pRequest->m_pDestFormat->GetType() != BPP_32))
 	{
 		ASSERT(LTFALSE);
@@ -1304,26 +1355,26 @@ LTRESULT FormatMgr::FillRect(FMRectRequest *pRequest)
 
 	rectWidth = pRequest->m_Rect.right - pRequest->m_Rect.left;
 	yCounter = pRequest->m_Rect.bottom - pRequest->m_Rect.top;
-	while(yCounter)
+	while (yCounter)
 	{
 		yCounter--;
-	
-		if(pRequest->m_pDestFormat->GetType() == BPP_16)
+
+		if (pRequest->m_pDestFormat->GetType() == BPP_16)
 		{
 			pOut16 = (uint16*)pOutLine;
 			xCounter = rectWidth;
-			while(xCounter)
+			while (xCounter)
 			{
 				xCounter--;
 				*pOut16 = outColor.wVal;
 				pOut16++;
 			}
 		}
-		else if(pRequest->m_pDestFormat->GetType() == BPP_32)
+		else if (pRequest->m_pDestFormat->GetType() == BPP_32)
 		{
 			pOut32 = (uint32*)pOutLine;
 			xCounter = rectWidth;
-			while(xCounter)
+			while (xCounter)
 			{
 				xCounter--;
 				*pOut32 = outColor.dwVal;
@@ -1352,13 +1403,13 @@ void FormatMgr::InitScaleTables()
 	m_ScaleTo8[7] = m_7to8;
 	m_ScaleTo8[8] = m_8to8;
 
-	for(i=0; i < NUM_SCALE_TABLES; i++)
-	{								
+	for (i = 0; i < NUM_SCALE_TABLES; i++)
+	{
 		// Setup X to 8 bits.
 		maxVal = (1 << i) - 1;
-		for(j=0; j <= maxVal; j++)
+		for (j = 0; j <= maxVal; j++)
 		{
-			if(maxVal == 0)
+			if (maxVal == 0)
 			{
 				m_ScaleTo8[i][j] = 0;
 			}
@@ -1369,7 +1420,7 @@ void FormatMgr::InitScaleTables()
 		}
 
 		// Setup 8 bits to X.
-		for(j=0; j < 256; j++)
+		for (j = 0; j < 256; j++)
 		{
 			m_ScaleFrom8[i][j] = (uint8)((j * maxVal) / 255);
 		}
@@ -1377,11 +1428,11 @@ void FormatMgr::InitScaleTables()
 }
 
 
-LTRESULT FormatMgr::PValueToFormatColor(PFormat *pFormat, PValue in, GenericColor &out)
+LTRESULT FormatMgr::PValueToFormatColor(PFormat* pFormat, PValue in, GenericColor& out)
 {
-	if(g_ConvertFromPValueFns[pFormat->GetType()])
+	if (g_ConvertFromPValueFns[pFormat->GetType()])
 	{
-		g_ConvertFromPValueFns[pFormat->GetType()](this, pFormat, (uint8*)&in, (uint8*)&out);		
+		g_ConvertFromPValueFns[pFormat->GetType()](this, pFormat, (uint8*)&in, (uint8*)&out);
 		return LT_OK;
 	}
 	else
@@ -1392,11 +1443,11 @@ LTRESULT FormatMgr::PValueToFormatColor(PFormat *pFormat, PValue in, GenericColo
 }
 
 
-LTRESULT FormatMgr::PValueFromFormatColor(PFormat *pFormat, GenericColor in, PValue &out)
+LTRESULT FormatMgr::PValueFromFormatColor(PFormat* pFormat, GenericColor in, PValue& out)
 {
-	if(g_ConvertToPValueFns[pFormat->GetType()])
+	if (g_ConvertToPValueFns[pFormat->GetType()])
 	{
-		g_ConvertToPValueFns[pFormat->GetType()](this, pFormat, (uint8*)&in, (uint8*)&out);		
+		g_ConvertToPValueFns[pFormat->GetType()](this, pFormat, (uint8*)&in, (uint8*)&out);
 		return LT_OK;
 	}
 	else
@@ -1409,9 +1460,9 @@ LTRESULT FormatMgr::PValueFromFormatColor(PFormat *pFormat, GenericColor in, PVa
 
 uint32 CalcImageSize(BPPIdent bpp, uint32 width, uint32 height)
 {
-	if(IsFormatCompressed(bpp))
+	if (IsFormatCompressed(bpp))
 	{
-		if(bpp == BPP_S3TC_DXT1)
+		if (bpp == BPP_S3TC_DXT1)
 			return (width * height) >> 1;
 		else
 			return width * height;

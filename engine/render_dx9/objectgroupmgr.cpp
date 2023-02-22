@@ -1,5 +1,4 @@
 #include "precompile.h"
-#include "de_objects.h"
 #include "objectgroupmgr.h"
 
 //static member variables

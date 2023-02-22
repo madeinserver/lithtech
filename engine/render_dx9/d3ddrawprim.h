@@ -27,10 +27,6 @@
 #include "gendrawprim.h"
 #endif
 
-#ifndef __RENDER_H__
-#include "render.h"
-#endif
-
 #ifndef __DE_OBJECTS_H__
 #include "de_objects.h"
 #endif

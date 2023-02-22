@@ -1,11 +1,15 @@
-
-#include "bdefs.h"
+#include "precompile.h"
 #include "ilttexinterface.h"
 #include "d3dtexinterface.h"
-#include "Render.h"
+#include "ltpixelformat.h"
+#include "ltcolorops.h"
 #include "dtxmgr.h"
-#include "colorops.h"
-#include "clientmgr.h"
+#include <algorithm>
+
+#define FN_NAME(name) \
+    static char *___bdefs__pFnName = #name;
+
+#define MAX(x,y)                    (((x)>(y)) ? (x) : (y))
 
 //------------------------------------------------------------------
 //------------------------------------------------------------------
@@ -14,20 +18,17 @@
 //------------------------------------------------------------------
 
 //IWorldClientBSP holder
-#include "world_client_bsp.h"
+#include "iltworldclientbsp.h"
 static IWorldClientBSP *world_bsp_client;
 define_holder(IWorldClientBSP, world_bsp_client);
 
 //IClientFileMgr
-#include "client_filemgr.h"
+#include "iltclientfilemgr.h"
 static IClientFileMgr *client_file_mgr;
 define_holder(IClientFileMgr, client_file_mgr);
 
 // interface database
 define_interface(CSysTexInterface, ILTTexInterface); 
-
-
-extern CClientMgr*			g_pClientMgr;
 
 //---------------------------------------------------------------------
 // Utility functions
@@ -99,7 +100,7 @@ LTRESULT CSysTexInterface::CreateTextureFromName(HTEXTURE &hTexture, const char 
 		else
 		{
 			//it isn't already loaded, so create one and load it
-		hTexture = g_pClientMgr->m_SharedTextureBank.Allocate();
+		hTexture = r_GetRenderStruct()->m_access.AllocateSharedTexture();
 		
 		if (hTexture) 
 		{
@@ -107,17 +108,17 @@ LTRESULT CSysTexInterface::CreateTextureFromName(HTEXTURE &hTexture, const char 
 			hTexture->m_pFile = pIdent;
 			pIdent->m_pData	  = hTexture;
 
-			dResult	 = r_LoadSystemTexture(hTexture);
+			dResult	 = r_GetRenderStruct()->m_access.LoadSystemTexture(hTexture);
 
 			if (dResult == LT_OK) 
 			{
-				r_BindTexture(hTexture, false);
+				r_GetRenderStruct()->m_access.BindTexture(hTexture, false);
 				hTexture->SetRefCount(hTexture->GetRefCount() + 1);
-				dl_AddHead(&g_pClientMgr->m_SharedTextures, &hTexture->m_Link, hTexture); 
+				r_GetRenderStruct()->m_access.LinkSharedTexture(hTexture);
 			} 
 			else 
 			{
-				g_pClientMgr->m_SharedTextureBank.Free(hTexture); 
+				r_GetRenderStruct()->m_access.FreeSharedTexture(hTexture);
 			} 
 		} 
 	}
@@ -132,7 +133,7 @@ LTRESULT CSysTexInterface::CreateTextureFromData(HTEXTURE &hTexture, ETextureTyp
 	if (nAutoGenMipMaps == 0) 
 	{
 		// We need to autogen them all the way down, so set nAutoGenMipMaps to the number we're going to want.
- 		nAutoGenMipMaps = 1; uint32 iTmp = MAX(nWidth,nHeight); 
+		nAutoGenMipMaps = 1; uint32 iTmp = MAX(nWidth, nHeight);
 		while (iTmp > 2 && nAutoGenMipMaps < 8) 
 		{ 
 			iTmp /= 2; ++nAutoGenMipMaps; 
@@ -154,7 +155,7 @@ LTRESULT CSysTexInterface::CreateTextureFromData(HTEXTURE &hTexture, ETextureTyp
 	}
 
 	//allocate our shared texture
-	hTexture = g_pClientMgr->m_SharedTextureBank.Allocate();
+	hTexture = r_GetRenderStruct()->m_access.AllocateSharedTexture();
 
 	//check the allocation
 	if(!hTexture)
@@ -162,7 +163,8 @@ LTRESULT CSysTexInterface::CreateTextureFromData(HTEXTURE &hTexture, ETextureTyp
 
 	//clear the texture out, and add it to the global list of shared textures
 	memset(hTexture, 0, sizeof(*hTexture)); 
-	dl_AddHead(&g_pClientMgr->m_SharedTextures, &hTexture->m_Link, hTexture);
+
+	r_GetRenderStruct()->m_access.LinkSharedTexture(hTexture);
 
 	//there is no file reference for this shared texture since it is entirely user created
 	hTexture->m_pFile = NULL;
@@ -180,8 +182,7 @@ LTRESULT CSysTexInterface::CreateTextureFromData(HTEXTURE &hTexture, ETextureTyp
 	pTextureData->m_pSharedTexture		= hTexture;
 
 	// Add the new texture to the list of texture data
-	dl_AddHead(&g_SysCache.m_List, &pTextureData->m_Link, pTextureData);
-	g_SysCache.m_CurMem += pTextureData->m_AllocSize;
+	r_GetRenderStruct()->m_access.LinkTextureData(pTextureData);
 
 	if (((SharedTexture*)hTexture)->m_pEngineData) 
 	{
@@ -189,7 +190,7 @@ LTRESULT CSysTexInterface::CreateTextureFromData(HTEXTURE &hTexture, ETextureTyp
 		{
 			if (!r_GetRenderStruct()->ConvertTexDataToDD(pData,&TheFormat,nWidth,nHeight,pTextureData->m_Mips[i].m_Data,&TheFormat,pTextureData->m_Header.GetBPPIdent(), pTextureData->m_Header.m_IFlags, pTextureData->m_Mips[i].m_Width,pTextureData->m_Mips[i].m_Height)) 
 			{
-				r_UnloadSystemTexture(pTextureData); hTexture = NULL;
+				r_GetRenderStruct()->m_access.UnloadSystemTexture(pTextureData); hTexture = NULL;
 				return LT_ERROR; 
 			} 
 		}
@@ -198,13 +199,13 @@ LTRESULT CSysTexInterface::CreateTextureFromData(HTEXTURE &hTexture, ETextureTyp
 		if (!hTexture->m_pRenderData) 
 		{
 			// Bind it to the renderer.
-			r_BindTexture(hTexture, true); 
+			r_GetRenderStruct()->m_access.BindTexture(hTexture, true);
 		}
 		return LT_OK; 
 	}
 	else 
 	{
-		r_UnloadSystemTexture((TextureData*)((SharedTexture*)hTexture)->m_pEngineData); hTexture = NULL;
+		r_GetRenderStruct()->m_access.UnloadSystemTexture((TextureData*)((SharedTexture*)hTexture)->m_pEngineData); hTexture = NULL;
 		return LT_ERROR; 
 	} 
 
@@ -219,7 +220,7 @@ LTRESULT CSysTexInterface::GetTextureData(const HTEXTURE hTexture, const uint8* 
 		return LT_ERROR; 
 	}
 
- 	TextureData* pTextureData = r_GetTextureData(pTexture);
+ 	TextureData* pTextureData = r_GetRenderStruct()->m_access.GetTextureData(pTexture);
  	if (!pTextureData)					 
 	{ 
 		return LT_ERROR; 
@@ -241,7 +242,7 @@ LTRESULT CSysTexInterface::GetTextureData(const HTEXTURE hTexture, const uint8* 
 // Let the engine know that we are finished modifing the texture
 LTRESULT CSysTexInterface::FlushTextureData (const HTEXTURE hTexture, ETextureMod eChanged, uint32 nMipMap) 
 {
-	r_BindTexture(hTexture, true);		 // Bind it to the renderer.
+	r_GetRenderStruct()->m_access.BindTexture(hTexture, true);		 // Bind it to the renderer.
 	return (LT_OK);
 }
 
@@ -255,7 +256,7 @@ LTRESULT CSysTexInterface::GetTextureType(const HTEXTURE hTexture, ETextureType 
 
 	uint32 nWidth, nHeight;
 	PFormat Format;
-	if(!r_GetTextureInfo(hTexture, nWidth, nHeight, Format))
+	if(!r_GetRenderStruct()->m_access.GetTextureInfo(hTexture, nWidth, nHeight, Format))
 	{
 		return LT_ERROR;
 	}
@@ -278,7 +279,7 @@ LTRESULT CSysTexInterface::GetTextureDims(const HTEXTURE hTexture, uint32 &nWidt
 	}
 
 	PFormat Format;
-	if(!r_GetTextureInfo(hTexture, nWidth, nHeight, Format))
+	if(!r_GetRenderStruct()->m_access.GetTextureInfo(hTexture, nWidth, nHeight, Format))
 	{
 		return LT_ERROR;
 	}
@@ -306,7 +307,7 @@ bool CSysTexInterface::ReleaseTextureHandle(const HTEXTURE hTexture)
 	
 	if(pTexture->GetRefCount() == 0) 
 	{
-		g_pClientMgr->FreeSharedTexture(hTexture); 
+		r_GetRenderStruct()->m_access.FreeSharedTexture(hTexture);
 	}
 
 	return true;

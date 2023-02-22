@@ -13,7 +13,7 @@
 #include "texturescriptinstance.h"
 #include "texturescriptmgr.h"
 #include "rendererframestats.h"
-#include "renderstruct.h"
+#include "ltrenderstruct.h"
 #include "sprite.h"
 #include <algorithm>
 

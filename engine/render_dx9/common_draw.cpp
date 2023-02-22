@@ -1,11 +1,10 @@
 #include "precompile.h"
 
 #include "3d_ops.h"
-#include "renderstruct.h"
+#include "ltrenderstruct.h"
 #include "common_draw.h"
 #include "common_stuff.h"
 #include "FixedPoint.h"
-#include "de_mainworld.h"
 #include "rendererframestats.h"
 #include "rendertargetmgr.h"
 #include "rendertarget.h"
@@ -17,7 +16,7 @@
 //------------------------------------------------------------------
 
 //IWorldClientBSP holder
-#include "world_client_bsp.h"
+#include "iltworldclientbsp.h"
 static IWorldClientBSP *world_bsp_client;
 define_holder(IWorldClientBSP, world_bsp_client);
 
