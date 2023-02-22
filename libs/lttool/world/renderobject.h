@@ -11,18 +11,6 @@
 
 class CRenderObject
 {
-public:
-	enum RENDER_OBJECT_TYPES {										// List of valid Render Object Types...
-		eInvalid		= 0,										// Note: If these values change - need to update the packers...
-		eDebugLine		= 1,
-		eDebugPolygon	= 2,
-		eDebugText		= 3,
-		eRigidMesh		= 4,
-		eSkelMesh		= 5,
-		eVAMesh			= 6,
-		eABCPieceLOD	= 7,
-	};
-
 protected :
     RENDER_OBJECT_TYPES m_Type;
     

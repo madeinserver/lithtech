@@ -98,7 +98,6 @@ public:
 
 
 uint32 g_BPPShifts[NUM_BIT_TYPES] = {0, 0, 1, 2, 0, 0, 0, 0};		//! added 0 at the end for BPP_32P -- jyl
-uint32 g_PixelBytes[NUM_BIT_TYPES] = {1, 1, 2, 4, 0, 0, 0, 1};		//! added 1 at the end for BPP_32P -- jyl
 
 
 
@@ -488,7 +487,7 @@ LTRESULT GenericCopy(FormatMgr *pFormatMgr, const ConvertRequest *pRequest)
 	uint32 nDWords, nWords, nBytes;
 	uint32 copySize;
 
-	ASSERT(pRequest->m_pSrcFormat->m_BPP == pRequest->m_pDestFormat->m_BPP);
+	ASSERT(pRequest->m_pSrcFormat->m_nBPP == pRequest->m_pDestFormat->m_nBPP);
 
 	bytesPerLine = pRequest->m_Width << pRequest->m_pSrcFormat->GetBPPShift();
 	pSrcLine = pRequest->m_pSrc;
@@ -512,8 +511,8 @@ LTRESULT GenericCopy(FormatMgr *pFormatMgr, const ConvertRequest *pRequest)
 			return LT_ERROR;
 		}
 
-		ASSERT(pRequest->m_pSrcFormat->m_BPP == pRequest->m_pDestFormat->m_BPP);
-		copySize = CalcImageSize(pRequest->m_pSrcFormat->m_BPP, pRequest->m_Width, pRequest->m_Height);
+		ASSERT(pRequest->m_pSrcFormat->m_nBPP == pRequest->m_pDestFormat->m_nBPP);
+		copySize = CalcImageSize(pRequest->m_pSrcFormat->m_nBPP, pRequest->m_Width, pRequest->m_Height);
 		memcpy(pRequest->m_pDest, pRequest->m_pSrc, copySize);
 		return LT_OK;
 	}
@@ -862,11 +861,11 @@ LTRESULT ConvertDXTGeneric(FormatMgr *pFormatMgr,
 	defaultPValueAlphaMask = PVALUE_ALPHAMASK;
 	defaultByteAlphaMask = 0xFF;
 	bAlpha = bInterpolatedAlpha = LTFALSE;
-	if(pRequest->m_pSrcFormat->m_BPP == BPP_S3TC_DXT3)
+	if(pRequest->m_pSrcFormat->m_nBPP == BPP_S3TC_DXT3)
 	{
 		bAlpha = LTTRUE;
 	}
-	else if(pRequest->m_pSrcFormat->m_BPP == BPP_S3TC_DXT5)
+	else if(pRequest->m_pSrcFormat->m_nBPP == BPP_S3TC_DXT5)
 	{
 		bAlpha = bInterpolatedAlpha = LTTRUE;
 
@@ -1153,105 +1152,6 @@ ConvertPValueFn g_ConvertToPValueFns[NUM_BIT_TYPES] =
 	LTNULL, CPV_8toBF, CPV_16toBF, CPV_32toBF, LTNULL, LTNULL, LTNULL, LTNULL
 };
 
-
-
-// ------------------------------------------------------------------------------ //
-// PFormat.
-// ------------------------------------------------------------------------------ //
-
-// Figures out where the bits start and end.  left is the MSB, right is the LSB.
-// (left will be a greater number than right).
-static void GetMaskBounds(uint32 mask, uint32 *pLeft, uint32 *pRight)
-{
-	uint32 testMask, i;
-
-	// Starting with 1, find out where the mask starts.
-	*pRight = 0;
-	testMask = 1;
-	for(i=0; i < 32; i++)
-	{
-		if(testMask & mask)
-			break;
-		
-		testMask <<= 1;
-		(*pRight)++;
-	}
-
-	// Now find where it ends.
-	*pLeft = *pRight;
-	for(i=0; i < 32; i++)
-	{
-		if(!(testMask & mask))
-			break;
-		
-		testMask <<= 1;
-		(*pLeft)++;
-	}
-}
-
-
-static void SetBitCountAndRightShift(PFormat *pFormat, uint32 iPlane)
-{
-	uint32 left, right;
-
-	GetMaskBounds(pFormat->m_Masks[iPlane], &left, &right);
-	pFormat->m_nBits[iPlane] = left - right;
-	pFormat->m_FirstBits[iPlane] = right;
-}
-
-
-void PFormat::Init(BPPIdent bpp, uint32 aMask, uint32 rMask, uint32 gMask, uint32 bMask)
-{
-	uint32 i;
-
-	m_BPP = bpp;
-	m_Masks[CP_ALPHA] = aMask;
-	m_Masks[CP_RED] = rMask;
-	m_Masks[CP_GREEN] = gMask;
-	m_Masks[CP_BLUE] = bMask;
-
-	for(i=0; i < NUM_COLORPLANES; i++)
-	{
-		SetBitCountAndRightShift(this, i);
-	}
-}
-
-
-void PFormat::InitPValueFormat()
-{
-	Init(BPP_32, PVALUE_ALPHAMASK, PVALUE_REDMASK, PVALUE_GREENMASK, PVALUE_BLUEMASK);
-}
-
-
-uint32 PFormat::GetBPPShift()
-{
-	return g_BPPShifts[(uint32)m_BPP];
-}
-
-
-uint32 PFormat::GetBitType()
-{
-	return m_BPP;
-}
-
-
-LTBOOL PFormat::IsSameFormat(PFormat *pOther)
-{
-	return m_BPP == pOther->m_BPP && 
-		m_Masks[0] == pOther->m_Masks[0] &&
-		m_Masks[1] == pOther->m_Masks[1] &&
-		m_Masks[2] == pOther->m_Masks[2] &&
-		m_Masks[3] == pOther->m_Masks[3];
-}
-
-
-uint32 PFormat::GetNumPixelBytes()
-{
-	return g_PixelBytes[m_BPP];
-}
-
-
-
 // ------------------------------------------------------------------------------ //
 // ConvertRequest.
 // ------------------------------------------------------------------------------ //
@@ -1301,14 +1201,14 @@ LTBOOL FMConvertRequest::IsValid() const
 		}
 
 		// Make sure it has a palette if it's 8 bit.
-		if(m_pSrcFormat->m_BPP == BPP_8P)
+		if(m_pSrcFormat->m_nBPP == BPP_8P)
 		{
 			if(!m_pSrcPalette)
 				return LTFALSE;
 		}
 
 		// Make sure it has a palette if it's 8 bit.
-		if(m_pSrcFormat->m_BPP == BPP_32P)
+		if(m_pSrcFormat->m_nBPP == BPP_32P)
 		{
 			if(!m_pSrcPalette)
 				return LTFALSE;
@@ -1365,7 +1265,7 @@ LTRESULT FormatMgr::ConvertPixels(const FMConvertRequest *pRequest)
 	}
 
 	// Do generic conversion.
-	fn = g_ConvertPixelsFns[pRequest->m_pSrcFormat->GetBitType()][pRequest->m_pDestFormat->GetBitType()];
+	fn = g_ConvertPixelsFns[pRequest->m_pSrcFormat->GetType()][pRequest->m_pDestFormat->GetType()];
 	if(!fn)
 	{
 		return LT_UNSUPPORTED;
@@ -1385,7 +1285,7 @@ LTRESULT FormatMgr::FillRect(FMRectRequest *pRequest)
 
 
 	if(!pRequest->IsValid() ||
-		(pRequest->m_pDestFormat->m_BPP != BPP_16 && pRequest->m_pDestFormat->m_BPP != BPP_32))
+		(pRequest->m_pDestFormat->m_nBPP != BPP_16 && pRequest->m_pDestFormat->m_nBPP != BPP_32))
 	{
 		ASSERT(LTFALSE);
 		return LT_ERROR;
@@ -1403,7 +1303,7 @@ LTRESULT FormatMgr::FillRect(FMRectRequest *pRequest)
 	{
 		yCounter--;
 	
-		if(pRequest->m_pDestFormat->m_BPP == BPP_16)
+		if(pRequest->m_pDestFormat->m_nBPP == BPP_16)
 		{
 			pOut16 = (uint16*)pOutLine;
 			xCounter = rectWidth;
@@ -1414,7 +1314,7 @@ LTRESULT FormatMgr::FillRect(FMRectRequest *pRequest)
 				pOut16++;
 			}
 		}
-		else if(pRequest->m_pDestFormat->m_BPP == BPP_32)
+		else if(pRequest->m_pDestFormat->m_nBPP == BPP_32)
 		{
 			pOut32 = (uint32*)pOutLine;
 			xCounter = rectWidth;
@@ -1474,9 +1374,9 @@ void FormatMgr::InitScaleTables()
 
 LTRESULT FormatMgr::PValueToFormatColor(PFormat *pFormat, PValue in, GenericColor &out)
 {
-	if(g_ConvertFromPValueFns[pFormat->m_BPP])
+	if(g_ConvertFromPValueFns[pFormat->m_nBPP])
 	{
-		g_ConvertFromPValueFns[pFormat->m_BPP](this, pFormat, (uint8*)&in, (uint8*)&out);		
+		g_ConvertFromPValueFns[pFormat->m_nBPP](this, pFormat, (uint8*)&in, (uint8*)&out);		
 		return LT_OK;
 	}
 	else
@@ -1489,9 +1389,9 @@ LTRESULT FormatMgr::PValueToFormatColor(PFormat *pFormat, PValue in, GenericColo
 
 LTRESULT FormatMgr::PValueFromFormatColor(PFormat *pFormat, GenericColor in, PValue &out)
 {
-	if(g_ConvertToPValueFns[pFormat->m_BPP])
+	if(g_ConvertToPValueFns[pFormat->m_nBPP])
 	{
-		g_ConvertToPValueFns[pFormat->m_BPP](this, pFormat, (uint8*)&in, (uint8*)&out);		
+		g_ConvertToPValueFns[pFormat->m_nBPP](this, pFormat, (uint8*)&in, (uint8*)&out);		
 		return LT_OK;
 	}
 	else
@@ -1504,7 +1404,7 @@ LTRESULT FormatMgr::PValueFromFormatColor(PFormat *pFormat, GenericColor in, PVa
 
 uint32 CalcImageSize(BPPIdent bpp, uint32 width, uint32 height)
 {
-	if(IsBPPCompressed(bpp))
+	if(IsFormatCompressed(bpp))
 	{
 		if(bpp == BPP_S3TC_DXT1)
 			return (width * height) >> 1;

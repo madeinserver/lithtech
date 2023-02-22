@@ -21,7 +21,7 @@ DRESULT S3TC_Compressor::CompressUsingLibrary()
 	m_pOutData = NULL;
 
 	// Check more things..	
-	if(!IsBPPCompressed(m_Format))
+	if(!IsFormatCompressed(m_Format))
 		return LT_ERROR;
 
 	if(m_DataFormat.m_BPP != BPP_16 && m_DataFormat.m_BPP != BPP_32)
@@ -147,7 +147,7 @@ BOOL ConvertTextureData(TextureData *pData, BPPIdent bpp)
 
 					memcpy(aNewSection.GetArray() + nOldSize, tempBuf.GetArray(), nNewImageSize);
 				}
-				else if(IsBPPCompressed(bpp))
+				else if(IsFormatCompressed(bpp))
 				{
 					// Compress.
 					sCompress.m_Format = bpp;
@@ -241,7 +241,7 @@ BOOL ConvertTextureData(TextureData *pData, BPPIdent bpp)
 			memcpy(pMip->m_Data, tempBuf.GetArray(), pMip->m_Width * pMip->m_Height * sizeof(DWORD));
 			pMip->m_Pitch = pMip->m_Width * sizeof(DWORD);
 		}
-		else if(IsBPPCompressed(bpp))
+		else if(IsFormatCompressed(bpp))
 		{
 			if(pData->m_Header.m_IFlags & DTX_MIPSALLOCED)
 			{

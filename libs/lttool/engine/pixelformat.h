@@ -6,6 +6,8 @@
 	#include "ltpvalue.h"
     #endif
 
+#include "ltpformat.h"
+
 
 	// 0-8 inclusive.
 	#define NUM_SCALE_TABLES	9
@@ -18,23 +20,6 @@
 
 
 	class FormatMgr;
-
-
-	// Bits-per-pixel identifiers.
-	enum BPPIdent
-	{
-		BPP_8P=0,		// 8 bit palettized
-		BPP_8,			// 8 bit RGB
-		BPP_16,
-		BPP_32,
-		BPP_S3TC_DXT1,
-		BPP_S3TC_DXT3,
-		BPP_S3TC_DXT5,
-		BPP_32P,		//! this was added for true color pallete support
-		NUM_BIT_TYPES
-	};
-
-
 
 	// RGB masks for RGB 565:
 	#define RGB565_RSHIFT	8 // Left shift.
@@ -64,10 +49,6 @@
 	};
 				  
 
-	inline LTBOOL IsBPPCompressed(BPPIdent ident)
-	{
-		return ident == BPP_S3TC_DXT1 || ident == BPP_S3TC_DXT3 || ident == BPP_S3TC_DXT5;
-	}
 
 	char* GetBPPString(BPPIdent ident);
 
@@ -114,51 +95,6 @@
 	
 
 	typedef SafeArray<uint8, 256> ScaleFrom8Table;
-
-
-	// Pixel format.
-	class PFormat
-	{
-	public:
-		
-		// Use these to set it up.  It will precalculate some data so it's best to 
-		// initialize a PFormat and keep it around.
-		// (virtual so renderers don't have to link it in..)  
-		virtual void Init(BPPIdent bpp, uint32 aMask, uint32 rMask, uint32 gMask, uint32 bMask);
-
-		// Initialize with the PValue format.  This format is BY FAR the fastest format to
-		// convert to/from.
-		void		InitPValueFormat();
-		
-		// Shift from 8 bits to m_BPP (if m_BPP=8, this is 0, if it's 32, this is 4, etc..)
-		uint32		GetBPPShift();
-
-		uint32		GetBitType();
-		LTBOOL		IsSameFormat(PFormat *pOther);
-
-		// Get the number of bytes per pixel.
-		uint32		GetNumPixelBytes();
-
-		LTBOOL		IsCompressed() {return IsBPPCompressed(m_BPP);}
-
-	
-	// Info specified.
-	public:
-
-		// Tells how many bits per pixel and if it's palettized.
-		BPPIdent	m_BPP;		// Bits per pixel.
-
-	
-	// Precalculated stuff.
-	public:
-
-		uint32		m_Masks[NUM_COLORPLANES];
-		uint32		m_nBits[NUM_COLORPLANES];		// Bit counts for each plane.
-		uint32		m_FirstBits[NUM_COLORPLANES];	// Tells at which bit the color plane starts.
-	};
-
-
-
 
 	// Passed to FormatMgr::ConvertPixels.
 	#define ConvertRequest FMConvertRequest
