@@ -57,9 +57,9 @@ struct LTRenderInfo : public ILTInfo
 {
 	void Init()
 	{
-		driverName = "RndDrv.dll";
+		driverName = "RenderDrv.dll";
 		descName = "RenderSysDesc";
-		makeName = "RenderMakeDesc";
+		makeName = "RenderSysMake";
 		modType = "render";
 	}
 };

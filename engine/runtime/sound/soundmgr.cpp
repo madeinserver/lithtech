@@ -94,7 +94,7 @@ struct LTSoundInfo : public ILTInfo
     {
         driverName = "SndDrv.dll";
         descName = "SoundSysDesc";
-        makeName = "SoundMakeDesc";
+        makeName = "SoundSysMake";
         modType = "sound";
     }
 };

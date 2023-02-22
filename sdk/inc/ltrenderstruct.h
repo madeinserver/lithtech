@@ -335,6 +335,7 @@ struct LTRenderStruct
 		uint32			m_Time_Vis;
 
         // MIS: new render structures for abstracting
+ 
         int             (*GetFrameStats)(LTRendererStats& refStats);
         bool            (*GetBackBuffer)(HBACKBUFFER* pBackBuffer);
         void            (*ReleaseBackBuffer)(HBACKBUFFER pBackBuffer);

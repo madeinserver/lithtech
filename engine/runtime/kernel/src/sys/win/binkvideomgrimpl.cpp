@@ -5,7 +5,7 @@
 #include "bdefs.h"
 #include "clientmgr.h"
 #include "interface_helpers.h"
-#include "colorops.h"
+#include "ltcolorops.h"
 #include <d3d9.h>
 
 //this needs to come last since the bink headers cause conflicts with a lot of other headers
