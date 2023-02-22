@@ -27,12 +27,6 @@ private:
 
 #define TERM_MSG	"Execution may terminate..."
 
-
-
-#define RENDER_DRIVER_NAME			"RenderDrv.dll"
-#define RENDER_DRIVER_DESC_NAME		"RenderSysDesc"
-#define RENDER_DRIVER_MAKE_NAME		"RenderSysMakes"
-
 struct ILTInfo
 {
 	const char* driverName;

@@ -24,8 +24,8 @@ list(REMOVE_ITEM LT_SERVER_SOURCE
     ${CMAKE_CURRENT_LIST_DIR}/kernel/src/win/binkvideomgrimpl.cpp
     ${CMAKE_CURRENT_LIST_DIR}/kernel/src/win/binkvideomgrimpl.h
     ${CMAKE_CURRENT_LIST_DIR}/kernel/src/sys/win/client.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/kernel/src/sys/win/render.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/kernel/src/sys/win/render.h
+    ${CMAKE_CURRENT_LIST_DIR}/kernel/src/render.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/kernel/src/render.h
     ${CMAKE_CURRENT_LIST_DIR}/kernel/src/sys/win/ltrendermgr_impl.cpp
     ${CMAKE_CURRENT_LIST_DIR}/kernel/src/sys/win/ltrendermgr_impl.h
     ${CMAKE_CURRENT_LIST_DIR}/kernel/src/sys/win/input.h
