@@ -980,7 +980,7 @@ inline void UpdateSendToClientState(LTObject *pObject, UpdateInfo *pInfo)
  	sm_AddObjectChangeInfo(pInfo, 
 		pObject, &pInfo->m_pClient->m_ObjInfos[pObject->m_ObjectID]);
 
-	for (Attachment *pAttachment=pObject->m_Attachments; pAttachment; pAttachment=pAttachment->m_pNext) 
+	for (LTAttachment*pAttachment=pObject->m_Attachments; pAttachment; pAttachment=pAttachment->m_pNext)
 	{
 		LTObject *pAttachedObj = sm_FindObject(pAttachment->m_nChildID);
 		if (!pAttachedObj) 
@@ -1261,7 +1261,7 @@ static void WriteUnguaranteedDataWithAttachments(LTObject* pObject, CPacket_Writ
 	WriteUnguaranteedInfo(pObject, cUnguaranteed);
 
 	//now do the same for all the attached objects
-	for (Attachment *pAttachment = pObject->m_Attachments; pAttachment; pAttachment = pAttachment->m_pNext) 
+	for (LTAttachment*pAttachment = pObject->m_Attachments; pAttachment; pAttachment = pAttachment->m_pNext)
 	{
 		LTObject *pAttachedObj = sm_FindObject(pAttachment->m_nChildID);
 		if (!pAttachedObj) 
@@ -1281,7 +1281,7 @@ static void UpdateSendTimeWithAttachments(LTObject* pObject, UpdateInfo *pInfo, 
 	pInfo->m_pClient->m_ObjInfos[pObject->m_ObjectID].m_nLastSentU = pInfo->m_nUpdateTime;
 
 	// Update the send time of the attachments
-	for (Attachment *pAttachment = pObject->m_Attachments; pAttachment; pAttachment = pAttachment->m_pNext) 
+	for (LTAttachment*pAttachment = pObject->m_Attachments; pAttachment; pAttachment = pAttachment->m_pNext)
 	{
 		LTObject *pAttachedObj = sm_FindObject(pAttachment->m_nChildID);
 		if (!pAttachedObj) 

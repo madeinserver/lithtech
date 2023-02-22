@@ -16,11 +16,11 @@
 void cis_Init();
 void cis_Term();
 
-struct RenderStruct;
+struct LTRenderStruct;
 
 // If these returns FALSE, then there was an error backing up/restoring surfaces.
 // Memory exceptions can get thrown in here too.
-bool cis_RendererIsHere(RenderStruct *pStruct);
+bool cis_RendererIsHere(LTRenderStruct *pStruct);
 bool cis_RendererGoingAway();
 
 

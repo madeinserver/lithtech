@@ -1772,7 +1772,7 @@ LTRESULT om_Init(ObjectMgr *pMgr, LTBOOL bClient)
     }
 
     LT_MEM_TRACK_ALLOC(sb_Init2(&pMgr->m_TrackerBank, sizeof(LTAnimTracker), TRACKER_CACHE, TRACKER_START_SIZE), LT_MEM_TYPE_MISC);
-    LT_MEM_TRACK_ALLOC(sb_Init2(&pMgr->m_AttachmentBank, sizeof(Attachment), 16, 32), LT_MEM_TYPE_MISC);
+    LT_MEM_TRACK_ALLOC(sb_Init2(&pMgr->m_AttachmentBank, sizeof(LTAttachment), 16, 32), LT_MEM_TYPE_MISC);
 
     for (i=0; i < NUM_OBJECTTYPES; i++)
     {
@@ -1860,7 +1860,7 @@ LTRESULT om_DestroyObject(ObjectMgr *pMgr, LTObject *pObject)
 
 
 LTRESULT om_CreateAttachment(ObjectMgr *pMgr, LTObject *pParent, uint16 nChildID, int iSocket,
-    LTVector *pOffset, LTRotation *pRotationOffset, Attachment **ppAttachment)
+    LTVector *pOffset, LTRotation *pRotationOffset, LTAttachment**ppAttachment)
 {
 	//check the sanity of our parameters
 	if(!pParent || (nChildID == pParent->m_ObjectID))
@@ -1871,8 +1871,8 @@ LTRESULT om_CreateAttachment(ObjectMgr *pMgr, LTObject *pParent, uint16 nChildID
 	}
 
     // Setup the attachment.
-	Attachment *pAttachment;
-    LT_MEM_TRACK_ALLOC(pAttachment = (Attachment*)sb_Allocate(&pMgr->m_AttachmentBank), LT_MEM_TYPE_OBJECT);
+	LTAttachment*pAttachment;
+    LT_MEM_TRACK_ALLOC(pAttachment = (LTAttachment*)sb_Allocate(&pMgr->m_AttachmentBank), LT_MEM_TYPE_OBJECT);
     if (!pAttachment)
     {
         return LT_ERROR;
@@ -1912,8 +1912,8 @@ LTRESULT om_CreateAttachment(ObjectMgr *pMgr, LTObject *pParent, uint16 nChildID
 LTRESULT om_RemoveAttachment(ObjectMgr *pMgr, LTObject *pParent, uint16 nChildID)
 {
     // Find it and remove it.
-    Attachment **ppPrev = &pParent->m_Attachments;
-    Attachment *pCur	= pParent->m_Attachments;
+	LTAttachment**ppPrev = &pParent->m_Attachments;
+	LTAttachment*pCur	= pParent->m_Attachments;
 
     while (pCur)
     {

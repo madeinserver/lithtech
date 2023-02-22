@@ -77,7 +77,7 @@ void SMoveAbstract::BreakContainerLinks(LTObject *pObj)
 
 void SMoveAbstract::MoveAttachments(MoveState *pState)
 {
-    Attachment *pAttachment;
+    LTAttachment*pAttachment;
     LTObject *pAttachedObj;
     MoveState moveState;
     LTVector attachPos;

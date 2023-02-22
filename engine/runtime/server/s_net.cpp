@@ -734,7 +734,7 @@ bool FillPacketFromInfo(Client *pClient, LTObject *pObj, ObjInfo *pInfo, CPacket
     if (changeFlags & CF_ATTACHMENTS)
     {
         // Write the attachments.
-	    Attachment *pCur = pObj->m_Attachments;
+        LTAttachment*pCur = pObj->m_Attachments;
         while (pCur)
         {
 			cPacket.Writeuint16(pCur->m_nChildID);

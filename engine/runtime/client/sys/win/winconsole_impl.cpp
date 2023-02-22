@@ -16,7 +16,7 @@
 #include "clientmgr.h"
 #include "clientde_impl.h"
 #include "iltclient.h"
-#include "renderstruct.h"
+#include "ltrenderstruct.h"
 #include "iltfontmanager.h"
 #include "ilttexinterface.h"
 #include "debuggeometry.h"
@@ -653,7 +653,7 @@ CConsole::~CConsole()
 	m_bInitialized = false;
 }
 
-bool CConsole::Init(const LTRect *pRect, CommandHandler handler, RenderStruct *pStruct, CConIterator *pCompletionIterator )
+bool CConsole::Init(const LTRect *pRect, CommandHandler handler, LTRenderStruct *pStruct, CConIterator *pCompletionIterator )
 {
 	HWND hWnd = (HWND)dsi_GetMainWindow();
 

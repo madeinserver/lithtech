@@ -2464,7 +2464,7 @@ LTRESULT sm_RemoveObjectFromWorld( LPBASECLASS pBaseClass )
 		pObject->m_InternalFlags |= IFLAG_OBJECTGOINGAWAY;
 
 		// Send a detach message to the child attachments.
-		Attachment *pAttachment = pObject->m_Attachments;
+		LTAttachment*pAttachment = pObject->m_Attachments;
 		while (pAttachment)
 		{
 			LTObject *pChild = sm_FindObject(pAttachment->m_nChildID);

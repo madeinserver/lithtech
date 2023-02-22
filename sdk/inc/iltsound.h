@@ -13,7 +13,6 @@
 #include "iltsoundmgr.h"
 #endif
 
-
 #define LS_OK			0x0
 #define LS_ERROR		0x1
 
@@ -376,7 +375,7 @@ protected:
 	virtual ~ILTSoundSys( ) {}
 
 public:
-	virtual bool		Init( ) = 0;
+	virtual bool		Init() = 0;
 	virtual void		Term( ) = 0;
 
 public:
@@ -512,31 +511,5 @@ public:
 public:
 };
 
-// sound factory abstract base class
-// used to generate ILTSoundSys platform dependent interface instances
-
-//! FnEnumSoundSysCallback
-
-typedef bool ( *FnEnumSoundSysCallback )( const char* pcSoundSysName, const char* pcSoundSysDesc, void* pUserData );
-
-//! ILTSoundFactory
-
-class ILTSoundFactory
-{
-protected:
-	ILTSoundFactory( ) {}
-	virtual ~ILTSoundFactory( ) {}
-
-public:
-	virtual bool EnumSoundSystems( FnEnumSoundSysCallback fnEnumCallback, void* pUserData = NULL );
-	virtual bool FillSoundSystems( char* pcSoundSysNames, uint uiMaxStringLen ) = 0;
-	virtual ILTSoundSys* MakeSoundSystem( const char* pcSoundSystemName ) = 0;
-
-public:
-	static ILTSoundFactory* GetSoundFactory( );
-
-protected:
-	static ILTSoundFactory* m_pSoundFactory;
-};
 
 #endif	// __ILTSOUND_H_

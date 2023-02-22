@@ -255,7 +255,7 @@ protected:
 	LCriticalSection	m_CS;
 
 	// The structure used for buffer stuff.
-	RenderStruct*	m_pStruct;
+	LTRenderStruct*	m_pStruct;
 
 	LTRect	m_Rect, m_ScrRect;
 	// Fill a rectangle with the calculated output rectangle
@@ -304,7 +304,7 @@ public:
 	CConsole();			
 	~CConsole();
 
-	bool Init( const LTRect *pRect, CommandHandler handler, RenderStruct *pStruct, CConIterator *pCompletionIterator = LTNULL );
+	bool Init( const LTRect *pRect, CommandHandler handler, LTRenderStruct*pStruct, CConIterator *pCompletionIterator = LTNULL );
 	bool InitBare();
 	void	Term( bool bDeleteTextLines = true );
 
@@ -325,8 +325,8 @@ public:
 	float	GetBackgroundAlpha() const { return m_fBackgroundAlpha; };
 	void	SetBackgroundAlpha( float fValue );
 
-	RenderStruct*	GetRenderStruct() const { return m_pStruct; };
-	void			SetRenderStruct( RenderStruct *pStruct ) { m_pStruct = pStruct; };
+	LTRenderStruct*	GetRenderStruct() const { return m_pStruct; };
+	void			SetRenderStruct(LTRenderStruct*pStruct ) { m_pStruct = pStruct; };
 
 	CUIFont* GetFont() const { return m_Font; }
 

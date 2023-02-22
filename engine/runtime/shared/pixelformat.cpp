@@ -1158,43 +1158,6 @@ static void SetBitCountAndRightShift(PFormat *pFormat, uint32 iPlane)
 	pFormat->m_FirstBits[iPlane] = right;
 }
 
-//the bytes per pixel for each format type, (0 if not applicable)
-const uint32 g_PixelBytes[NUM_BIT_TYPES] = {1, 1, 2, 4, 0, 0, 0, 1, 3,};
-
-void PFormat::Init(BPPIdent Type, uint32 aMask, uint32 rMask, uint32 gMask, uint32 bMask)
-{
-
-	m_eType				= Type;
-	m_nBPP				= g_PixelBytes[m_eType] * 8;
-	m_Masks[CP_ALPHA]	= aMask;
-	m_Masks[CP_RED]		= rMask;
-	m_Masks[CP_GREEN]	= gMask;
-	m_Masks[CP_BLUE]	= bMask;
-
-	for(uint32 i=0; i < NUM_COLORPLANES; i++)
-	{
-		SetBitCountAndRightShift(this, i);
-	}
-}
-
-
-void PFormat::InitPValueFormat()
-{
-	Init(BPP_32, PVALUE_ALPHAMASK, PVALUE_REDMASK, PVALUE_GREENMASK, PVALUE_BLUEMASK);
-}
-
-bool PFormat::IsSameFormat(PFormat *pOther) const
-{
-	return 
-		m_eType    == pOther->m_eType && 
-		m_nBPP	   == pOther->m_nBPP &&
-		m_Masks[0] == pOther->m_Masks[0] &&
-		m_Masks[1] == pOther->m_Masks[1] &&
-		m_Masks[2] == pOther->m_Masks[2] &&
-		m_Masks[3] == pOther->m_Masks[3];
-}
-
-
 // ------------------------------------------------------------------------------ //
 // FMConvertRequest.
 // ------------------------------------------------------------------------------ //

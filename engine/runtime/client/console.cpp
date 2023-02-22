@@ -35,7 +35,7 @@ LTRESULT con_LoadBackground()
 	return GETCONSOLE()->LoadBackground();
 }
 
-bool con_Init(LTRect *pRect, CommandHandler handler, RenderStruct *pStruct)
+bool con_Init(LTRect *pRect, CommandHandler handler, LTRenderStruct *pStruct)
 {
 	return GETCONSOLE()->Init( pRect, handler, pStruct );
 }

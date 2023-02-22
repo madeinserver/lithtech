@@ -6,6 +6,7 @@
 #include "clientshell.h"
 #include "wave.h"
 #include "dsys_interface.h"
+#include "ltdllfactory.h"
 #undef PlaySound
 
 //------------------------------------------------------------------
@@ -87,6 +88,18 @@ ClientGlob* GetClientGlob()
     return &g_ClientGlob;
 }
 
+struct LTSoundInfo : public ILTInfo
+{
+    void Init()
+    {
+        driverName = "SndDrv.dll";
+        descName = "SoundSysDesc";
+        makeName = "SoundMakeDesc";
+        modType = "sound";
+    }
+};
+
+static LTFactory<ILTSoundSys, LTSoundInfo> g_SoundFactory;
 
 static ILTSoundSys* g_pSoundSys = LTNULL;
 
@@ -104,7 +117,7 @@ ILTSoundSys* SoundSys(bool bTerminate)
 
         if (pClientGlob != LTNULL && pClientGlob->m_acSoundDriverName[0] != 0)
         {
-           g_pSoundSys = ILTSoundFactory::GetSoundFactory()->MakeSoundSystem(&pClientGlob->m_acSoundDriverName[0]);
+           g_pSoundSys = g_SoundFactory.MakeSystem(&pClientGlob->m_acSoundDriverName[0]);
            if (g_pSoundSys != LTNULL && !g_pSoundSys->Init())
            {
                 g_pSoundSys->Term();
@@ -116,7 +129,7 @@ ILTSoundSys* SoundSys(bool bTerminate)
         if (g_pSoundSys == LTNULL)
         {
 				// grab the default snddrv.dll NOTE: does't call Init on it. 
-				g_pSoundSys = ILTSoundFactory::GetSoundFactory()->MakeSoundSystem(LTNULL);
+				g_pSoundSys = g_SoundFactory.MakeSystem(LTNULL);
 
 
 		  }

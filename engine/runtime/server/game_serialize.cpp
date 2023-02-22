@@ -945,7 +945,7 @@ static LTRESULT sm_RestoreNextObject(ILTStream *pStream, LTObject *pObj, uint32 
 
 static void sm_SaveAttachments(LTObject *pObject, ILTStream *pStream)
 {
-    Attachment *pCur;
+	LTAttachment*pCur;
     uint16 count;
 
 

@@ -859,7 +859,7 @@ LTRESULT CLTClient::ProcessAttachments(HOBJECT pObj)
 {
 	CHECK_PARAMS(pObj, CLTClient::ProcessAttachments);
 
-	for (Attachment *pAttachment=pObj->m_Attachments;
+	for (LTAttachment *pAttachment=pObj->m_Attachments;
 		pAttachment;
 		pAttachment=pAttachment->m_pNext)
 	{

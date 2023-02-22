@@ -24,8 +24,8 @@ typedef uint32 CONCOLOR;
 // Initialize/term the console.
 bool con_InitBare();
 
-struct RenderStruct;
-bool con_Init(LTRect *pRect, CommandHandler handler, RenderStruct *pStruct);
+struct LTRenderStruct;
+bool con_Init(LTRect *pRect, CommandHandler handler, LTRenderStruct *pStruct);
 
 void con_Term(bool bDeleteTextLines);
 

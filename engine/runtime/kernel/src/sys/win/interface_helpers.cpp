@@ -1,6 +1,6 @@
 
 #include "bdefs.h"
-#include "renderstruct.h"
+#include "ltrenderstruct.h"
 #include "interface_helpers.h"
 
 

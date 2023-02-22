@@ -1,26 +1,14 @@
 #ifndef __RENDERSTRUCT_H__
 #define __RENDERSTRUCT_H__
 
-#ifndef __PIXELFORMAT_H__
-#include "pixelformat.h"
-#endif
-
-#ifndef __LIGHTMAPDEFS_H__
-#include "lightmapdefs.h"
-#endif
-
-class SharedTexture;
-class TextureData;
-class Attachment;
 struct RenderInfoStruct;
-
-#ifndef __RENDEROBJECT_H__
-#include "renderobject.h"
-#endif
 
 #ifndef _LT_GRAPHICS_CAPS_H_
 #include "ltgraphicscaps.h"
 #endif
+
+#include "ltattachment.h"
+#include "ltpformat.h"
 
 #ifndef NUM_MIPMAPS
     #define NUM_MIPMAPS 8
@@ -145,21 +133,21 @@ public:
 	bool				m_bUseOld;
 };
 
-struct RenderStruct
+struct LTRenderStruct
 {
-		RenderStruct() : m_bInitted(false), m_bLoaded(false), m_nIn3D(0), m_nInOptimized2D(0) {}
+    LTRenderStruct() : m_bInitted(false), m_bLoaded(false), m_nIn3D(0), m_nInOptimized2D(0) {}
 
     // Functions LithTech implements.
 
         // Processes the attachment.  Returns the child object if it exists.
-        LTObject*   (*ProcessAttachment)(LTObject *pParent, Attachment *pAttachment);
+        LTObject*   (*ProcessAttachment)(LTObject *pParent, LTAttachment*pAttachment);
 
         // Get a shared texture from a file name  (returns NULL on failure)
         SharedTexture*  (*GetSharedTexture)(const char *pFilename);
 
         // Gets the texture in memory (guaranteed to be in memory until the next 
         // call to GetTexture).  
-        TextureData*    (*GetTexture)(SharedTexture *pTexture);
+        HTEXTUREDATA     (*GetTexture)(SharedTexture *pTexture);
 
 		// Gets the texture's file name
 		const char *	(*GetTextureName)(const SharedTexture *pTexture);
@@ -306,8 +294,8 @@ struct RenderStruct
         void            (*BlitFromScreen)(BlitRequest *pRequest);
         
         // Creating RenderObjects...
-        CRenderObject*  (*CreateRenderObject)(CRenderObject::RENDER_OBJECT_TYPES ObjectType);
-        bool            (*DestroyRenderObject)(CRenderObject* pObject);
+        HRENDEROBJECT   (*CreateRenderObject)(RENDER_OBJECT_TYPES ObjectType);
+        bool            (*DestroyRenderObject)(HRENDEROBJECT pObject);
 
 		// Load rendering data from the specified stream
 		bool			(*LoadWorldData)(ILTStream *pStream);
@@ -365,22 +353,6 @@ struct RenderStruct
         void            (*SetConsoleTextRenderMode)();
         void            (*UnsetConsoleTextRenderMode)();
 };
-
-
-
-// This is what you use to select how you want to initialize the renderer..  Get a list of
-// the modes it supports, then copy the desired mode and pass it into RenderStruct::Init().
-
-// Get the list with GetSupportedModes() and pass that into FreeModeList() to free it.
-typedef RMode* (*GetSupportedModesFn)();
-typedef void (*FreeModeListFn)(RMode *pHead);
-
-
-// To make a DirectEngine rendering DLL, make a DLL with the function 
-// "RenderDLLSetup" that looks like this.  This function should init all the
-// function pointers in the structure.
-typedef void (*RenderDLLSetupFn)(RenderStruct *pStruct);
-
 
 #endif  // __RENDERSTRUCT_H__
 

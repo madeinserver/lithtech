@@ -10,24 +10,6 @@ used to manipulate it.
 #include "ltbasetypes.h"
 #endif
 
-
-/*!
-Generic color value.
-*/
-typedef uint32 PValue;
-
-/*!
-The color planes are indexed by these.
-*/
-enum
-{
-    CP_ALPHA =    0,
-    CP_RED =      1,
-    CP_GREEN =    2,
-    CP_BLUE =     3,
-    NUM_COLORPLANES = 4,
-};
-
 /*!
 Mask for each component.
 */
@@ -42,9 +24,26 @@ Mask for each component.
 #define PLANEOFFSET_BLUE    0
 
 /*!
+The color planes are indexed by these.
+*/
+enum
+{
+    CP_ALPHA = 0,
+    CP_RED = 1,
+    CP_GREEN = 2,
+    CP_BLUE = 3,
+    NUM_COLORPLANES = 4,
+};
+
+/*!
+Generic color value.
+*/
+typedef uint32 PValue;
+
+/*!
 Get the byte offset into a \b PValue for the given color plane.
 */
-inline uint32 PValue_GetPlaneOffset(uint32 iPlane) {
+static inline uint32 PValue_GetPlaneOffset(uint32 iPlane) {
     if (iPlane == CP_ALPHA) {
         return 3;
     }
@@ -59,27 +58,27 @@ inline uint32 PValue_GetPlaneOffset(uint32 iPlane) {
     }
 }
 
-inline PValue PValue_Set(uint32 a, uint32 r, uint32 g, uint32 b) {
+static inline PValue PValue_Set(uint32 a, uint32 r, uint32 g, uint32 b) {
     return (a << 24) | (r << 16) | (g << 8) | b;
 }
 
-inline uint32 PValue_GetA(PValue value) {
+static inline uint32 PValue_GetA(PValue value) {
     return value >> 24;
 }
 
-inline uint32 PValue_GetR(PValue value) {
+static inline uint32 PValue_GetR(PValue value) {
     return (value >> 16) & 0xFF;
 }
 
-inline uint32 PValue_GetG(PValue value) {
+static inline uint32 PValue_GetG(PValue value) {
     return (value >> 8) & 0xFF;
 }
 
-inline uint32 PValue_GetB(PValue value) {
+static inline uint32 PValue_GetB(PValue value) {
     return value & 0xFF;
 }
 
-inline void PValue_Get(PValue value, uint32 &a, uint32 &r, uint32 &g, uint32 &b) {
+static inline void PValue_Get(PValue value, uint32 &a, uint32 &r, uint32 &g, uint32 &b) {
     a = PValue_GetA(value);
     r = PValue_GetR(value);
     g = PValue_GetG(value);

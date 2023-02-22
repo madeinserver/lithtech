@@ -13,10 +13,7 @@
 #include "stringmgr.h"
 #include "sysfile.h"
 #include "ltengineobjects.h"
-
-#ifndef __LINUX
-    #include "renderstruct.h"
-#endif
+#include "ltrenderstruct.h"
 
 // holders
 #include "compress.h"

@@ -21,10 +21,6 @@
 #include "s_client.h"
 #include "servermgr.h"
 
-#ifndef __LINUX
-     #include "renderstruct.h"
-#endif
-
 //------------------------------------------------------------------
 //------------------------------------------------------------------
 // Holders and their headers.

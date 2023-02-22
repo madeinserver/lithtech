@@ -10,6 +10,8 @@
 #include "videomgr.h"
 #include "sysconsole_impl.h"
 #include "dtxmgr.h"
+#include "iltrender.h"
+#include "ltdllfactory.h"
 
 //------------------------------------------------------------------
 //------------------------------------------------------------------
@@ -49,10 +51,63 @@ extern int32	g_CV_CursorCenter;
 
 RMode g_RMode;
 
+// render dll
+
+struct LTRenderInfo : public ILTInfo
+{
+	void Init()
+	{
+		driverName = "RndDrv.dll";
+		descName = "RenderSysDesc";
+		makeName = "RenderMakeDesc";
+		modType = "render";
+	}
+};
+
+static LTFactory<ILTRenderSys, LTRenderInfo> g_renderFactory;
+static ILTRenderSys* g_pRenderSys = LTNULL;
+
+extern int32 g_ScreenWidth, g_ScreenHeight; // Console variables.
 
 // ------------------------------------------------------------ //
 // Internal functions.
 // ------------------------------------------------------------ //
+
+ILTRenderSys* GetRenderSys(bool bTerminate = false)
+{
+	if (bTerminate && g_pRenderSys != LTNULL)
+	{
+		g_pRenderSys->Term();
+		g_pRenderSys = NULL;
+	}
+	else if (!bTerminate && g_pRenderSys == LTNULL)
+	{
+		ClientGlob* pClientGlob = &g_ClientGlob;
+
+		if (pClientGlob != LTNULL && pClientGlob->m_acSoundDriverName[0] != 0)
+		{
+			g_pRenderSys = g_renderFactory.MakeSystem(&pClientGlob->m_acSoundDriverName[0]);
+			if (g_pRenderSys != LTNULL && !g_pRenderSys->Init())
+			{
+				g_pRenderSys->Term();
+				g_pRenderSys = LTNULL;
+			}
+		}
+
+		// try default driver 
+		if (g_pRenderSys == LTNULL)
+		{
+			// grab the default snddrv.dll NOTE: does't call Init on it. 
+			g_pRenderSys = g_renderFactory.MakeSystem(LTNULL);
+
+
+		}
+
+		//ASSERT(g_pSoundSys != LTNULL);
+	}
+
+	return g_pRenderSys;
+}
 
 void r_UnloadSystemTexture(TextureData *pTexture)
 {
@@ -346,9 +401,9 @@ LTRESULT r_LoadSystemTexture(SharedTexture *pSharedTexture)
 
 
 // ------------------------------------------------------------ //
-// RenderStruct function implementations.
+// LTRenderStruct function implementations.
 // ------------------------------------------------------------ //
-LTObject* r_ProcessAttachment(LTObject *pParent, Attachment *pAttachment)
+LTObject* r_ProcessAttachment(LTObject *pParent, LTAttachment *pAttachment)
 {
 	// Use CommonLT::GetAttachmentTransform.
 	LTransform tAttachment;
@@ -552,10 +607,10 @@ static void r_InitSysCache(SysCache *pCache)
 
 
 // ------------------------------------------------------------ //
-// The global RenderStruct.
+// The global LTRenderStruct.
 // ------------------------------------------------------------ //
 
-RenderStruct g_Render;
+LTRenderStruct g_Render;
 
 
 // ------------------------------------------------------------ //
@@ -578,7 +633,7 @@ void r_InitRenderStruct(bool bFullClear)
 	if(bFullClear)
 		memset(&g_Render, 0, sizeof(g_Render));
 	else
-		memset(&g_Render, 0, offsetof(RenderStruct, m_DontClearMarker));
+		memset(&g_Render, 0, offsetof(LTRenderStruct, m_DontClearMarker));
 	
 	g_Render.ProcessAttachment			= r_ProcessAttachment;	
 	g_Render.GetSharedTexture			= r_GetSharedTexture;
@@ -625,9 +680,11 @@ LTRESULT r_InitRender(RMode *pMode)
 	init.m_hWnd = (void*)hWnd;
 	memcpy(&init.m_Mode, pMode, sizeof(RMode));
 
+	if (!GetRenderSys())
+		return LT_ERROR;
 
-	// Set up the RenderStruct.
-	rdll_RenderDLLSetup(&g_Render);
+	// Set up the LTRenderStruct.
+	GetRenderSys()->Setup(&g_Render);
 
 	// Store these.. the renderer may change them for pixel doubling.
 	g_Render.m_Width = pMode->m_Width;

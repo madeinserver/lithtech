@@ -42,7 +42,7 @@ extern int32 g_nConsoleLines;
 CisSurface g_ScreenSurface;
 
 // The render struct we're using..
-RenderStruct *g_pCisRenderStruct = LTNULL;
+LTRenderStruct *g_pCisRenderStruct = LTNULL;
 
 // Used for transparent drawing.
 GenericColor g_TransparentColor, g_SolidColor;
@@ -425,7 +425,7 @@ static LTRESULT cis_DoDrawSurfaceToSurface(HSURFACE hDest, HSURFACE hSrc,
 	if(!bIsInside)
 		return LT_OK;
 	
-	// Try to translate the command to let the RenderStruct do it.
+	// Try to translate the command to let the LTRenderStruct do it.
 	if(fn == cis_OpaqueDraw || 
 		fn == cis_TransparentDraw)
 	{
@@ -653,7 +653,7 @@ static LTRESULT cis_InternalTransformSurfaceToSurface(HSURFACE hDest, HSURFACE h
 	warpPoints[3].source_x = 0.0f;
 	warpPoints[3].source_y = (float)(pSrc->m_Height - 1);
 
-	// Try to translate the command to let the RenderStruct do it
+	// Try to translate the command to let the LTRenderStruct do it
 	if(pDest == &g_ScreenSurface)
 	{
 		if(r_GetRenderStruct()->WarpToScreen)
@@ -748,7 +748,7 @@ static LTRESULT cis_InternalScaleSurfaceToSurface(HSURFACE hDest, HSURFACE hSrc,
 		srcRect.bottom = pSrc->m_Height;
 	}
 
-	// Try to get the RenderStruct to do it.
+	// Try to get the LTRenderStruct to do it.
 	if(tType == 0 || tType == 1)
 	{
 		if(pDest == &g_ScreenSurface)
@@ -1833,7 +1833,7 @@ static LTRESULT cis_RenderObjects(HLOCALOBJ hCamera, HLOCALOBJ *pObjects, int nO
 
 static LTRESULT cis_StartOptimized2D()
 {
-	RenderStruct *pStruct;
+	LTRenderStruct *pStruct;
 
 	pStruct = r_GetRenderStruct();
 	if(!pStruct->m_bInitted)
@@ -1853,7 +1853,7 @@ static LTRESULT cis_StartOptimized2D()
 
 static LTRESULT cis_EndOptimized2D()
 {
-	RenderStruct *pStruct;
+	LTRenderStruct *pStruct;
 
 	pStruct = r_GetRenderStruct();
 	if(!pStruct->m_bInitted)
@@ -1876,7 +1876,7 @@ static LTRESULT cis_EndOptimized2D()
 
 static LTRESULT cis_SetOptimized2DBlend(LTSurfaceBlend blend)
 {
-	RenderStruct *pStruct;
+	LTRenderStruct *pStruct;
 
 	pStruct = r_GetRenderStruct();
 	if(!pStruct->m_bInitted)
@@ -1893,7 +1893,7 @@ static LTRESULT cis_SetOptimized2DBlend(LTSurfaceBlend blend)
 
 static LTRESULT cis_GetOptimized2DBlend(LTSurfaceBlend &blend)
 {
-	RenderStruct *pStruct;
+	LTRenderStruct *pStruct;
 
 	pStruct = r_GetRenderStruct();
 	if(!pStruct->m_bInitted)
@@ -1908,7 +1908,7 @@ static LTRESULT cis_GetOptimized2DBlend(LTSurfaceBlend &blend)
 
 static LTRESULT cis_SetOptimized2DColor(HLTCOLOR hColor)
 {
-	RenderStruct *pStruct;
+	LTRenderStruct*pStruct;
 
 	pStruct = r_GetRenderStruct();
 	if(!pStruct->m_bInitted)
@@ -1925,7 +1925,7 @@ static LTRESULT cis_SetOptimized2DColor(HLTCOLOR hColor)
 
 static LTRESULT cis_GetOptimized2DColor(HLTCOLOR &hColor)
 {
-	RenderStruct *pStruct;
+	LTRenderStruct*pStruct;
 
 	pStruct = r_GetRenderStruct();
 	if(!pStruct->m_bInitted)
@@ -2078,7 +2078,7 @@ void cis_Term()
 }
 
 
-bool cis_RendererIsHere(RenderStruct *pStruct)
+bool cis_RendererIsHere(LTRenderStruct *pStruct)
 {
 	g_pCisRenderStruct = pStruct;
 	

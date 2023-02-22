@@ -102,7 +102,7 @@ LTRESULT om_DestroyObject(ObjectMgr *pMgr, LTObject *pObject);
 
 // Create an attachment.
 LTRESULT om_CreateAttachment(ObjectMgr *pMgr, LTObject *pParent, uint16 nChildID, int iSocket,
-    LTVector *pOffset, LTRotation *pRotationOffset, Attachment **ppAttachment);
+    LTVector *pOffset, LTRotation *pRotationOffset, LTAttachment **ppAttachment);
 
 // Remove an attachment.  Returns DE_OK or DE_ERROR if it can't find the attachment.
 LTRESULT om_RemoveAttachment(ObjectMgr *pMgr, LTObject *pParent, uint16 nChildID);
@@ -114,7 +114,7 @@ void om_ClearSerializeIDs(ObjectMgr *pMgr);
 // Remove all attachments from the object.
 inline void om_RemoveAttachments(ObjectMgr *pMgr, LTObject *pObj) 
 {
-    Attachment *pCur, *pNext;
+    LTAttachment*pCur, *pNext;
 
     pCur = pObj->m_Attachments;
     while (pCur) 

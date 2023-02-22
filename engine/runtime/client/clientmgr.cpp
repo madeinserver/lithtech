@@ -23,7 +23,7 @@
 
 #include "build_options.h"
 #include "dsys_interface.h"
-#include "renderstruct.h"
+#include "ltrenderstruct.h"
 #include "render.h"
 #include "musicdriver.h"
 #include "soundmgr.h"
@@ -183,7 +183,7 @@ void _GetRModeFromConsoleVariables(RMode *pMode)
 
 void MaybeDrawConsole()
 {
-    RenderStruct *pStruct;
+    LTRenderStruct *pStruct;
 
     if (g_CV_ForceConsole)
     {
@@ -728,7 +728,7 @@ void CClientMgr::UnbindSharedTextures(bool bUnLoad_EngineData)
 
 void CClientMgr::InitConsole()
 {
-    RenderStruct *pRender = r_GetRenderStruct();
+    LTRenderStruct *pRender = r_GetRenderStruct();
     ASSERT(pRender);
     LTRect rect (0, 0, pRender->m_Width, pRender->m_Height/2);
 
@@ -1813,7 +1813,7 @@ bool CClientMgr::Render(CameraInstance *pCamera, int drawMode, LTObject **pObjec
     uint32 width, height, i;
     SceneDesc *pDesc;
     int renderStatus;
-    RenderStruct *pRenderStruct;
+    LTRenderStruct *pRenderStruct;
     Counter renderTicks;
     SceneDesc sceneDesc;
     LTObject *skyObjects[MAX_SKYOBJECTS];
@@ -1921,7 +1921,7 @@ bool CClientMgr::Render(CameraInstance *pCamera, int drawMode, LTObject **pObjec
 bool CClientMgr::MakeCubicEnvMap(CameraInstance *pCamera, uint32 nSize, const char* pszPrefix)
 {
     uint32 width, height, i;
-    RenderStruct *pRenderStruct;
+    LTRenderStruct *pRenderStruct;
     Counter renderTicks;
     SceneDesc Desc;
     LTObject *skyObjects[MAX_SKYOBJECTS];

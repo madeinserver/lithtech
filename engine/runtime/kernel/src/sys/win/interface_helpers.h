@@ -118,7 +118,7 @@ typedef struct
 
 
 extern CisSurface g_ScreenSurface;
-extern RenderStruct *g_pCisRenderStruct;
+extern LTRenderStruct *g_pCisRenderStruct;
 extern GenericColor g_TransparentColor, g_SolidColor;
 
 extern PFormat g_ScreenFormat;

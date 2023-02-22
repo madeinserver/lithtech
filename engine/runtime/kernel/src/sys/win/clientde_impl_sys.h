@@ -17,7 +17,7 @@
 
 	// If these returns FALSE, then there was an error backing up/restoring surfaces.
 	// Memory exceptions can get thrown in here too.
-	LTBOOL cis_RendererIsHere(RenderStruct *pStruct);
+	LTBOOL cis_RendererIsHere(LTRenderStruct *pStruct);
 	LTBOOL cis_RendererGoingAway();
 
 

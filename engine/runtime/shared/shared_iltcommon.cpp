@@ -146,10 +146,10 @@ LTRESULT CLTCommonShared::GetAttachmentTransform(HATTACHMENT hAttachment,
 
     LTObject *pParent, *pChild;
     LTRESULT dResult;
-    Attachment *pAttachment;
+    LTAttachment*pAttachment;
     LTransform tBase;
 
-    pAttachment = (Attachment*)hAttachment;
+    pAttachment = (LTAttachment*)hAttachment;
     if (!pAttachment) {
         ERR(1, LT_INVALIDPARAMS);
     }
@@ -237,7 +237,7 @@ LTRESULT CLTCommonShared::GetAttachments(HLOCALOBJ pObj, HLOCALOBJ *inList, uint
     uint32 &outListSize, uint32 &outNumAttachments)
 {
     FN_NAME(CLTCommonShared::GetAttachments);
-    Attachment *pCur;
+    LTAttachment*pCur;
     LTObject *pParent, *pChild;
     LTRESULT dResult;
 

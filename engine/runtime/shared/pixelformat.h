@@ -1,49 +1,17 @@
 #ifndef __PIXELFORMAT_H__
 #define __PIXELFORMAT_H__
 
-#ifndef __LTPVALUE_H__
-#include "ltpvalue.h"
-#endif
 
 #ifndef __LTBASETYPES_H__
 #include "ltbasetypes.h"
 #endif
 
+#ifndef __LTPFORMAT_H__
+#include "ltpformat.h"
+#endif
+
 // 0-8 inclusive.
 #define NUM_SCALE_TABLES    9
-
-// Bits-per-pixel identifiers.
-enum BPPIdent 
-{
-    BPP_8P=0,       // 8 bit palettized
-    BPP_8,          // 8 bit RGB
-    BPP_16,
-    BPP_32,
-    BPP_S3TC_DXT1,
-    BPP_S3TC_DXT3,
-    BPP_S3TC_DXT5,
-    BPP_32P,        //this was added for true color pallete support
-    BPP_24,
-    NUM_BIT_TYPES
-};
-
-// This is what is used to represent a color value in a particular format.
-union GenericColor {
-    uint32  dwVal;
-    uint16  wVal;
-    uint8   bVal;
-};
-              
-// A palette color.
-struct RPaletteColor {
-    union {
-        struct {
-            unsigned char   a, r, g, b;
-        } rgb;
-        
-        uint32 dword;
-    };
-};
 
 
 // Helper for debugging..
@@ -70,51 +38,6 @@ private:
 
 
 typedef SafeArray<uint8, 256> ScaleFrom8Table;
-
-inline bool IsFormatCompressed(BPPIdent eType)
-{
-	return (eType == BPP_S3TC_DXT1) || (eType == BPP_S3TC_DXT3) || (eType == BPP_S3TC_DXT5);
-}
-
-// Pixel format.
-class PFormat 
-{
-public:
-    
-    // Use these to set it up.  It will precalculate some data so it's best to 
-    // initialize a PFormat and keep it around.
-    // (virtual so renderers don't have to link it in..)  
-    virtual void Init(BPPIdent Type, uint32 aMask, uint32 rMask, uint32 gMask, uint32 bMask);
-
-    // Initialize with the PValue format.  This format is BY FAR the fastest format to
-    // convert to/from.
-    void        InitPValueFormat();
-    
-    BPPIdent    GetType() const					{ return m_eType; }
-	uint32		GetBitsPerPixel() const			{ return m_nBPP; }
-	uint32		GetBytesPerPixel() const		{ return m_nBPP / 8; }
-	bool	    IsCompressed() const			{ return IsFormatCompressed(m_eType); }
-
-    bool	    IsSameFormat(PFormat *pOther) const;    
-
-// Info specified.
-public:
-
-    // Tells how many bits per pixel and if it's palettized.
-	BPPIdent	m_eType;
-    uint32		m_nBPP;      // Bits per pixel.
-
-
-// Precalculated stuff.
-public:
-
-    uint32      m_Masks[NUM_COLORPLANES];
-    uint32      m_nBits[NUM_COLORPLANES];       // Bit counts for each plane.
-    uint32      m_FirstBits[NUM_COLORPLANES];   // Tells at which bit the color plane starts.
-};
-
-
-
 
 // Passed to FormatMgr::ConvertPixels.
 class FMConvertRequest 

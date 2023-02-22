@@ -3,10 +3,7 @@
 #include "dtxmgr.h"
 #include "render.h"
 
-#ifdef __D3D
 extern FormatMgr g_FormatMgr;
-#endif
-
 int g_dtxInMemSize = 0;
 
 //Texture groups, used to control offsetting of Mip Maps when they are loaded, thus allowing
@@ -236,8 +233,7 @@ LTRESULT dtx_Create(ILTStream *pStream, TextureData **ppOut, uint32& nBaseWidth,
 	uint32 nTexHeight = hdr.m_BaseHeight / (1 << nMipOffset);
 	uint32 nNumMips	  = hdr.m_nMipmaps - nMipOffset;
 
-	// For D3D I'm supporting converts to DD texture formats (the sys mem copy will be in DD format - so it's fast copy & minimal mem storage).
-#ifdef __D3D
+	// I'm supporting converts to DD texture formats (the sys mem copy will be in DD format - so it's fast copy & minimal mem storage).
 
 	PFormat DstFormat;
 
@@ -373,48 +369,7 @@ LTRESULT dtx_Create(ILTStream *pStream, TextureData **ppOut, uint32& nBaseWidth,
 		delete[] pTmpBuffer; 
 		pTmpBuffer = NULL; 
 	}
-#else
 
-	// Allocate it.
-	pRet = dtx_Alloc(hdr.GetBPPIdent(), nTexWidth, nTexHeight, nNumMips, &allocSize, &textureDataSize);
-	if (!pRet) RETURN_ERROR(1, dtx_Create, LT_OUTOFMEMORY);
-
-	dtx_SetupDTXFormat2(pRet->m_Header.GetBPPIdent(), &pRet->m_PFormat);
-
-	pRet->m_pSharedTexture = LTNULL;
-	memcpy(&pRet->m_Header, &hdr, sizeof(DtxHeader));
-
-	
-
-	// Read in mipmap data (and convert it to our DDFormat).
-	for (uint32 iMipmap=0; iMipmap < hdr.m_nMipmaps; iMipmap++) 
-	{
-		bool bSkipImageData = true;
-
-		if (iMipmap >= nMipOffset)
-		{
-			bSkipImageData = false;
-		}
-
-		TextureMipData* pMip = &pRet->m_Mips[iMipmap];
-		if (hdr.GetBPPIdent() == BPP_32) 
-		{
-			for (uint y=0; y < pMip->m_Height; y++) 
-			{
-				// Read the line.
-				dtx_ReadOrSkip(bSkipImageData, pStream,
-					&pMip->m_Data[y*pMip->m_Pitch],
-					pMip->m_Width * sizeof(uint32));
-			} 
-		}
-		else 
-		{
-			uint32 size = CalcImageSize(hdr.GetBPPIdent(), pMip->m_Width, pMip->m_Height);
-			dtx_ReadOrSkip(bSkipImageData, pStream, pMip->m_Data, size); 
-		} 
-	}
-#endif
-	
 	//don't bother loading in the sections
 	pRet->m_Header.m_nSections = 0;
 

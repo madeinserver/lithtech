@@ -40,12 +40,6 @@
 		link_to_implementation(CUIWidgetManager, Default);
 		link_to_implementation(CUIMessageQueue,	Default);
 
-        //D3D render LIB implements interfaces.
-		#ifdef __D3D
-		link_to_implementation(CSysTexInterface, Default);
-	    link_to_implementation(D3DRenderStyles, Default);
-		#endif // __D3D
-
         //Remote Communication Contex LIB implements interfaces??
 
 #ifdef LIBLTINFO_OUTPUT_REDIRECTION

@@ -215,9 +215,9 @@ LTRESULT CLTCommonClient::GetPointShade(const LTVector *pPoint, LTVector *pColor
 
 LTRESULT CLTCommonClient::GetAttachmentObjects(HATTACHMENT hAttachment, HOBJECT &hParent, HOBJECT &hChild) {
     FN_NAME(CLTCommonClient::GetAttachmentObjects);
-    Attachment *pAttachment;
+    LTAttachment*pAttachment;
 
-    pAttachment = (Attachment *)hAttachment;
+    pAttachment = (LTAttachment*)hAttachment;
     if (!pAttachment)
     {
         ERR(1, LT_INVALIDPARAMS);

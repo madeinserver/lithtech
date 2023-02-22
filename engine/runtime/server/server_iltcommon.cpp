@@ -200,7 +200,7 @@ LTRESULT CLTCommonServer::SetObjectFilenames(HOBJECT pObj, ObjectCreateStruct *p
 
     LTRESULT dResult;
     Model *pOldModel, *pNewModel;
-    Attachment *pAttachment;
+	LTAttachment*pAttachment;
     uint32 newSocketIndex;
     LTBOOL bNodesChanged;
     ExtraDataBackup backup;
@@ -384,10 +384,10 @@ LTRESULT CLTCommonServer::CreateMessage(ILTMessage_Write* &pMsg) {
 
 LTRESULT CLTCommonServer::GetAttachmentObjects(HATTACHMENT hAttachment, HOBJECT &hParent, HOBJECT &hChild) {
     FN_NAME(CLTCommonServer::GetAttachmentObjects);
-    Attachment *pAttachment;
+	LTAttachment*pAttachment;
 
 
-    pAttachment = (Attachment*)hAttachment;
+    pAttachment = (LTAttachment*)hAttachment;
     if (!pAttachment)
     {
         ERR(1, LT_INVALIDPARAMS);
@@ -414,7 +414,7 @@ LTRESULT CLTCommonServer::NumAttachments(HLOCALOBJ hObject, uint32 &dwAttachCoun
 		ERR(1, LT_INVALIDPARAMS);
 	}
 
-	Attachment * pAttachment = hObject->m_Attachments;
+	LTAttachment* pAttachment = hObject->m_Attachments;
 	while (pAttachment)
 	{
 		++dwAttachCount;

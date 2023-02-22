@@ -31,6 +31,9 @@
     #define SOUND_DRIVER_NAME_LEN   32
     #define SOUND_DRIVER_NAME_ARG   "+sounddll"
 
+    #define RENDER_DRIVER_NAME_LEN   32
+    #define RENDER_DRIVER_NAME_ARG "+renderdll"
+    
     class CClientMgr;
 
 	class ClientGlob {
@@ -81,6 +84,8 @@
         char            m_ExitMessage[500];
 
         char            m_acSoundDriverName[ SOUND_DRIVER_NAME_LEN ];
+
+        char            m_acRenderDriverName[RENDER_DRIVER_NAME_LEN];
 
 		bool			m_bConsoleEnabled;
     };

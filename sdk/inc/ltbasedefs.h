@@ -2374,6 +2374,23 @@ protected:
 class   SharedTexture;
 typedef SharedTexture* HTEXTURE;
 
+class   TextureData;
+typedef TextureData* HTEXTUREDATA;
+
+class   CRenderObject;
+typedef CRenderObject* HRENDEROBJECT;
+
+enum RENDER_OBJECT_TYPES {										// List of valid Render Object Types...
+	eInvalid = 0,										// Note: If these values change - need to update the packers...
+	eDebugLine = 1,
+	eDebugPolygon = 2,
+	eDebugText = 3,
+	eRigidMesh = 4,
+	eSkelMesh = 5,
+	eVAMesh = 6,
+	eABCPieceLOD = 7,
+};
+
 struct LTTechniqueInfo
 {
 	char szName[128];
@@ -2465,6 +2482,39 @@ protected:
 	LTEffectShader*		m_pNext; 				// next in list
 };
 
+
+// Bits-per-pixel identifiers.
+enum BPPIdent
+{
+    BPP_8P = 0,       // 8 bit palettized
+    BPP_8,          // 8 bit RGB
+    BPP_16,
+    BPP_32,
+    BPP_S3TC_DXT1,
+    BPP_S3TC_DXT3,
+    BPP_S3TC_DXT5,
+    BPP_32P,        //this was added for true color pallete support
+    BPP_24,
+    NUM_BIT_TYPES
+};
+
+// This is what is used to represent a color value in a particular format.
+union GenericColor {
+    uint32  dwVal;
+    uint16  wVal;
+    uint8   bVal;
+};
+
+// A palette color.
+struct RPaletteColor {
+    union {
+        struct {
+            unsigned char   a, r, g, b;
+        } rgb;
+
+        uint32 dword;
+    };
+};
 
 
 /*!

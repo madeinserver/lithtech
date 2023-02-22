@@ -60,6 +60,9 @@ struct ObjectCreateStruct;
 #include "transformmaker.h"
 #endif
 
+#include "ltrendererstats.h"
+#include "ltattachment.h"
+
 #define INVALID_OBJECTID ((unsigned short)-1)
 
 #define INVALID_SERIALIZEID 0xFFFF
@@ -87,16 +90,6 @@ class CRenderStyle;
 // ------------------------------------------------------------- //
 // Structures.
 // ------------------------------------------------------------- //
-
-class Attachment
-{
-public:
-	LTransform          m_Offset;       // transform offset.
-	uint16				m_nChildID;		// the child object of this attachment.
-	uint16				m_nParentID;	// the parent object of this attachment.
-	uint32              m_iSocket;      // Model node index (if the parent is not a model, this is -1).
-    Attachment          *m_pNext;
-};
 
 
 struct ClientData
@@ -226,7 +219,7 @@ public:
     uint8			m_ColorB;
     uint8			m_ColorA;
 
-    Attachment      *m_Attachments;		// Objects attached to this one.
+    LTAttachment      *m_Attachments;		// Objects attached to this one.
 
     LTVector        m_Scale;    // Scale..
 

@@ -9,7 +9,7 @@
 #include "iltfontmanager.h"
 #include "ilttexinterface.h"
 #include "iltdrawprim.h"
-#include "renderstruct.h"
+#include "ltrenderstruct.h"
 
 static ILTDrawPrim *g_pILTDrawPrimInternal;
 define_holder_to_instance(ILTDrawPrim, g_pILTDrawPrimInternal, Internal);
@@ -28,18 +28,10 @@ define_holder(ILTTexInterface, g_ITexInterface);
 // NOTE: This can only only implement the CDebugGeometry class - it is included in 
 //	the engine (DI objects like the DebugLines, etc.) should have their code only in the
 //	the renderer (with the headers shared in both)...
-#ifdef __D3D
+
 CDebugGeometry::CDebugGeometry() : mVisible(true), mWidth(0.5f) {}
 CDebugGeometry::~CDebugGeometry() { 
 	clear(); }
-#elif defined(__XBOX)
-CDebugGeometry::CDebugGeometry() : mVisible(true), mWidth(0.5f) {}
-CDebugGeometry::~CDebugGeometry() { 
-	clear(); }
-#else
-CDebugGeometry::CDebugGeometry() {}
-CDebugGeometry::~CDebugGeometry() {}
-#endif
 
 // Get a particular debug geometry object (selected by an ID)
 CDebugGeometry& getDebugGeometry()
@@ -50,48 +42,27 @@ CDebugGeometry& getDebugGeometry()
 
 void CDebugGeometry::clear()
 {
-#ifdef __D3D
-	RenderStruct* pRendStruct = r_GetRenderStruct();
+	LTRenderStruct* pRendStruct = r_GetRenderStruct();
 	if (pRendStruct) if (!pRendStruct->m_bInitted) pRendStruct = NULL;	// Renderer already shut down...
-#endif
-#ifdef __XBOX
-	RenderStruct* pRendStruct = r_GetRenderStruct();
-	if (pRendStruct) if (!pRendStruct->m_bInitted) pRendStruct = NULL;	// Renderer already shut down...
-#endif
     
 	while (!mLines.empty())
     {					// Clear out mLines...
 		CDIDebugLine* pLine = *(mLines.begin()); 
 		mLines.pop_front();
-#ifdef __D3D
 	 	if (pRendStruct) pRendStruct->DestroyRenderObject(pLine);
-#endif
-#ifdef __XBOX
-	 	if (pRendStruct) pRendStruct->DestroyRenderObject(pLine);
-#endif
     }
 
 	while (!mPolygons.empty()) {				// Clear out mPolygons...
 		CDIDebugPolygon* pPoly = *(mPolygons.begin()); 
 		mPolygons.pop_front();
-#ifdef __D3D
-		if (pRendStruct) pRendStruct->DestroyRenderObject(pPoly); 
-#endif
-#ifdef __XBOX
-		if (pRendStruct) pRendStruct->DestroyRenderObject(pPoly); 
-#endif
+		if (pRendStruct) pRendStruct->DestroyRenderObject(pPoly);
     }
     
 
 	while (!mText.empty()) {					// Clear out mText...
 		CDIDebugText* pText = *(mText.begin()); 
 		mText.pop_front();
-#ifdef __D3D
 	 	if (pRendStruct) pRendStruct->DestroyRenderObject(pText); 
-#endif
-#ifdef __XBOX
-	 	if (pRendStruct) pRendStruct->DestroyRenderObject(pText); 
-#endif
     }
 }
 
@@ -99,12 +70,8 @@ void CDebugGeometry::addLine(const LTVector& from, const LTVector& to, const LTR
 {
 	// The renderer creates the render object (DD Object) and passes it back to us...		
 	CDIDebugLine* pLine = NULL;	
-#ifdef __D3D
-	pLine = (CDIDebugLine*)r_GetRenderStruct()->CreateRenderObject(CRenderObject::eDebugLine); if (!pLine) return;
-#endif
-#ifdef __XBOX
-	pLine = (CDIDebugLine*)r_GetRenderStruct()->CreateRenderObject(CRenderObject::eDebugLine); if (!pLine) return;
-#endif
+
+	pLine = (CDIDebugLine*)r_GetRenderStruct()->CreateRenderObject(eDebugLine);
     if (!pLine) {
 		return;
 	}	
@@ -121,13 +88,9 @@ void CDebugGeometry::addLine(const LTVector& from, const LTVector& to, const LTR
 void CDebugGeometry::addPolygon(CDIDebugPolygon* poly, bool bScreenSpace)
 {
 	CDIDebugPolygon* pPoly = NULL;
-#ifdef __D3D
-	pPoly = (CDIDebugPolygon*)r_GetRenderStruct()->CreateRenderObject(CRenderObject::eDebugPolygon); if (!pPoly) return;
-#endif
-#ifdef __XBOX
-	pPoly = (CDIDebugPolygon*)r_GetRenderStruct()->CreateRenderObject(CRenderObject::eDebugPolygon); if (!pPoly) return;
-#endif
-    if (!pPoly) return;
+	pPoly = (CDIDebugPolygon*)r_GetRenderStruct()->CreateRenderObject(eDebugPolygon);
+	if (!pPoly) return;
+
 	pPoly->m_bScreenSpace  = bScreenSpace;
 	pPoly->m_DPPoly3	   = poly->m_DPPoly3;
 	pPoly->m_DPPoly4	   = poly->m_DPPoly4;
@@ -144,23 +107,13 @@ void CDebugGeometry::addText(const char* szText, const LTVector& position, const
 {
 
 	CDIDebugText* pText = NULL;
-#ifdef __D3D
-	pText = (CDIDebugText*)r_GetRenderStruct()->CreateRenderObject(CRenderObject::eDebugText); if (!pText) return;
-#endif
-#ifdef __XBOX
-	pText = (CDIDebugText*)r_GetRenderStruct()->CreateRenderObject(CRenderObject::eDebugText); if (!pText) return;
-#endif
-    if (!pText) return;
 
-#ifdef __D3D
+	pText = (CDIDebugText*)r_GetRenderStruct()->CreateRenderObject(eDebugText); 
+	if (!pText) return;
+
 	if (!GETCONSOLE()->GetInitialized()) return;
 	pText->SetFont(GETCONSOLE()->GetFont()); 
-#endif
-#ifdef __XBOX
-	if (!GETCONSOLE()->GetInitialized()) return;
-	pText->SetFont(GETCONSOLE()->GetFont()); 
-#endif
-	
+
 	pText->m_DPVert.rgba.a = color.rgb.a; pText->m_DPVert.rgba.r = color.rgb.r; pText->m_DPVert.rgba.g = color.rgb.g; pText->m_DPVert.rgba.b = color.rgb.b;
 	
 	pText->m_DPVert.x = position.x; pText->m_DPVert.y = position.y; pText->m_DPVert.z = position.z;
@@ -206,12 +159,7 @@ CDIDebugText::~CDIDebugText()
 #ifndef RGBA_MAKE
 #define RGBA_MAKE(r, g, b, a)		((uint32) (((a) << 24) | ((r) << 16) | ((g) << 8) | (b)))
 #endif
-#ifdef __D3D	// While we're keeping the old drawtext method...
-void r_GenericTextPrint(char *pMsg, const LTRect *pRect, uint32 textColor);
-#endif
-#ifdef __XBOX	// While we're keeping the old drawtext method...
-void r_GenericTextPrint(char *pMsg, const LTRect *pRect, uint32 textColor);
-#endif
+
 extern int32 g_ScreenWidth, g_ScreenHeight;
 void CDIDebugText::Render()
 {

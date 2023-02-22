@@ -1,28 +1,16 @@
 
 // This file defines DirectEngine's interface to the renderer and holds
-// the global RenderStruct used to talk to it.
+// the global LTRenderStruct used to talk to it.
 
 #ifndef __RENDER_H__
 #define __RENDER_H__
 
-struct RenderStruct;
-struct RMode;
-
-//  Functions that used to be extracted from the render DLL with GetProcAddress
-//  but are now staticly linked.
-extern RMode* rdll_GetSupportedModes();
-extern void rdll_FreeModeList(RMode *pModes);
-extern void rdll_RenderDLLSetup(RenderStruct *pStruct);
-
-//  End.
-
-
 #ifndef __RENDERSTRUCT_H__
-#include "renderstruct.h"
+#include "ltrenderstruct.h"
 #endif
 
 
-extern RenderStruct g_Render;
+extern LTRenderStruct g_Render;
 extern RMode        g_RMode;                // The current (or last successful) config for the renderer.
 
 
@@ -36,14 +24,14 @@ class CClientMgr;
 #define R_INVALIDRENDEROPTIONS  3
 
 
-// Returns the RenderStruct it's using to talk to the driver.
+// Returns the LTRenderStruct it's using to talk to the driver.
 // Better be initialized...
-inline RenderStruct* r_GetRenderStruct() {return &g_Render;}
+inline LTRenderStruct* r_GetRenderStruct() {return &g_Render;}
 
 
 inline LTBOOL r_IsRenderInitted() {return g_Render.m_bInitted;}
 
-// Called right at the beginning by the client.. initializes the RenderStruct
+// Called right at the beginning by the client.. initializes the LTRenderStruct
 // data members.
 void r_InitRenderStruct(bool bFullClear);
 
@@ -84,7 +72,7 @@ void r_BindTexture(SharedTexture *pSharedTexture, LTBOOL bTextureChanged);
 void r_UnbindTexture(SharedTexture *pSharedTexture, bool bUnLoad_EngineData);
 
 // Called by the renderer and ILTClient::ProcessAttachments.
-LTObject* r_ProcessAttachment(LTObject *pParent, Attachment *pAttachment);
+LTObject* r_ProcessAttachment(LTObject *pParent, LTAttachment *pAttachment);
 
 struct SysCache 
 {

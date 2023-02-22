@@ -1111,7 +1111,7 @@ CDIModelDrawable* ModelPiece::CreateModelRenderObject(uint32 type)
 #if !defined(DE_SERVER_COMPILE) && !defined(DE_HEADLESS_CLIENT)
 	// Note : The renderer can create render objects without being initialized
 	if (r_GetRenderStruct()->m_bLoaded)
-		return (CDIModelDrawable*)r_GetRenderStruct()->CreateRenderObject((enum CRenderObject::RENDER_OBJECT_TYPES)type);
+		return (CDIModelDrawable*)r_GetRenderStruct()->CreateRenderObject((enum RENDER_OBJECT_TYPES)type);
 
 
 #endif

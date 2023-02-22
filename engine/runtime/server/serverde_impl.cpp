@@ -2375,7 +2375,7 @@ LTRESULT si_CreateAttachment(HOBJECT hParent,
 
 
 	// Set it up.
-	Attachment *pAttachment;
+	LTAttachment*pAttachment;
 	LTRESULT dResult = om_CreateAttachment(
 							&g_pServerMgr->m_ObjectMgr, 
 							pParent, 
@@ -2398,7 +2398,7 @@ LTRESULT si_CreateAttachment(HOBJECT hParent,
 
 LTRESULT si_RemoveAttachment(HATTACHMENT hAttachment)
 {
-	Attachment *pAttachment = (Attachment*)hAttachment;
+	LTAttachment*pAttachment = (LTAttachment*)hAttachment;
 	if (!pAttachment)
 		RETURN_ERROR(1, ILTPhysics::RemoveAttachment, LT_INVALIDPARAMS);
 
@@ -2438,7 +2438,7 @@ LTRESULT si_FindAttachment(HOBJECT hParent, HOBJECT hChild, HATTACHMENT *hAttach
 	*hAttachment = LTNULL;
 	LTObject *pParent = (LTObject*)hParent;
 	LTObject *pChild = (LTObject*)hChild;
-	for (Attachment *pCur = pParent->m_Attachments; pCur; pCur = pCur->m_pNext)
+	for (LTAttachment*pCur = pParent->m_Attachments; pCur; pCur = pCur->m_pNext)
 	{
         if (pCur->m_nChildID == pChild->m_ObjectID)
 		{

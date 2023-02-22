@@ -357,14 +357,15 @@ void dsi_ServerSleep(uint32 ms) {
 
 #ifdef DE_CLIENT_COMPILE
 #include "clientmgr.h"
+#include "iltrender.h"
 
-extern int32 g_ScreenWidth, g_ScreenHeight; // Console variables.
+extern ILTRenderSys* GetRenderSys(bool bTerminate = false);
 
 static void dsi_GetDLLModes(char *pDLLName, RMode **pMyList) {
     RMode *pMyMode;
     RMode *pListHead, *pCur;
 
-    pListHead = rdll_GetSupportedModes();
+    pListHead = GetRenderSys()->GetSupportedModes();
     
     // Copy the mode list.
     pCur = pListHead;
@@ -379,7 +380,7 @@ static void dsi_GetDLLModes(char *pDLLName, RMode **pMyList) {
         pCur = pCur->m_pNext;
     }                       
 
-    rdll_FreeModeList(pListHead);
+    GetRenderSys()->FreeModeList(pListHead);
 }
 
 
