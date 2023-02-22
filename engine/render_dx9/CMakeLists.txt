@@ -1,0 +1,10 @@
+file(GLOB SRC "*.h" "*.cpp" "*.rc")
+source_group("" FILES ${SRC})
+
+add_library(RenderDx9 SHARED ${SRC})
+target_include_directories(RenderDx9 PRIVATE .)
+target_link_libraries(RenderDx9 PRIVATE ltsdk ltmem d3d9 d3dx9)
+target_link_directories(RenderDx9 PRIVATE ${DirectX_ROOT_DIR}/Lib/${DX_ARCH})
+set_target_properties(RenderDx9 PROPERTIES FOLDER engine/render)
+target_precompile_headers(RenderDx9 PRIVATE StdAfx.h)
+out_name(RenderDx9 RenderDrv)
