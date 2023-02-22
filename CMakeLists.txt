@@ -22,6 +22,10 @@ else() # /MD
     set(CMAKE_MFC_FLAG 2)
 endif()
 
+macro(out_name PROJ OUTNAME)
+    set_target_properties(${PROJ} PROPERTIES OUTPUT_NAME ${OUTNAME} OUTPUT_NAME_DEBUG ${OUTNAME} OUTPUT_NAME_RELEASE ${OUTNAME} OUTPUT_NAME_MINSIZEREL ${OUTNAME} OUTPUT_NAME_RELWITHDEBINFO ${OUTNAME})
+endmacro()
+
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${LT_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${LT_FLAGS}")
 
@@ -35,10 +39,8 @@ endif()
 
 if(WIN32)
     find_package(DirectX REQUIRED)
-    set(LT_RENDER "DIRECTX9")
 elseif(UNIX AND NOT APPLE)
     set(LINUX 1)
-    set(LT_RENDER "OPENGL")
 else()
     message(FATAL_ERROR "Unsupported platform")
 endif()
@@ -52,6 +54,10 @@ find_package(Freetype REQUIRED)
 add_subdirectory(sdk)
 add_subdirectory(libs)
 add_subdirectory(engine)
+
+if (NOT LT_NO_GAMES)
+    add_subdirectory(games)
+endif()
 
 if (NOT LT_NO_TOOLS)
     add_subdirectory(tools)
