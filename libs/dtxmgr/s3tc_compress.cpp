@@ -2,21 +2,12 @@
 #include "dtxmgr.h"
 #include "s3tc_compress.h"
 #include "dynarray.h"
-#include <ddraw.h>
-
-extern "C"
-{
-	#include "s3tc.h"
-};
-
+#include <squish.h>
 
 LTRESULT S3TC_Compressor::CompressUsingLibrary()
 {
-	DDSURFACEDESC ddsdInput, ddsdOutput;
 	LTRESULT dRet;
-	float weight[3];
 	uint32 encodeType;
-
 
 	// Init output stuff.
 	m_pOutData = NULL;
@@ -32,57 +23,31 @@ LTRESULT S3TC_Compressor::CompressUsingLibrary()
 	if((m_Width & 3) || (m_Height & 3))
 		return LT_ERROR;
 
-	weight[0] = 0.3086f;
-	weight[1] = 0.6094f;
-	weight[2] = 0.0820f;
-
 	dRet = LT_ERROR;
 
-	// Setup a DDraw surface with the input data.
-	memset(&ddsdInput, 0, sizeof(ddsdInput));
-	ddsdInput.dwSize = sizeof(ddsdInput);
-	ddsdInput.dwWidth = m_Width;
-	ddsdInput.dwHeight = m_Height;
-	ddsdInput.dwFlags = DDSD_CAPS | DDSD_WIDTH | DDSD_HEIGHT | DDSD_PIXELFORMAT | 
-		DDSD_LPSURFACE | DDSD_PITCH;
-	ddsdInput.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN | DDSCAPS_SYSTEMMEMORY;
-
-	ddsdInput.ddpfPixelFormat.dwFlags = DDPF_RGB;
 	if(m_DataFormat.m_Masks[CP_ALPHA])
 		ddsdInput.ddpfPixelFormat.dwFlags |= DDPF_ALPHAPIXELS;
 		
-	ddsdInput.ddpfPixelFormat.dwSize = sizeof(ddsdInput.ddpfPixelFormat);
-	ddsdInput.ddpfPixelFormat.dwRGBBitCount = 
-		(m_DataFormat.m_nBPP == BPP_16) ? 16 : 32;
 	ddsdInput.ddpfPixelFormat.dwRGBAlphaBitMask = m_DataFormat.m_Masks[CP_ALPHA];
 	ddsdInput.ddpfPixelFormat.dwRBitMask = m_DataFormat.m_Masks[CP_RED];
 	ddsdInput.ddpfPixelFormat.dwGBitMask = m_DataFormat.m_Masks[CP_GREEN];
 	ddsdInput.ddpfPixelFormat.dwBBitMask = m_DataFormat.m_Masks[CP_BLUE];
 
-	ddsdInput.lpSurface = m_pData;
-	ddsdInput.lPitch = m_Pitch;
-
-	memset(&ddsdOutput, 0, sizeof(ddsdOutput));
-	ddsdOutput.dwSize = sizeof(ddsdOutput);
+	unsigned long encodeType = 0;
 
 	if(m_Format == BPP_S3TC_DXT1)
-		encodeType = S3TC_ENCODE_RGB_FULL;
+		encodeType = squish::kDxt1;
 	else if(m_Format == BPP_S3TC_DXT3)
-		encodeType = S3TC_ENCODE_RGB_FULL | S3TC_ENCODE_ALPHA_EXPLICIT;
+		encodeType = squish::kDxt3;
 	else
-		encodeType = S3TC_ENCODE_RGB_FULL | S3TC_ENCODE_ALPHA_INTERPOLATED;
+		encodeType = squish::kDxt5;
 
-	m_OutDataSize = S3TCgetEncodeSize(&ddsdInput, encodeType);
+	m_OutDataSize = squish::GetStorageRequirements(m_Width, m_Height, encodeType);
 	m_pOutData = new uint8[m_OutDataSize];
 	if(m_pOutData)
 	{
-		S3TCencode(&ddsdInput, 
-			NULL,
-			&ddsdOutput,
-			m_pOutData, 
-			encodeType,
-			weight);
-	
+		squish::CompressImage((const squish::u8*)m_pData, m_Width, m_Height, 
+			m_Pitch, (m_DataFormat.m_nBPP == BPP_16) ? 16 : 32, m_pOutData, encodeType);
 		dRet = LT_OK;
 	}
 

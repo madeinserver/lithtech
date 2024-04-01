@@ -199,7 +199,7 @@
 		DtxSection			*m_pSections;	// All the sections.
 
 		// Stuff the DTX loader doesn't touch (doesn't even intialize).
-		SharedTexture		*m_pSharedTexture;	// From whence it came..
+		HTEXTURE			m_pSharedTexture;	// From whence it came..
 		uint32              m_Flags;			// Flags for the renderer. Combination of the TF_ flags above.
 
 		// This is where the pixels go.
