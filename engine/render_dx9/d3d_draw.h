@@ -10,6 +10,8 @@ class SharedTexture;
 class ViewParams;
 class IAggregateShader;
 
+#include <iltobject.h>
+
 #ifndef __D3D_CONVAR_H__
 #include "d3d_convar.h"
 #endif
@@ -121,23 +123,23 @@ public:
 // ---------------------------------------------------------------- //
 
 // Get special alpha blend states based on the object's flags2.
-inline void d3d_GetBlendStates(LTObject *pObject, uint32 &srcBlend, uint32 &destBlend, uint32 &dwFog, uint32 &dwFogColor)
+inline void d3d_GetBlendStates(ILTObject *pObject, uint32 &srcBlend, uint32 &destBlend, uint32 &dwFog, uint32 &dwFogColor)
 {
 	PD3DDEVICE->GetRenderState(D3DRS_FOGCOLOR, (unsigned long *)&dwFogColor);
 
 	PD3DDEVICE->GetRenderState(D3DRS_FOGENABLE, (unsigned long *)&dwFog);
-	if (pObject->m_Flags & FLAG_FOGDISABLE) 
+	if (pObject->GetFlags() & FLAG_FOGDISABLE)
 	{
 		dwFog = 0; 
 	}
 
-	if (pObject->m_Flags2 & FLAG2_ADDITIVE) 
+	if (pObject->GetFlags2() & FLAG2_ADDITIVE)
 	{
 		srcBlend	= D3DBLEND_ONE;
 		destBlend	= D3DBLEND_ONE;
 		dwFogColor	= 0; 
 	}
-	else if (pObject->m_Flags2 & FLAG2_MULTIPLY) 
+	else if (pObject->GetFlags2() & FLAG2_MULTIPLY)
 	{
 		srcBlend	= D3DBLEND_ZERO;
 		destBlend	= D3DBLEND_SRCCOLOR;

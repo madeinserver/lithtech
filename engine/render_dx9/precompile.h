@@ -40,7 +40,8 @@
 
 #include "d3dddstructs.h"
 #include "ltrenderstruct.h"
-#include "sharedtexture.h"
+#include "ilttexture.h"
+#include "iltdynamiclight.h"
 
 // STL
 #pragma warning(disable : 4786)

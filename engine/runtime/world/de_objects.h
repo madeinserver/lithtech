@@ -62,6 +62,8 @@ struct ObjectCreateStruct;
 
 #include "ltrendererstats.h"
 #include "ltattachment.h"
+#include "iltparticlesystem.h"
+#include "iltdynamiclight.h"
 
 #define INVALID_OBJECTID ((unsigned short)-1)
 
@@ -115,7 +117,7 @@ struct ClientData
 
 
 // All objects sitting in the BSP are LTObjects.
-class LTObject : public WorldTreeObj
+class LTObject : public WorldTreeObj, public ILTObject
 {
 // Virtuals.
 public:
@@ -204,6 +206,10 @@ public:
 
 	// Get the global force override...
 	const LTVector &GetGlobalForceOverride() const	{ return m_GlobalForceOverride; }
+
+    uint32 GetFlags() const { return m_Flags; }
+    uint32 GetFlags2() const { return m_Flags2; }
+    uint32 GetUserFlags() const { return m_UserFlags; }
 
 public:
 
@@ -366,7 +372,7 @@ public:
 
 
 // Dynamic lights.
-class DynamicLight : public LTObject
+class DynamicLight : public LTObject, public ILTDynamicLight
 {
 // Overrides.
 public:
@@ -625,33 +631,8 @@ protected :
 
 };
 
- 
-
-// A single particle.
-struct PSParticle
-{
-    LTVector    m_Pos;				// Current position of the particle
-    LTVector    m_Velocity;			// Current velocity of the particle
-	float       m_Size;				// Particle size
-
-    LTVector    m_Color;			// 0-255
-    float       m_Alpha;			// 0-1
-    
-	float		m_fAngle;			// Angle in radians of this particle
-	float		m_fAngularVelocity;	// Velocity of the angular change in radians per second
-
-    float       m_Lifetime;         // Current lifetime left
-    float       m_TotalLifetime;    // Total lifetime (i.e. initial value)
-
-	uint32		m_nUserData;		// 32 bits of user data...
-
-    PSParticle  *m_pNext;			// Linked list information
-    PSParticle  *m_pPrev;
-};
-
-
 // A particle system.
-class LTParticleSystem : public LTObject
+class LTParticleSystem : public ILTParticleSystem
 {
 // Overrides.
 public:

@@ -101,7 +101,7 @@ public:
 
 // Call this to have it set the texture.  This will have its memory tracked and put under the
 // specified memory type
-bool d3d_SetTexture(SharedTexture* pTexture, uint32 nStage, ERendererFrameStats eMemType);
+bool d3d_SetTexture(HTEXTURE pTexture, uint32 nStage, ERendererFrameStats eMemType);
 
 // Call to set a D3D texture 
 bool d3d_SetTextureDirect(LPDIRECT3DBASETEXTURE9 pTexture, uint32 nStage);
@@ -115,8 +115,8 @@ bool d3d_DisableTexture(uint32 iStage);
 
 
 // Texture binding. Used to initially create and setup textures
-void d3d_BindTexture(SharedTexture *pTexture, bool bTextureChanged);
-void d3d_UnbindTexture(SharedTexture *pTexture);
+void d3d_BindTexture(HTEXTURE pTexture, bool bTextureChanged);
+void d3d_UnbindTexture(HTEXTURE pTexture);
 
 class RTexture
 {
@@ -158,7 +158,7 @@ public:
 
 	uint16				m_BaseWidth;
 	uint16				m_BaseHeight;	// Base width and height.
-	SharedTexture*		m_pSharedTexture;
+	HTEXTURE			m_pSharedTexture;
 	
 	// If this texture has a detail texture, this is its scale & rotation (stored as sin/cos).
 	float				m_DetailTextureScale;
@@ -214,7 +214,7 @@ public:
 	void				Term(bool bFullTerm);
 
 	// Texture Management Functions...
-	RTexture*			CreateRTexture(SharedTexture* pSharedTexture, TextureData* pTextureData);
+	RTexture*			CreateRTexture(HTEXTURE pSharedTexture, TextureData* pTextureData);
 	void				FreeTexture(RTexture* pTexture);
 	void				FreeAllTextures();
 
@@ -230,7 +230,7 @@ public:
 	bool				UploadRTexture(TextureData* pSrcTexture, uint32 iSrcLvl, RTexture* pDstTexture, uint32 iDstLvl);
 
 	// Get/Set State Functions...
-	static void			DrawPrimSetTexture(SharedTexture* pTexture)			{ d3d_SetTexture(pTexture, 0, eFS_DrawPrimTexMemory); }
+	static void			DrawPrimSetTexture(HTEXTURE pTexture)			{ d3d_SetTexture(pTexture, 0, eFS_DrawPrimTexMemory); }
 	static void			DisableTextures()									{ for (uint32 i=0;i<MAX_TEXTURESTAGES;++i) { d3d_DisableTexture(i); } }
 	void				SetSupportDXT1(bool bSupportsDXT1)					{ m_bSupportsDXT1 = bSupportsDXT1; }
 	void				SetSupportDXT3(bool bSupportsDXT3)					{ m_bSupportsDXT3 = bSupportsDXT3; }

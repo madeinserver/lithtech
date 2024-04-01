@@ -2381,8 +2381,8 @@ protected:
 	}
 };
 
-class   SharedTexture;
-typedef SharedTexture* HTEXTURE;
+class   ILTTexture;
+typedef ILTTexture* HTEXTURE;
 
 class   TextureData;
 typedef TextureData* HTEXTUREDATA;

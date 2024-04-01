@@ -2,7 +2,6 @@
 
 class ViewParams;
 
-#include "de_objects.h"
 #include "3d_ops.h"
 #include "d3d_texture.h"
 #include "fixedpoint.h"
@@ -31,7 +30,7 @@ public:
 // Internals.
 // ------------------------------------------------------------------- //
 
-static void d3d_DrawLineSystem(const ViewParams& Params, LTObject *pObject)
+static void d3d_DrawLineSystem(const ViewParams& Params, HOBJECT pObject)
 {
 	LSLine *pLine;
 	CLineSystemVertex Verts[2];
@@ -41,7 +40,7 @@ static void d3d_DrawLineSystem(const ViewParams& Params, LTObject *pObject)
 
 	// Setup the main transform.
 	LTMatrix mSystemTransform;
-	d3d_SetupTransformation(&pObject->GetPos(), (float*)&pObject->m_Rotation, &pObject->m_Scale, &mSystemTransform);
+	d3d_SetupTransformation(&pObject->GetPos(), (float*)&pObject->GetRotation(), &pObject->GetScale(), &mSystemTransform);
 	MatTranspose(&mSystemTransform);
 
 	PD3DDEVICE->SetTransform(D3DTS_WORLD, (D3DMATRIX*)&mSystemTransform);
@@ -85,7 +84,7 @@ static void d3d_DrawLineSystem(const ViewParams& Params, LTObject *pObject)
 // Externals.
 // ------------------------------------------------------------------- //
 
-void d3d_ProcessLineSystem(LTObject *pObject)
+void d3d_ProcessLineSystem(HOBJECT pObject)
 {
 	if(!g_CV_DrawLineSystems)
 		return;

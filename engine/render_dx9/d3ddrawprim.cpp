@@ -297,7 +297,7 @@ void CD3DDrawPrim::SetTexture(LPDIRECT3DDEVICE9 pDevice)
 			{
 				if(m_pTexture)
 				{				
-					RTexture* pRTexture = (RTexture*)m_pTexture->m_pRenderData;
+					RTexture* pRTexture = (RTexture*)m_pTexture->GetRenderData();
 					pD3DEffect->SetTexture("texture0", pRTexture->m_pD3DTexture);
 				}
 			}
@@ -331,9 +331,8 @@ void CD3DDrawPrim::SetCamera(LPDIRECT3DDEVICE9 pDevice)
 	float MaxZ = (m_bReallyClose) ? 0.1f : m_PrevViewport.MaxZ;
 
 	if (m_pCamera) 
-	{
-		LTObject* pLTCameraObj = (LTObject*)m_pCamera;				// Set the Camera (if there is one)...
-		CameraInstance* pCamera = pLTCameraObj->ToCamera();
+	{			
+		CameraInstance* pCamera = m_pCamera->ToCamera(); // Set the Camera (if there is one)...
 
 		if ((pCamera->m_Left != (int)PrevViewport.X) || 
 			(pCamera->m_Top != (int)PrevViewport.Y) || 

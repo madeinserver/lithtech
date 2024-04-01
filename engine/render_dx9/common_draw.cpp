@@ -37,7 +37,7 @@ DynamicLight *g_WorldDynamicLights[MAX_VISIBLE_LIGHTS];
 uint32 g_nNumWorldDynamicLights;
 
 // The list of dynamic lights that will be used to light objects
-DynamicLight *g_ObjectDynamicLights[MAX_VISIBLE_LIGHTS];
+ILTDynamicLight *g_ObjectDynamicLights[MAX_VISIBLE_LIGHTS];
 uint32 g_nNumObjectDynamicLights;
 
 ViewParams g_ViewParams;

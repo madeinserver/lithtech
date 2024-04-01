@@ -16,7 +16,7 @@ FormatMgr				g_FormatMgr;
 DECLARE_LTLINK(g_Textures);
 
 
-static bool ShouldFreeSystemTexture(const SharedTexture* pTexture)
+static bool ShouldFreeSystemTexture(const HTEXTURE pTexture)
 {
 	assert(pTexture);
 
@@ -25,7 +25,7 @@ static bool ShouldFreeSystemTexture(const SharedTexture* pTexture)
 		return false;
 
 	//make sure that we could recreate this texture if needed
-	if(pTexture->m_pFile == NULL)
+	if(pTexture->GetFile() == NULL)
 		return false;
 
 	//it is free to be discared
@@ -123,7 +123,7 @@ int32 d3d_GetFirstUsableMipmap(TextureData *pTexture)
 }
 
 // Don't call this.. it's only called by d3d_SetTexture.
-RTexture* d3d_CreateAndLoadTexture(SharedTexture *pSharedTexture)
+RTexture* d3d_CreateAndLoadTexture(HTEXTURE pSharedTexture)
 {
 	RTexture*	 pRet = NULL; 
 
@@ -152,19 +152,19 @@ RTexture* d3d_CreateAndLoadTexture(SharedTexture *pSharedTexture)
 	return pRet;
 }
 
-void d3d_BindTexture(SharedTexture *pSharedTexture, bool bTextureChanged)
+void d3d_BindTexture(HTEXTURE pSharedTexture, bool bTextureChanged)
 {
 	if (!pSharedTexture) 
 	{
 		return; 
 	}
 
-	if (pSharedTexture->m_pRenderData) 
+	if (pSharedTexture->GetRenderData()) 
 	{	
 		// Convert it and stuff.
 		if (bTextureChanged) 
 		{
-			RTexture* pRTexture		  = (RTexture*)pSharedTexture->m_pRenderData; 
+			RTexture* pRTexture		  = (RTexture*)pSharedTexture->GetRenderData();
 
 			TextureData* pTextureData = g_pStruct->GetTexture(pSharedTexture);
 			if (pTextureData) 
@@ -188,12 +188,12 @@ void d3d_BindTexture(SharedTexture *pSharedTexture, bool bTextureChanged)
 	}
 }
 
-void d3d_UnbindTexture(SharedTexture *pSharedTexture)
+void d3d_UnbindTexture(HTEXTURE pSharedTexture)
 {
 	RTexture *pTexture;
-	if (pSharedTexture->m_pRenderData) 
+	if (pSharedTexture->GetRenderData()) 
 	{
-		pTexture = (RTexture*)pSharedTexture->m_pRenderData;
+		pTexture = (RTexture*)pSharedTexture->GetRenderData();
 		g_TextureManager.FreeTexture(pTexture); 
 	}
 }
@@ -427,7 +427,7 @@ bool CTextureManager::UploadRTexture(TextureData* pSrcTexture, uint32 iSrcLvl, R
 // This sets up pTexture with all the Direct3D stuff it needs and copies
 // in the texture data from pTextureData.
 // pBuild should have m_pSharedTexture, m_pTextureData, and m_iStage initted.
-RTexture* CTextureManager::CreateRTexture(SharedTexture* pSharedTexture, TextureData* pTextureData)
+RTexture* CTextureManager::CreateRTexture(HTEXTURE pSharedTexture, TextureData* pTextureData)
 {
 	// [KLS] 10/17/01 Removed assert if not initialized, this can happen when you
 	// ALT-TAB (the assert was really annoying when debugging and didn't represent 
@@ -583,7 +583,7 @@ RTexture* CTextureManager::CreateRTexture(SharedTexture* pSharedTexture, Texture
 
 	// Associate the texture.
 	pRTexture->m_pSharedTexture		= pSharedTexture;
-	pSharedTexture->m_pRenderData	= pRTexture; 
+	pSharedTexture->SetRenderData(pRTexture);
 	
 	pRTexture->m_Link.m_pData = pRTexture;
 	dl_Insert(&g_Textures, &pRTexture->m_Link);
@@ -610,7 +610,7 @@ void CTextureManager::FreeTexture(RTexture* pTexture)
 	// Disassociates texture from its SharedTexture (if any)
 	if (pTexture->m_pSharedTexture) 
 	{
-		pTexture->m_pSharedTexture->m_pRenderData = NULL;
+		pTexture->m_pSharedTexture->SetRenderData(NULL);
 		pTexture->m_pSharedTexture = NULL; 
 	}
 
@@ -890,13 +890,13 @@ static void d3d_InternalSetCurrentTextureDirect(LPDIRECT3DBASETEXTURE9 pTexture,
 }
 
 // Call this to have it set the texture.
-bool d3d_SetTexture(SharedTexture* pTexture, uint32 iStage, ERendererFrameStats eMemType) 
+bool d3d_SetTexture(HTEXTURE pTexture, uint32 iStage, ERendererFrameStats eMemType) 
 {
 	//see if we actually have a valid texture
 	if (pTexture) 
 	{
 		//we do, make sure that the render texture is correct
-		RTexture* pRTexture = (RTexture*)pTexture->m_pRenderData;
+		RTexture* pRTexture = (RTexture*)pTexture->GetRenderData();
 	
 		if(!pRTexture) 
 		{

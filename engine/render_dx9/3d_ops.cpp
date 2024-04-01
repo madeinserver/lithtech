@@ -7,19 +7,11 @@
 #include "fixedpoint.h"
 #include "d3d_texture.h"
 
-// Make sure the right intel compiler is being used.
-#ifdef _USE_INTEL_COMPILER
-	#if __ICL < 400
-		#error This build requires the Intel Compiler version 4.0 or higher
-	#endif
-#endif
-
-void d3d_CalcLightAdd(LTObject *pObject, LTVector *pLightAdd)
+void d3d_CalcLightAdd(HOBJECT pObject, LTVector *pLightAdd)
 {
 	uint32 i;
     float distSquared, percent;
-	DynamicLight *pLight;
-
+	HDYNAMICLIGHT pLight;
 
 	pLightAdd->Init();
 
@@ -27,20 +19,20 @@ void d3d_CalcLightAdd(LTObject *pObject, LTVector *pLightAdd)
 	{
 		pLight = g_ObjectDynamicLights[i];
 
-		if ((pLight->m_Flags & FLAG_ONLYLIGHTWORLD) != 0)
+		if ((pLight->GetFlags() & FLAG_ONLYLIGHTWORLD) != 0)
 			continue;
 
 		distSquared = pLight->GetPos().DistSqr(pObject->GetPos());
 
-		if(distSquared < (pLight->m_LightRadius*pLight->m_LightRadius))
+		if(distSquared < (pLight->GetRadius() *pLight->GetRadius()))
 		{
 			// Add some light.
-			percent = 1.0f - ((float)sqrt(distSquared) / pLight->m_LightRadius);
+			percent = 1.0f - ((float)sqrt(distSquared) / pLight->GetRadius());
 			percent *= 0.7f; // Tone down a little..
 
-			pLightAdd->x += (float)((long)pLight->m_ColorR - (255 - (long)pLight->m_ColorR)) * percent;
-			pLightAdd->y += (float)((long)pLight->m_ColorG - (255 - (long)pLight->m_ColorG)) * percent;
-			pLightAdd->z += (float)((long)pLight->m_ColorB - (255 - (long)pLight->m_ColorB)) * percent;
+			pLightAdd->x += (float)((long)pLight->GetColorR() - (255 - (long)pLight->GetColorR())) * percent;
+			pLightAdd->y += (float)((long)pLight->GetColorG() - (255 - (long)pLight->GetColorG())) * percent;
+			pLightAdd->z += (float)((long)pLight->GetColorB() - (255 - (long)pLight->GetColorB())) * percent;
 		}
 	}
 }

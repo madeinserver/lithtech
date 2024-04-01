@@ -67,7 +67,11 @@ LONG LTCrashHandler::WriteMiniDump(_EXCEPTION_POINTERS *pExceptionInfo )
 		if (pMiniDumpWriteDump)
 		{
 			// set the dump file name
+#ifdef _USE_32BIT_TIME_T
 			sprintf(m_szDumpPath, "term-%ld.dmp", m_nTime);
+#else
+			sprintf(m_szDumpPath, "term-%lld.dmp", m_nTime);
+#endif
 
 			// create the file
 			HANDLE hFile = CreateFile( m_szDumpPath, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS,

@@ -1,6 +1,4 @@
 #include "precompile.h"
-
-#include "de_objects.h"
 #include "common_draw.h"
 #include "common_stuff.h"
 
@@ -10,7 +8,7 @@
  
 //given a light object, this will queue it up into the appropriate lighting lists. It
 //will return false if it was not able to insert it into all appropriate lists
-void d3d_ProcessLight(LTObject* pObj)
+void d3d_ProcessLight(HOBJECT pObj)
 {
 	//first off see if dynamic lights are enabled
 	if(!g_CV_DynamicLight.m_Val)
@@ -20,7 +18,7 @@ void d3d_ProcessLight(LTObject* pObj)
 	}
 
 	//get our dynamic light
-	DynamicLight* pLight = pObj->ToDynamicLight();
+	HDYNAMICLIGHT pLight = pObj->ToDynamicLight();
 
 	//see if we have room in the list of object dynamic lights
 	if(g_nNumObjectDynamicLights < MAX_VISIBLE_LIGHTS)
@@ -30,7 +28,7 @@ void d3d_ProcessLight(LTObject* pObj)
 	}
 
 	//now see if this light should dynamically light the world
-	if(g_CV_DynamicLightWorld.m_Val || (pLight->m_Flags2 & FLAG2_FORCEDYNAMICLIGHTWORLD))
+	if(g_CV_DynamicLightWorld.m_Val || (pLight->GetFlags2() & FLAG2_FORCEDYNAMICLIGHTWORLD))
 	{
 		//see if we have room in the list
 		if(g_nNumWorldDynamicLights < MAX_VISIBLE_LIGHTS)

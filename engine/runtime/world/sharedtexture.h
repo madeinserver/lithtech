@@ -1,6 +1,7 @@
 #ifndef _SHAREDTEXTURE_H_
 #define _SHAREDTEXTURE_H_
 
+#include "Ilttexture.h"
 
 // SharedTexture flags.  The m_RefCount member is shared by the flags and the refcount.
 #define ST_TAGGED           0x8000  // Used by client when freeing unused textures.
@@ -24,18 +25,7 @@ enum ESharedTexType
 	eSharedTexType_Effect
 };
 
-enum ELinkedTex
-{	
-	eLinkedTex_EnvMap,			// The environment map of this texture
-	eLinkedTex_Detail,			// The detail texture of this texture
-	eLinkedTex_BumpMap,			// The bumpmap of this texture
-	eLinkedTex_EffectTexture1,	// The effect texture 1 of this texture
-	eLinkedTex_EffectTexture2,	// The effect texture 2 of this texture
-	eLinkedTex_EffectTexture3,	// The effect texture 1 of this texture
-	eLinkedTex_EffectTexture4,	// The effect texture 2 of this texture
-};
-
-class SharedTexture
+class SharedTexture : public ILTTexture
 {
 public:
 

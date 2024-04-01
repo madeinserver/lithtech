@@ -4,10 +4,6 @@
 class LTPolyGrid;
 class ViewParams;
 
-#ifndef __DE_OBJECTS_H__
-#include "de_objects.h"
-#endif
-
 #ifndef __COMMON_STUFF_H__
 #include "common_stuff.h"
 #endif
@@ -25,7 +21,7 @@ class ViewParams;
 class VisibleSet;
 class ObjectDrawList;
 
-typedef void (*DrawObjectFn)(const ViewParams& Params, LTObject *pObject);
+typedef void (*DrawObjectFn)(const ViewParams& Params, HOBJECT pObject);
 
 class BaseObjectSet
 {
@@ -46,7 +42,7 @@ public:
 
 	inline bool	IsEmpty()	{return m_nObjects == 0;}
 
-	void		Add(LTObject *pObject)
+	void		Add(HOBJECT pObject)
 	{
 		if(m_nObjects < m_nMaxObjects)
 		{
@@ -69,7 +65,7 @@ public:
 
 public:
 
-	LTObject	**m_pObjects;
+	HOBJECT		*m_pObjects;
 	uint32		m_nObjects;
 
 
@@ -108,7 +104,7 @@ public:
 	bool		Init(VisibleSet *pVisibleSet, char *pSetName, uint32 defaultMax);
 	void		Term();
 
-	LTObject		**m_pArray;
+	HOBJECT		*m_pArray;
 
 };
 

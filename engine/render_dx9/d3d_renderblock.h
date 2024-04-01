@@ -8,7 +8,6 @@
 
 #include "aabb.h"
 #include "erendershader.h"
-#include "de_sprite.h"
 
 // External classes
 class ViewParams;

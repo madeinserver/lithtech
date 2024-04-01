@@ -42,7 +42,7 @@ LTRESULT (defined in ltcodes.h).
 /*!
 Forward declaration of LTObject.
 */
-	class LTObject;
+	class ILTObject;
 
 
 
@@ -50,10 +50,22 @@ Forward declaration of LTObject.
 Handles.
 Object handle definition.
 */
-	typedef LTObject* HOBJECT;
-	typedef LTObject* HLOCALOBJ;
+	typedef ILTObject* HOBJECT;
+	typedef ILTObject* HLOCALOBJ;
 
-	#define INVALID_HOBJECT ((LTObject *)0)
+	#define INVALID_HOBJECT ((ILTObject *)0)
+
+	class ILTCamera;
+	typedef ILTCamera* HCAMERA;
+
+	class ILTParticleSystem;
+	typedef ILTParticleSystem* HPARTICLESYSTEM;
+
+	class ILTDynamicLight;
+	typedef ILTDynamicLight* HDYNAMICLIGHT;
+
+	class ILTVolumeEffect;
+	typedef ILTVolumeEffect* HVOLUMEEFFECT;
 
 /*!
 Model handles.

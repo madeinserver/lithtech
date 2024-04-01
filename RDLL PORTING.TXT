@@ -1,0 +1,2 @@
+1. Implement rdll callbacks
+2. Implement ILTVertexShaderMgr, ILTPixelShaderMgr, ILTEffectShaderMgr, ILTRenderTargetMgr

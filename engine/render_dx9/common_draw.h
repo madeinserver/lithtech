@@ -29,11 +29,11 @@ extern SceneDesc *g_pSceneDesc;
 extern bool g_have_world;
 
 // The list of lights that will be used to light the world
-extern DynamicLight *g_WorldDynamicLights[MAX_VISIBLE_LIGHTS];
+extern HDYNAMICLIGHT g_WorldDynamicLights[MAX_VISIBLE_LIGHTS];
 extern uint32 g_nNumWorldDynamicLights;
 
 // The list of dynamic lights that will be used to light objects
-extern DynamicLight *g_ObjectDynamicLights[MAX_VISIBLE_LIGHTS];
+extern HDYNAMICLIGHT g_ObjectDynamicLights[MAX_VISIBLE_LIGHTS];
 extern uint32 g_nNumObjectDynamicLights;
 
 // This is so we can inline some things.

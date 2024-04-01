@@ -4,6 +4,7 @@
 #include "ltpixelformat.h"
 #include "ltcolorops.h"
 #include "dtxmgr.h"
+#include "ilttexture.h"
 #include <algorithm>
 
 #define FN_NAME(name) \
@@ -78,7 +79,7 @@ LTRESULT CSysTexInterface::FindTextureFromName(HTEXTURE &hTexture, const char *p
 }
 
 // Create texture from a dtx file on disk.
-LTRESULT CSysTexInterface::CreateTextureFromName(HTEXTURE &hTexture, const char *pFilename)
+LTRESULT CSysTexInterface::CreateTextureFromName(HTEXTURE& hTexture, const char *pFilename)
 {
 	FileRef ref; 
 	LTRESULT dResult					 = LT_ERROR;
@@ -105,7 +106,7 @@ LTRESULT CSysTexInterface::CreateTextureFromName(HTEXTURE &hTexture, const char 
 		if (hTexture) 
 		{
 			memset(hTexture, 0, sizeof(*hTexture));
-			hTexture->m_pFile = pIdent;
+			hTexture->SetFile(pIdent);
 			pIdent->m_pData	  = hTexture;
 
 			dResult	 = r_GetRenderStruct()->m_access.LoadSystemTexture(hTexture);
@@ -167,14 +168,14 @@ LTRESULT CSysTexInterface::CreateTextureFromData(HTEXTURE &hTexture, ETextureTyp
 	r_GetRenderStruct()->m_access.LinkSharedTexture(hTexture);
 
 	//there is no file reference for this shared texture since it is entirely user created
-	hTexture->m_pFile = NULL;
+	hTexture->SetFile(NULL);
 
 	//allocate and initialize our actual texture data
 	hTexture->SetTextureInfo(nWidth, nHeight, TheFormat);
 
-	hTexture->m_pEngineData				= dtx_Alloc(TheFormat.GetType(), nWidth, nHeight, nAutoGenMipMaps, LTNULL, LTNULL);
+	hTexture->SetEngineData(dtx_Alloc(TheFormat.GetType(), nWidth, nHeight, nAutoGenMipMaps, LTNULL, LTNULL));
 
-	TextureData* pTextureData			= (TextureData*)hTexture->m_pEngineData;
+	TextureData* pTextureData			= (TextureData*)hTexture->GetEngineData();
 	pTextureData->m_PFormat				= TheFormat;
 	pTextureData->m_Flags				= TextureFlags;
 	pTextureData->m_Header.m_Extra[2]	= TheFormat.GetType();
@@ -184,7 +185,7 @@ LTRESULT CSysTexInterface::CreateTextureFromData(HTEXTURE &hTexture, ETextureTyp
 	// Add the new texture to the list of texture data
 	r_GetRenderStruct()->m_access.LinkTextureData(pTextureData);
 
-	if (((SharedTexture*)hTexture)->m_pEngineData) 
+	if ((hTexture)->GetEngineData()) 
 	{
 		for (uint i = 0; i < nAutoGenMipMaps; ++i) 
 		{
@@ -196,7 +197,7 @@ LTRESULT CSysTexInterface::CreateTextureFromData(HTEXTURE &hTexture, ETextureTyp
 		}
 
 		hTexture->SetRefCount(hTexture->GetRefCount() + 1);
-		if (!hTexture->m_pRenderData) 
+		if (!hTexture->GetRenderData())
 		{
 			// Bind it to the renderer.
 			r_GetRenderStruct()->m_access.BindTexture(hTexture, true);
@@ -205,7 +206,7 @@ LTRESULT CSysTexInterface::CreateTextureFromData(HTEXTURE &hTexture, ETextureTyp
 	}
 	else 
 	{
-		r_GetRenderStruct()->m_access.UnloadSystemTexture((TextureData*)((SharedTexture*)hTexture)->m_pEngineData); hTexture = NULL;
+		r_GetRenderStruct()->m_access.UnloadSystemTexture((TextureData*)(hTexture)->GetEngineData()); hTexture = NULL;
 		return LT_ERROR; 
 	} 
 
@@ -214,13 +215,8 @@ LTRESULT CSysTexInterface::CreateTextureFromData(HTEXTURE &hTexture, ETextureTyp
 
 LTRESULT CSysTexInterface::GetTextureData(const HTEXTURE hTexture, const uint8* &pData, uint32 &nPitch, uint32& nWidth, uint32& nHeight, ETextureType& eType) 
 {
-	SharedTexture* pTexture = (SharedTexture*)hTexture;
- 	if (!pTexture)						 
-	{
-		return LT_ERROR; 
-	}
 
- 	TextureData* pTextureData = r_GetRenderStruct()->m_access.GetTextureData(pTexture);
+ 	TextureData* pTextureData = r_GetRenderStruct()->m_access.GetTextureData(hTexture);
  	if (!pTextureData)					 
 	{ 
 		return LT_ERROR; 
@@ -290,14 +286,11 @@ LTRESULT CSysTexInterface::GetTextureDims(const HTEXTURE hTexture, uint32 &nWidt
 bool CSysTexInterface::ReleaseTextureHandle(const HTEXTURE hTexture)
 {
 	FN_NAME(CSysTexInterface::ReleaseTextureHandle);
-	SharedTexture* pTexture = hTexture;
-	if (!pTexture) 
-		return false;
 
 	if (!r_GetRenderStruct()->m_bInitted) 
 		return false;
 
-	pTexture->SetRefCount(pTexture->GetRefCount() - 1);
+	hTexture->SetRefCount(hTexture->GetRefCount() - 1);
 
 	// [dlk] 12/21/2005 - uncommented this block, as it caused a 64k memory leak on the console font.
 	// each time "restartrender" was called. (change carried over from Jupiter_Xbox)
@@ -305,7 +298,7 @@ bool CSysTexInterface::ReleaseTextureHandle(const HTEXTURE hTexture)
 	// (OLD comment) KLS - The texture will be cleaned up on level switch, don't delete it now
 	// since both the engine and game code may be reference this texture.
 	
-	if(pTexture->GetRefCount() == 0) 
+	if(hTexture->GetRefCount() == 0)
 	{
 		r_GetRenderStruct()->m_access.FreeSharedTexture(hTexture);
 	}
@@ -316,11 +309,9 @@ bool CSysTexInterface::ReleaseTextureHandle(const HTEXTURE hTexture)
 uint32 CSysTexInterface::AddRefTextureHandle(const HTEXTURE hTexture)
 {
 	FN_NAME(LTTexMod::ReleaseTextureHandle);
-	SharedTexture* pTexture = hTexture;
-	if (!pTexture) return false;
 
-	uint32 nNewRefCount = pTexture->GetRefCount() + 1;
-	pTexture->SetRefCount(nNewRefCount);
+	uint32 nNewRefCount = hTexture->GetRefCount() + 1;
+	hTexture->SetRefCount(nNewRefCount);
 
 	return nNewRefCount;
 }

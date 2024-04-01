@@ -9,13 +9,11 @@
 #include "ltrenderstruct.h"
 #include "common_draw.h"
 #include "d3d_texture.h"
-#include "de_mainworld.h"
 #include "drawobjects.h"
 #include "dirtyrect.h"
 #include "geomroutines.h"
 #include "drawsky.h"
 #include "drawlight.h"
-#include "debuggeometry.h"
 #include "d3d_renderstatemgr.h"
 #include "d3d_renderworld.h"
 #include "iaggregateshader.h"
@@ -133,10 +131,10 @@ void d3d_UnsetTranslucentObjectStates(bool bChangeZ)
 	}
 }
 
-static void d3d_ProcessObjectList(LTObject **pObjectList, int objectListSize)
+static void d3d_ProcessObjectList(HOBJECT *pObjectList, int objectListSize)
 {
 	int i;
-	LTObject *pObject;
+	HOBJECT pObject;
 
 	for(i=0; i < objectListSize; i++)
 	{
@@ -145,12 +143,12 @@ static void d3d_ProcessObjectList(LTObject **pObjectList, int objectListSize)
 		if(pObject)
 		{
 			//sanity check to make sure that this is an object type that we know how to process
-			assert((pObject->m_ObjectType >= 0) && (pObject->m_ObjectType < NUM_OBJECTTYPES));
+			assert((pObject->GetObjectType() >= 0) && (pObject->GetObjectType() < NUM_OBJECTTYPES));
 
-			if(	g_ObjectHandlers[pObject->m_ObjectType].m_ProcessObjectFn && 
-				(pObject->m_Flags & FLAG_VISIBLE))
+			if(	g_ObjectHandlers[pObject->GetObjectType()].m_ProcessObjectFn &&
+				(pObject->GetFlags() & FLAG_VISIBLE))
 			{
-				g_ObjectHandlers[pObject->m_ObjectType].m_ProcessObjectFn(pObject);
+				g_ObjectHandlers[pObject->GetObjectType()].m_ProcessObjectFn(pObject);
 			}
 		}
 	}
@@ -540,7 +538,7 @@ bool d3d_RenderWorldWithAggregate(uint32 nNumFrustumPlanes, const LTPlane* pFrus
 	//now draw each object in the set
 	for(uint32 nCurrObj = 0; nCurrObj < pSet->m_nObjects; nCurrObj++)
 	{
-		LTObject* pObj = pSet->m_pObjects[nCurrObj];
+		HOBJECT pObj = pSet->m_pObjects[nCurrObj];
 
 		//now we need to run through the queues for solid and chroma keyed world models,
 		//and call the aggregate on each after setting up the appropriate transform
@@ -548,8 +546,8 @@ bool d3d_RenderWorldWithAggregate(uint32 nNumFrustumPlanes, const LTPlane* pFrus
 		WorldModelInstance *pInstance;
 
 		//cull it based upon the frustum of the aggregate shader
-		LTVector vMin = pObj->m_Pos - pObj->m_Dims;
-		LTVector vMax = pObj->m_Pos + pObj->m_Dims;
+		LTVector vMin = pObj->GetPos() - pObj->GetDism();
+		LTVector vMax = pObj->GetPos() + pObj->GetDism();
 
 		bool bOccluded = false;
 		for(uint32 nCurrPlane = 0; nCurrPlane < nNumFrustumPlanes; nCurrPlane++)

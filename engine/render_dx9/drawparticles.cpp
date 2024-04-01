@@ -22,6 +22,7 @@ define_holder(IClientShell, i_client_shell);
 #include "lteffectshadermgr.h"
 #include "ltshaderdevicestateimp.h"
 #include "rendererconsolevars.h"
+#include "iltparticlesystem.h"
 
 // ---------------------------------------------------------------- //
 // Definitions.
@@ -88,7 +89,7 @@ class CParticleVertex
 public:
 
 	CParticleVertex()
-		: m_Normal(g_vParticleNormal)
+		: m_Normal(::g_vParticleNormal)
 	{
 	}
 
@@ -222,7 +223,7 @@ static inline uint32 CalcParticleColor(const PSParticle* pParticle)
 
 
 
-static PSParticle* d3d_DrawParticleBatch(LTParticleSystem *pSystem, PSParticle *pParticles, int nParticles)
+static PSParticle* d3d_DrawParticleBatch(HPARTICLESYSTEM pSystem, PSParticle *pParticles, int nParticles)
 {
 	//make sure that the number of particles we are drawing is less than a batch,
 	//and more than 0
@@ -231,18 +232,18 @@ static PSParticle* d3d_DrawParticleBatch(LTParticleSystem *pSystem, PSParticle *
 
 	float fScale = 1.0f / 255.0f;
 	LTVector vColorScale;
-	vColorScale.x = fScale * (float)pSystem->m_ColorR;
-	vColorScale.y = fScale * (float)pSystem->m_ColorG;
-	vColorScale.z = fScale * (float)pSystem->m_ColorB;
+	vColorScale.x = fScale * (float)pSystem->GetColorR();
+	vColorScale.y = fScale * (float)pSystem->GetColorG();
+	vColorScale.z = fScale * (float)pSystem->GetColorB();
 
-	float alphaScale = pSystem->m_ColorA;
+	float alphaScale = pSystem->GetColorA();
 
 	PSParticle		*pCurIn = pParticles;
 	CParticleVertex *pCurVert = CParticleVertex::m_BatchVerts;
 	uint32			nShade;
 
 	//see if we need to do rotations on these particles
-	if(pSystem->m_psFlags & PS_USEROTATION)
+	if(pSystem->GetPSFlags() & PS_USEROTATION)
 	{
 		//we need to consider the rotation of the particles (a bit slower)
 		int nMapIndex;
@@ -290,16 +291,16 @@ static PSParticle* d3d_DrawParticleBatch(LTParticleSystem *pSystem, PSParticle *
 			nShade = CalcParticleColor(pCurIn, vColorScale, alphaScale);
 
 			// Top-left.
-			pCurVert[0].SetupVert(vPos, g_vOffset[UpperLeft], fSize, nShade);
+			pCurVert[0].SetupVert(vPos, ::g_vOffset[UpperLeft], fSize, nShade);
 
 			// Top-right.
-			pCurVert[1].SetupVert(vPos, g_vOffset[UpperRight], fSize, nShade);
+			pCurVert[1].SetupVert(vPos, ::g_vOffset[UpperRight], fSize, nShade);
 
 			// Bottom-right.
-			pCurVert[2].SetupVert(vPos, g_vOffset[BottomRight], fSize, nShade);
+			pCurVert[2].SetupVert(vPos, ::g_vOffset[BottomRight], fSize, nShade);
 
 			// Bottom-left.
-			pCurVert[3].SetupVert(vPos, g_vOffset[BottomLeft], fSize, nShade);
+			pCurVert[3].SetupVert(vPos, ::g_vOffset[BottomLeft], fSize, nShade);
 
 			pCurVert += 4;
 
@@ -311,15 +312,15 @@ static PSParticle* d3d_DrawParticleBatch(LTParticleSystem *pSystem, PSParticle *
 
 	if (pCurVert != CParticleVertex::m_BatchVerts)
 	{
-		LTEffectImpl* pEffect = (LTEffectImpl*)LTEffectShaderMgr::GetSingleton().GetEffectShader(pSystem->m_nEffectShaderID);
+		LTEffectImpl* pEffect = (LTEffectImpl*)LTEffectShaderMgr::GetSingleton().GetEffectShader(pSystem->GetEffectShaderID());
 		if(pEffect)
 		{
 			ID3DXEffect* pD3DEffect = pEffect->GetEffect();
 			if(pD3DEffect)
 			{
-				if(pSystem->m_pCurTexture)
+				if(pSystem->GetCurrentTexture())
 				{				
-					RTexture* pRTexture = (RTexture*)pSystem->m_pCurTexture->m_pRenderData;
+					RTexture* pRTexture = (RTexture*)pSystem->GetCurrentTexture()->GetRenderData();
 					pD3DEffect->SetTexture("texture0", pRTexture->m_pD3DTexture);
 				}
 				//batch it!
@@ -370,10 +371,10 @@ static PSParticle* d3d_DrawParticleBatch(LTParticleSystem *pSystem, PSParticle *
 
 
 
-static void d3d_DrawParticles(LTParticleSystem *pSystem)
+static void d3d_DrawParticles(HPARTICLESYSTEM pSystem)
 {
-	int nBatches	= pSystem->m_nParticles / PARTICLE_BATCH_SIZE;
-	int nExtra		= pSystem->m_nParticles % PARTICLE_BATCH_SIZE;
+	int nBatches	= pSystem->GetParticles() / PARTICLE_BATCH_SIZE;
+	int nExtra		= pSystem->GetParticles() % PARTICLE_BATCH_SIZE;
 
 	//setup our vertex shader for this particle system
 	D3D_CALL(PD3DDEVICE->SetVertexShader(NULL));
@@ -384,7 +385,7 @@ static void d3d_DrawParticles(LTParticleSystem *pSystem)
     CParticleVertex::SetupBaseVerts();
 
 	// Draw all the batches and extra particles..
-	PSParticle *pCurPos = pSystem->m_ParticleHead.m_pNext;
+	PSParticle *pCurPos = pSystem->GetParticleHead().m_pNext;
 	for(int i=0; i < nBatches; i++)
 	{
 		pCurPos = d3d_DrawParticleBatch(pSystem, pCurPos, PARTICLE_BATCH_SIZE);
@@ -398,17 +399,17 @@ static void d3d_DrawParticles(LTParticleSystem *pSystem)
 
 
 
-void d3d_DrawParticleSystem(const ViewParams& Params, LTParticleSystem *pParticleSystem)
+void d3d_DrawParticleSystem(const ViewParams& Params, HPARTICLESYSTEM pParticleSystem)
 {
 	CountAdder cTicks_ParticleSystem(g_pSceneDesc->m_pTicks_Render_ParticleSystems);
 
 	//add our triangles drawn
-	IncFrameStat(eFS_ParticleTriangles, pParticleSystem->m_nParticles * 2);
+	IncFrameStat(eFS_ParticleTriangles, pParticleSystem->GetParticles() * 2);
 
-	bool bObjectSpace = !(pParticleSystem->m_psFlags & PS_WORLDSPACE);
+	bool bObjectSpace = !(pParticleSystem->GetPSFlags() & PS_WORLDSPACE);
 
 	// Set the texture.
-	SharedTexture *pTexture = pParticleSystem->m_pCurTexture;
+	HTEXTURE pTexture = pParticleSystem->GetCurTexture();
 	if(!pTexture || !d3d_SetTexture(pTexture, 0, eFS_ParticleTexMemory))
 	{
 		d3d_DisableTexture(0);
@@ -419,7 +420,7 @@ void d3d_DrawParticleSystem(const ViewParams& Params, LTParticleSystem *pParticl
 	LTVector vParticleUp;
 	LTVector vParticleRight;
 
-	if(pParticleSystem->m_Flags & FLAG_REALLYCLOSE)
+	if(pParticleSystem->GetFlags() & FLAG_REALLYCLOSE)
 	{
 		//if we are really close, we are in camera space, so the vectors are simply
 		//the basis vectors of a normal untransformed space
@@ -441,7 +442,7 @@ void d3d_DrawParticleSystem(const ViewParams& Params, LTParticleSystem *pParticl
 
 	if(bObjectSpace)
 	{
-		d3d_SetupTransformation(&pParticleSystem->GetPos(), (float*)&pParticleSystem->m_Rotation, &pParticleSystem->m_Scale, &systemTransform);
+		d3d_SetupTransformation(&pParticleSystem->GetPos(), (float*)&pParticleSystem->GetRotation(), &pParticleSystem->GetScale(), &systemTransform);
 
 		//initialize the camera plane, but make sure it is in object space
 		LTMatrix mInverse = systemTransform;
@@ -466,7 +467,7 @@ void d3d_DrawParticleSystem(const ViewParams& Params, LTParticleSystem *pParticl
 
 	//now if we are rotating, we need to calculate the rotated versions and store them in
 	//the table
-	if(pParticleSystem->m_psFlags & PS_USEROTATION)
+	if(pParticleSystem->GetPSFlags() & PS_USEROTATION)
 	{
 		//see if we can bail on caculating the vectors (can be done if the
 		//previous up and right vectors were close enough to the old ones)
@@ -510,17 +511,17 @@ void d3d_DrawParticleSystem(const ViewParams& Params, LTParticleSystem *pParticl
 	}
 
 	//setup the lighting if applicable
-	if(pParticleSystem->m_psFlags & PS_LIGHT)
+	if(pParticleSystem->GetPSFlags() & PS_LIGHT)
 	{
 		PD3DDEVICE->SetRenderState(D3DRS_LIGHTING, TRUE);
-		d3d_SetupTouchingLights(pParticleSystem->m_SystemCenter, pParticleSystem->m_SystemRadius);
+		d3d_SetupTouchingLights(pParticleSystem->GetSystemCenter(), pParticleSystem->GetSystemRadius());
 	}
 
 	//setup the transform for the vertices...either by setting up the world to camera
 	//or the object to world
 	CReallyCloseData RCData;
 
-	if(pParticleSystem->m_Flags & FLAG_REALLYCLOSE)
+	if(pParticleSystem->GetFlags() & FLAG_REALLYCLOSE)
 	{
 		//if we are really close, we are in the camera space, so we need to disable
 		//the world to view transform
@@ -542,13 +543,13 @@ void d3d_DrawParticleSystem(const ViewParams& Params, LTParticleSystem *pParticl
 	if(bObjectSpace)
 		d3d_SetD3DMat(D3DTS_WORLD, &Params.m_mIdentity);
 
-	if(pParticleSystem->m_psFlags & PS_LIGHT)
+	if(pParticleSystem->GetPSFlags() & PS_LIGHT)
 	{
 		PD3DDEVICE->SetRenderState(D3DRS_LIGHTING, FALSE);
 	}
 
 	//restore the world to view matrix
-	if(pParticleSystem->m_Flags & FLAG_REALLYCLOSE)
+	if(pParticleSystem->GetFlags() & FLAG_REALLYCLOSE)
 	{
 		//if we are really close, we are in the camera space, so we need to disable
 		//the world to view transform

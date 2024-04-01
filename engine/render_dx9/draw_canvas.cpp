@@ -1,6 +1,5 @@
 #include "precompile.h"
 
-#include "de_objects.h"
 #include "draw_canvas.h"
 #include "d3d_convar.h"
 #include "drawobjects.h"
@@ -12,7 +11,7 @@ class ViewParams;
 class Tester_Canvas
 {
 public:
-	static bool Filter(LTObject *pObj) {
+	static bool Filter(HOBJECT pObj) {
 		return !(((Canvas*)pObj)->cd.m_ClientFlags & CF_SOLIDCANVAS); }
 };
 
@@ -41,12 +40,12 @@ void CanvasDrawMgr::DrawCanvas(Canvas *pCanvas)
 // --------------------------------------------------------------------------- //
 // Global functions.
 // --------------------------------------------------------------------------- //
-void d3d_DrawCanvasCB(const ViewParams& Params, LTObject *pCanvas)
+void d3d_DrawCanvasCB(const ViewParams& Params, HOBJECT pCanvas)
 {
 	g_CanvasDrawMgr.DrawCanvas((Canvas*)pCanvas);
 }
 
-void d3d_ProcessCanvas(LTObject *pObject)
+void d3d_ProcessCanvas(HOBJECT pObject)
 {
 	if (!g_CV_DrawCanvases.m_Val) 
 		return;

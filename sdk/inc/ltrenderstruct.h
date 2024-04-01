@@ -66,7 +66,7 @@ struct SceneDesc
 
     // Sky definition and objects.
     SkyDef          m_SkyDef;
-    LTObject        **m_SkyObjects;
+    HOBJECT         *m_SkyObjects;
     int             m_nSkyObjects;
 
     // Viewport rectangle.
@@ -80,7 +80,7 @@ struct SceneDesc
     LTRotation      m_Rotation;
     
     // Objects to draw, if mode is DRAWMODE_OBJECTSONLY.
-    LTObject        **m_pObjectList;
+    HOBJECT         *m_pObjectList;
     int             m_ObjectListSize;
 
     // If ModelHookFn is set, then the renderer will call it before drawing each model.
@@ -133,17 +133,17 @@ public:
 */
 struct LTInternalAccess
 {
-    LTRESULT (*LoadSystemTexture)(SharedTexture* pSharedTexture);
+    LTRESULT (*LoadSystemTexture)(HTEXTURE pSharedTexture);
 
     //frees the associated texture data and cleans up references to it
     void (*UnloadSystemTexture)(TextureData* pTexture);
 
     //this will bind the texture to the device. Note that the texture data is not guaranteed to be valid
     //after this call since the renderer can free it to save memory
-    void (*BindTexture)(SharedTexture* pSharedTexture, LTBOOL bTextureChanged);
+    void (*BindTexture)(HTEXTURE pSharedTexture, LTBOOL bTextureChanged);
 
     //unbinds the texture from the device
-    void (*UnbindTexture)(SharedTexture* pSharedTexture, bool bUnLoad_EngineData);
+    void (*UnbindTexture)(HTEXTURE pSharedTexture, bool bUnLoad_EngineData);
 
     HTEXTURE(*AllocateSharedTexture)();
 
@@ -166,20 +166,20 @@ struct LTRenderStruct
     // Functions LithTech implements.
 
         // Processes the attachment.  Returns the child object if it exists.
-        LTObject*   (*ProcessAttachment)(LTObject *pParent, LTAttachment*pAttachment);
+        HOBJECT   (*ProcessAttachment)(HOBJECT pParent, LTAttachment*pAttachment);
 
         // Get a shared texture from a file name  (returns NULL on failure)
-        SharedTexture*  (*GetSharedTexture)(const char *pFilename);
+        HTEXTURE  (*GetSharedTexture)(const char *pFilename);
 
         // Gets the texture in memory (guaranteed to be in memory until the next 
         // call to GetTexture).  
-        HTEXTUREDATA     (*GetTexture)(SharedTexture *pTexture);
+        HTEXTUREDATA     (*GetTexture)(HTEXTURE pTexture);
 
 		// Gets the texture's file name
-		const char *	(*GetTextureName)(const SharedTexture *pTexture);
+		const char *	(*GetTextureName)(const HTEXTURE pTexture);
 
         // Force it to free this texture.
-        void            (*FreeTexture)(SharedTexture *pTexture);
+        void            (*FreeTexture)(HTEXTURE pTexture);
 
         // Runs a string in the console.  The render drivers usually use this
         // so they can get HLTPARAMs right away and not have to check for
@@ -234,15 +234,15 @@ struct LTRenderStruct
         // Any textures you expect the renderer to use must be bound and unbound.
         // If bTextureChanged is TRUE, the renderer should reinitialize its data for the texture
         // even if it's already bound.
-        void            (*BindTexture)(SharedTexture *pTexture, bool bTextureChanged);
-        void            (*UnbindTexture)(SharedTexture *pTexture);
+        void            (*BindTexture)(HTEXTURE pTexture, bool bTextureChanged);
+        void            (*UnbindTexture)(HTEXTURE pTexture);
         DDFormat        (*GetTextureDDFormat1)(BPPIdent BPP, uint32 iFlags);
         bool            (*QueryDDSupport)(PFormat* Format);
         bool            (*GetTextureDDFormat2)(BPPIdent BPP, uint32 iFlags, PFormat* pFormat);
         bool            (*ConvertTexDataToDD)(uint8* pSrcData, PFormat* SrcFormat, uint32 SrcWidth, uint32 SrcHeight, uint8* pDstData, PFormat* DstFormat, BPPIdent eDstType, uint32 nDstFlags, uint32 DstWidth, uint32 DstHeight);
 
 		//called to set a texture for the draw primitive
-		void            (*DrawPrimSetTexture)(SharedTexture *pTexture);
+		void            (*DrawPrimSetTexture)(HTEXTURE pTexture);
         void            (*DrawPrimDisableTextures)();
 
         // You render through a context.  Note: LithTech frees all of its lightmap data

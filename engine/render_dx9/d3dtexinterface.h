@@ -19,7 +19,7 @@ class CSysTexInterface : public ILTTexInterface
 
 		// Create texture from data on the disk or in memory. If in
 		// memory, then must specify type.
-		virtual LTRESULT CreateTextureFromName(HTEXTURE &hTexture, 
+		virtual LTRESULT CreateTextureFromName(HTEXTURE& hTexture, 
 			const char *pFilename);
 
 		virtual LTRESULT CreateTextureFromData(HTEXTURE &hTexture,

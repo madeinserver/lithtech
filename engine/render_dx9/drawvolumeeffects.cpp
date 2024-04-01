@@ -12,7 +12,6 @@ define_holder(IClientShell, i_client_shell);
 #include "ltrenderstruct.h"
 #include "drawobjects.h"
 #include "d3d_renderworld.h"
-#include "de_mainworld.h"
 #include "common_draw.h"
 #include "relevantlightlist.h"
 #include "rendererframestats.h"
@@ -40,7 +39,7 @@ define_holder(IFindObj, g_pIFindObj);
 // forward declarations
 struct DynamicParticleVertex;
 void d3d_DrawWireframeBox(const LTVector& Min, const LTVector& Max, uint32 color);
-static void CreateLightList( LTObject* obj, CRelevantLightList& lightList );
+static void CreateLightList(HOBJECT obj, CRelevantLightList& lightList );
 static void LightDynamicParticlesNonDirectional( DynamicParticleVertex* verts, uint32 numVerts, CRelevantLightList& lightList, bool quads );
 
 
@@ -573,7 +572,7 @@ static void StaticLightCallback( WorldTreeObj* obj, void* user )
 
 
 // setup the relevant light list
-static void CreateLightList( LTObject* obj, CRelevantLightList& lightList )
+static void CreateLightList( HOBJECT obj, CRelevantLightList& lightList )
 {
 	// TODO: console variable
 	uint32 maxLights = LTMIN( 100, MAX_LIGHTS_SUPPORTED_BY_D3D );
@@ -604,7 +603,7 @@ static void CreateLightList( LTObject* obj, CRelevantLightList& lightList )
 	// dynamic lights
 	for( uint32 i = 0; i < g_nNumObjectDynamicLights; i++ )
 	{
-		DynamicLight* srcLight = g_ObjectDynamicLights[i];
+		HDYNAMICLIGHT srcLight = g_ObjectDynamicLights[i];
 
 		if( srcLight->m_Flags & FLAG_ONLYLIGHTWORLD )
 			continue;
@@ -631,7 +630,7 @@ static void CreateLightList( LTObject* obj, CRelevantLightList& lightList )
 
 
 // actually render a volume effect
-static void TestAndDrawVolumeEffect(const ViewParams& Params, LTObject* pObject )
+static void TestAndDrawVolumeEffect(const ViewParams& Params, HOBJECT pObject )
 {
 	LTVolumeEffect* pEffect = (LTVolumeEffect*)pObject;
 

@@ -1,6 +1,4 @@
 #include "precompile.h"
-
-#include "de_objects.h"
 #include "d3d_texture.h"
 #include "setupmodel.h"
 #include "drawobjects.h"
@@ -19,7 +17,7 @@ void d3d_ModelPreFrame()
 	CRenderModelInfoList::GetSingleton().Clear();
 }
 
-void d3d_ProcessModel(LTObject *pObject)
+void d3d_ProcessModel(HOBJECT pObject)
 {
 	//see if we are even rendering models
 	if(!g_CV_DrawModels)
@@ -112,11 +110,11 @@ static void d3d_DrawTranslucentModel(const ViewParams& Params, LTObject *pObject
 }
 
 // Translucent model queueing hook function for sorting
-static void d3d_DrawTranslucentGlowModel(const ViewParams& Params, LTObject *pObject)
+static void d3d_DrawTranslucentGlowModel(const ViewParams& Params, HOBJECT pObject)
 {
 	d3d_QueueModel(Params, pObject);
 	CRenderModelPieceList::GetSingleton().RemapRenderStyles(CScreenGlowMgr::GetSingleton().GetRenderStyleMap());
-	CRenderModelPieceList::GetSingleton().RenderPieceList(pObject->m_ColorA * MATH_ONE_OVER_255);
+	CRenderModelPieceList::GetSingleton().RenderPieceList(pObject->GetColorA() * MATH_ONE_OVER_255);
 
 	//See above comments as to why the following is necessary
 	unsigned long nWasEnabled;
